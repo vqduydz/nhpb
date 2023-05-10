@@ -1,0 +1,41 @@
+{
+  "development": {
+    "username": "sa",
+    "password": "root",
+    "database": "nha-hang-pho-bien",
+    "host": "localhost",
+    "dialect": "mssql",
+    "timezone": "+07:00",
+    "dialectOptions": {
+      "options": {
+        "encrypt": true
+      }
+    }
+  },
+  "test": {
+    "username": "sa",
+    "password": "root",
+    "database": "nha-hang-pho-bien",
+    "host": "localhost",
+    "dialect": "mssql",
+    "timezone": "+07:00",
+    "dialectOptions": {
+      "options": {
+        "encrypt": true
+      }
+    }
+  },
+  "production": {
+    "username": "sa",
+    "password": "root",
+    "database": "nha-hang-pho-bien",
+    "host": "localhost",
+    "dialect": "mssql",
+    "timezone": "+07:00",
+    "dialectOptions": {
+      "options": {
+        "encrypt": true
+      }
+    }
+  }
+}

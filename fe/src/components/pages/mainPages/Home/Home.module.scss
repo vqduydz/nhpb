@@ -1,0 +1,207 @@
+.padding-0 {
+    padding: 0;
+}
+.choose-btn {
+    text-align: center;
+    display: inline-block;
+    position: relative;
+    font-weight: bold;
+    padding: 0;
+    span {
+        color: #333;
+        justify-content: center;
+        flex-direction: column;
+        &:hover {
+            color: var(--mau-bc-16);
+        }
+    }
+}
+
+.loading {
+    animation: spinner 0.5s linear infinite;
+}
+
+@keyframes spinner {
+    from {
+        transform: rotate(0);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+////////////////////////
+.border-bottom {
+    border-bottom: 3px solid #efeef5;
+}
+
+.btn {
+    padding: 0;
+    span {
+        flex-direction: column;
+    }
+    ul {
+        margin: 10px 0px 10px 25px;
+        li {
+            word-break: break-word;
+            white-space: normal;
+        }
+    }
+}
+
+.sub-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    font-weight: bold;
+    color: var(--mau-bc-16);
+    text-transform: uppercase;
+    padding: 0;
+    font-size: 1.28rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    span {
+        flex-direction: unset;
+    }
+}
+
+.xemthem-btn {
+    margin-left: 5px;
+    max-height: 36px;
+    font-size: 11px;
+    background: rgb(235, 235, 235);
+    text-transform: uppercase;
+    display: inline-block;
+    padding: 10px 15px;
+    color: rgb(40, 46, 65);
+
+    &:hover {
+        cursor: pointer;
+        color: #fff;
+        background: #f7d800;
+    }
+}
+
+.pre-btn,
+.next-btn {
+    position: absolute;
+    top: 50%;
+    display: block;
+    transform: translate(0, -50%);
+    cursor: pointer;
+    z-index: 100;
+    border: 2px solid #d7d7d7;
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.75;
+    padding: 0;
+    background-color: #fff;
+
+    svg {
+        height: 40px;
+        width: 40px;
+        color: #959595;
+    }
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.pre-btn {
+    left: -11px;
+}
+.next-btn {
+    right: -11px;
+}
+
+///
+.btn2,
+.btn3 {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    float: left;
+    min-height: 1px;
+    position: relative;
+    span {
+        color: #000;
+        flex-direction: column;
+    }
+    .sub-title {
+        padding: 5px 0;
+        font-size: 1.3rem;
+        word-break: break-word;
+        white-space: normal;
+        color: #111;
+    }
+    &:hover {
+        .sub-title {
+            color: var(--mau-bc-16);
+        }
+    }
+}
+
+.btn3 {
+    span {
+        flex-direction: row;
+    }
+    .sub-title {
+        flex: 1;
+        font-size: 1.6rem;
+        font-weight: bold;
+        padding: 5px;
+    }
+}
+
+iframe {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.app-feature {
+    margin: 10px 0;
+    li {
+        list-style: none;
+        padding-left: 30px;
+        position: relative;
+        margin-bottom: 5px;
+        &::before {
+            content: '';
+            position: absolute;
+            height: 7px;
+            width: 13px;
+            top: 6px;
+            left: 3px;
+            border: 2px solid #45c3d2;
+            border-right: none;
+            border-top: none;
+            transform: rotate(-45deg);
+            font-size: 14px;
+        }
+    }
+}
+.ads-block {
+    .ads-btn {
+        padding: 0;
+        height: 50px;
+        background: #fff;
+        span {
+            justify-content: center;
+        }
+    }
+}
+
+// input
+
+datalist::-webkit-calendar-picker-indicator {
+    display: none !important;
+}
+
+datalist::-webkit-inner-spin-button {
+    display: none !important;
+}
