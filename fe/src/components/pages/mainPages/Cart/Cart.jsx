@@ -4,7 +4,7 @@ import { Button, MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { memo, useEffect, useMemo, useState } from 'react';
 import Quantity from './Quantity';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { deleteCartItem, getOrderItems } from '_/redux/slices';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { useAuth } from '_/context/AuthContext';
@@ -94,10 +94,10 @@ const Cart = () => {
                     sx={{
                         '& .MuiSnackbar-anchorOriginTopCenter': {
                             position: 'fixed',
-                            top: '50%',
+                            top: '20%',
                             left: '50%',
                             width: 'fit-content',
-                            transform: 'translate(-50%,-50%)',
+                            transform: 'translate(-50%,-20%)',
                             '& .MuiAlert-root': {
                                 flexDirection: 'column',
                                 alignItems: 'center',

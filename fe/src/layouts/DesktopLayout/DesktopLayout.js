@@ -1,70 +1,45 @@
-import { Alert, Box, Slide, Snackbar } from '@mui/material';
+import { Box } from '@mui/material';
+
+import { SnackbarWrapper } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
-import classNames from 'classnames/bind';
 import { Header } from '.';
 import Content from './Content/Content';
-import styles from './DesktopLayout.module.scss';
 import Footer from './Footer/Footer';
 
-const cx = classNames.bind(styles);
-
 function DesktopLayout({ children }) {
-    const { snackbar, handleCloseSnackbar } = useAuth();
-    const { open, message, status } = snackbar;
-
-    const TransitionDown = (props) => {
-        return <Slide {...props} direction="down" />;
-    };
+    const { snackbar } = useAuth();
+    const { open } = snackbar;
 
     return (
-        <Box className={cx('wrapper')}>
-            {open && (
-                <Box
-                    sx={{
-                        '& .MuiSnackbar-anchorOriginTopCenter': {
-                            position: 'fixed',
-                            top: '50%',
-                            left: '50%',
-                            width: 'fit-content',
-                            transform: 'translate(-50%,-50%)',
-                            '& .MuiAlert-root': {
-                                alignItems: 'center',
-                                fontSize: '1.8rem',
-                                '& .MuiSvgIcon-root': { fontSize: '2.5rem' },
-                            },
-                        },
-                    }}
-                >
-                    <Snackbar
-                        TransitionComponent={TransitionDown}
-                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                        open={open}
-                        autoHideDuration={2000}
-                        onClose={() => {
-                            handleCloseSnackbar(status);
-                        }}
-                    >
-                        <Alert
-                            variant="filled"
-                            onClose={() => {
-                                handleCloseSnackbar(status);
-                            }}
-                            severity={status}
-                            sx={{ width: '100%' }}
-                        >
-                            {message}
-                        </Alert>
-                    </Snackbar>
-                </Box>
-            )}
+        <Box
+            sx={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                alignContent: 'center',
+            }}
+        >
+            {open && <SnackbarWrapper />}
             <Header />
-            <div className={cx('content')}>
+            <Box
+                sx={{
+                    width: '100%',
+                    minWidth: '768px',
+                    marginTop: `var(--header-height)`,
+                }}
+            >
                 <Content>{children}</Content>
-            </div>
+            </Box>
 
-            <div className={cx('footer')}>
+            <Box
+                sx={{
+                    width: '100%',
+                    minWidth: '768px',
+                }}
+            >
                 <Footer />
-            </div>
+            </Box>
         </Box>
     );
 }

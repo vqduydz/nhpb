@@ -24,7 +24,7 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
     const [libraries] = useState(['places']);
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: 'AIzaSyBN9XkKOtu7xtxh0NwuEXILfHpn0ZSmfD4',
+        googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
         libraries,
     });
 
@@ -55,9 +55,10 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
         },
         specificPosition: position,
     });
-
     const receiverUpdateMeno = useMemo(() => receiverUpdate, [receiverUpdate]);
     const { name, phoneNumber, address, specificPosition } = receiverUpdateMeno;
+
+    const GOONG_API_KEY = process.env.REACT_APP_GOONG_API_KEY;
 
     const handleMarkerDragEnd = (event) => {
         const lat = event.latLng.lat();
@@ -65,12 +66,10 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
         setReceiverUpdate({ ...receiverUpdateMeno, specificPosition: { lat, lng } });
     };
 
-    const api_key = 'hXqN5VLZ8jK6CPWKhe5ygeEUdfxA5E68ZCj3yaUN';
-
     useEffect(() => {
         if (isLoaded) {
             const address = currentUser.address || tphcm.name;
-            const url = `https://rsapi.goong.io/geocode?address=${address}&api_key=${api_key}`;
+            const url = `https://rsapi.goong.io/geocode?address=${address}&api_key=${GOONG_API_KEY}`;
 
             axios.get(url).then((res) => {
                 const position = res.data.results[0].geometry.location;
@@ -150,7 +149,7 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
     useEffect(() => {
         if (!address.specificAddress || !address.ward || !address.district) return;
         const place = `${address.specificAddress},${address.ward}, ${address.district}, ${tphcm.name}`;
-        const url = `https://rsapi.goong.io/geocode?address=${place}&api_key=${api_key}`;
+        const url = `https://rsapi.goong.io/geocode?address=${place}&api_key=${GOONG_API_KEY}`;
         axios.get(url).then((res) => {
             const position = res.data.results[0].geometry.location;
             const { address_components } = res.data.results[0];

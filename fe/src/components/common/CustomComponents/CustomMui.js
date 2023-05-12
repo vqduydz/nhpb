@@ -1,4 +1,16 @@
-import { AppBar, styled, TextField, Tooltip, useScrollTrigger, useTheme } from '@mui/material';
+import {
+    Alert,
+    AppBar,
+    Box,
+    Slide,
+    Snackbar,
+    styled,
+    TextField,
+    Tooltip,
+    useScrollTrigger,
+    useTheme,
+} from '@mui/material';
+import { useAuth } from '_/context/AuthContext';
 import { cloneElement } from 'react';
 
 export const muiCustomStyles = {
@@ -171,3 +183,52 @@ export const Inner = ({ sx = {}, children, className }) => {
 //     </div>
 // </Tooltip>
 // </ClickAwayListener>
+
+export const SnackbarWrapper = ({ sx = {}, children, className }) => {
+    const { snackbar, handleCloseSnackbar } = useAuth();
+    const { open, message, status } = snackbar;
+
+    const TransitionDown = (props) => {
+        return <Slide {...props} direction="down" />;
+    };
+
+    return (
+        <Box
+            sx={{
+                '& .MuiSnackbar-anchorOriginTopCenter': {
+                    position: 'fixed',
+                    top: '20%',
+                    left: '50%',
+                    width: 'fit-content',
+                    transform: 'translate(-50%,-20%)',
+                    '& .MuiAlert-root': {
+                        alignItems: 'center',
+                        fontSize: '1.8rem',
+                        '& .MuiSvgIcon-root': { fontSize: '2.5rem' },
+                    },
+                },
+            }}
+        >
+            <Snackbar
+                TransitionComponent={TransitionDown}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                open={open}
+                autoHideDuration={2000}
+                onClose={() => {
+                    handleCloseSnackbar(status);
+                }}
+            >
+                <Alert
+                    variant="filled"
+                    onClose={() => {
+                        handleCloseSnackbar(status);
+                    }}
+                    severity={status}
+                    sx={{ width: '100%' }}
+                >
+                    {message}
+                </Alert>
+            </Snackbar>
+        </Box>
+    );
+};

@@ -1,18 +1,14 @@
 import DoneIcon from '@mui/icons-material/Done';
 import PlaceIcon from '@mui/icons-material/Place';
 import { Box, Typography } from '@mui/material';
-import classNames from 'classnames/bind';
+
 import icon from '_/assets/icon';
-import styles from './Footer.module.scss';
-import SmartphoneIcon from '@mui/icons-material/Smartphone';
-import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { Button } from '_/components/common';
-import logo from '_/assets/images/logo.png';
-const cx = classNames.bind(styles);
+import { Inner } from '_/components/common/CustomComponents/CustomMui';
 
 function Footer() {
     return (
-        <Box sx={{ backgroundColor: '#f5f5f5' }} className={cx('wrapper')}>
+        <Box sx={{ backgroundColor: '#f5f5f5' }}>
             <Inner
                 sx={{
                     display: 'flex',
@@ -97,10 +93,24 @@ function Footer() {
                     <Box sx={{ flex: 1 }}>
                         <small>© 2023 Nhà hàng Phố Biển.</small>
                     </Box>
-                    <Box sx={{ display: 'flex', flex: 2, justifyContent: { 0: 'start', 768: 'flex-end' } }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flex: 2,
+                            justifyContent: { 0: 'start', 768: 'flex-end' },
+                            '& .app-btn': {
+                                padding: ' 0 5px',
+                                display: 'unset',
+                                color: '#45c3d2',
+                                '& span': {
+                                    display: 'unset',
+                                },
+                            },
+                        }}
+                    >
                         <Button
                             style={{ margin: '10px 10px 10px 0' }}
-                            className={cx('app-btn')}
+                            className="app-btn"
                             target="_blank"
                             href="https://facebook.com/vqduydz"
                         >
@@ -108,7 +118,7 @@ function Footer() {
                         </Button>
                         <Button
                             style={{ margin: '10px 10px 10px 0' }}
-                            className={cx('app-btn')}
+                            className="app-btn"
                             target="_blank"
                             href="https://www.youtube.com/@vqduydz"
                         >
