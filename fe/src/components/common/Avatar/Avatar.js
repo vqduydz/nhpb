@@ -1,9 +1,5 @@
 import { Avatar } from '@mui/material';
-import classNames from 'classnames/bind';
-import styles from './Avatar.module.scss';
 import { useAuth } from '_/context/AuthContext';
-
-const cx = classNames.bind(styles);
 
 function UserAvatar({ style, className }) {
     const { currentUser } = useAuth();
@@ -38,15 +34,13 @@ function UserAvatar({ style, className }) {
         }
     }
 
-    const classes = cx('avatar', {
-        [className]: className,
-    });
+    const classes = { [className]: className };
 
     if (!currentUser) return;
     const { photoURL, avatarUrl, firstName, lastName } = currentUser;
     const displayName = firstName + ' ' + lastName;
     return photoURL || avatarUrl ? (
-        <Avatar alt={displayName} src={avatarUrl ? avatarUrl : photoURL} sx={style} className={cx('avatar')} />
+        <Avatar alt={displayName} src={avatarUrl ? avatarUrl : photoURL} sx={style} />
     ) : (
         <Avatar
             style={{ backgroundColor: stringToColor(displayName), color: '#fff' }}
