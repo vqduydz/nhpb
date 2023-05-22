@@ -8,23 +8,35 @@ const Menu = db.Menu;
 const getCartItemByCartId = async (req, res) => {
   const { user_id } = req.params;
   try {
-    const cartItem = await CartItem.findAll({
+    const cartItems = await CartItem.findAll({
       where: { user_id },
 
-      include: {
-        model: Menu,
-        // where: sequelize.where(sequelize.col('CartItem.menu_id'), sequelize.col('id')),
-        attributes: ['name', 'price', 'image', 'slug'], // lấy các thuộc tính name và price của food
-      },
       attributes: ['id', 'user_id', 'menu_id', 'quantity'],
       order: [['createdAt', 'ASC']],
     });
-    console.log(!cartItem);
-    if (!cartItem) {
-      return res.status(404).json({ errorMessage: 'CartItem does not exist' });
-    }
 
-    return res.status(200).json({ cartItem });
+    const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
+
+    // Lấy danh sách slug của các cartItems
+    const cartItem_menu_id = cartItems.map((cartItem) => cartItem.menu_id);
+
+    // Lấy danh sách menu theo các slug của cartItems
+    const menus = await Menu.findAll({
+      where: {
+        id: cartItem_menu_id,
+      },
+      raw: true,
+      attributes: ['id', 'name', 'slug', 'catalog', 'catalogSlug', 'price', 'unit', 'thumb_url'],
+      order: [['id', 'ASC']],
+    });
+
+    const cartItemsWithMenu = cartItems.map((cartItem) => {
+      const catalogMenus = menus.filter((menu) => menu.id === cartItem.menu_id);
+      const { thumb_url, ...catalogMenu } = catalogMenus[0];
+      return { ...cartItem.toJSON(), menu: { ...catalogMenu, image: imagePath + thumb_url } };
+    });
+
+    return res.status(200).json(cartItemsWithMenu);
   } catch (error) {
     console.log('19--error:', error);
     return res.status(500).json({ errorMessage: 'Server error' });
@@ -68,7 +80,6 @@ const deleteCartItemById = async (req, res) => {
 
 const addCartItem = async (req, res) => {
   const { user_id, menu_id, quantity } = req.body;
-  console.log(req.body);
   try {
     const cartItem = await CartItem.findOne({
       where: { menu_id, user_id },

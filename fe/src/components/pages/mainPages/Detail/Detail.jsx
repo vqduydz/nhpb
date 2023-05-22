@@ -4,13 +4,11 @@ import { unwrapResult } from '@reduxjs/toolkit';
 import { MyButton, renderContent } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
-import { useThemMui } from '_/context/ThemeMuiContext';
 import { getCatalog, getMenu } from '_/redux/slices';
 import { routes } from '_/routes';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-// import { useHistory, useLocation } from "react-router-dom";
 
 const danhGia = [
     {
@@ -77,9 +75,8 @@ const Detail = () => {
     const { slug: _slug } = useParams();
     const [menu, setMenu] = useState({});
     const { addToCart, currentUser } = useAuth();
-    const { setLoading } = useThemMui();
-    const { id, name, catalog, price, unit, image, catalogSlug } = menu;
-    const [suggest, setSuggest] = useState([]);
+    const { id, name, catalog, price, unit, image_url, catalogSlug, imagePath } = menu;
+    const [suggest, setSuggest] = useState({ items: [], imagePath: '' });
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -90,23 +87,19 @@ const Detail = () => {
                 dispatch(getCatalog())
                     .then(unwrapResult)
                     .then((data) => {
-                        const { catalog } = data;
+                        const { catalogsWithMenus, imagePath } = data;
                         let suggest;
 
-                        catalog.forEach((item) => {
+                        catalogsWithMenus.forEach((item) => {
                             if (item.name === res.catalog) {
-                                suggest = item.Menus.filter((item) => item.name !== res.name);
+                                suggest = item.menus.filter((item) => item.name !== res.name);
                             }
                         });
-                        setSuggest(suggest);
+                        setSuggest({ items: suggest, imagePath });
                     })
-                    .catch((error) => {
-                        console.log(error);
-                    });
+                    .catch((error) => {});
             })
-            .catch((error) => {
-                console.log(error);
-            });
+            .catch((error) => {});
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [_slug]);
@@ -161,7 +154,7 @@ const Detail = () => {
                         >
                             <Box
                                 sx={{
-                                    backgroundImage: `url(${image})`,
+                                    backgroundImage: `url(${imagePath}${image_url})`,
                                     width: '100%',
                                     paddingTop: { 0: '56.25%', 768: '66.25%', 1200: '56.25%' },
                                     position: 'relative',
@@ -180,12 +173,6 @@ const Detail = () => {
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 flexDirection: 'column',
-                                '& .add-to-cart': {
-                                    opacity: 0.85,
-                                    '&:hover': {
-                                        opacity: 1,
-                                    },
-                                },
                             }}
                         >
                             <Box
@@ -228,21 +215,32 @@ const Detail = () => {
                                     Giá : {renderPrice(price)} / 1 {unit}
                                 </Typography>
                             </Box>
-
-                            <MyButton
-                                onClick={handleAddToCart}
-                                style={{ maxWidth: '300px' }}
-                                className="add-to-cart"
-                                color={{ bgColor: 'orange' }}
-                                fontSize={'1.6rem'}
-                            >
-                                <AddShoppingCartSharpIcon sx={{ mr: '5px' }} /> Thêm vào giỏ hàng
-                            </MyButton>
+                            {currentUser && currentUser.role !== 'Customer' ? (
+                                <MyButton
+                                    disable
+                                    style={{ maxWidth: '300px' }}
+                                    className="add-to-cart"
+                                    color={{ bgColor: 'orange' }}
+                                    fontSize={'1.6rem'}
+                                >
+                                    <AddShoppingCartSharpIcon sx={{ mr: '5px' }} /> Thêm vào giỏ hàng
+                                </MyButton>
+                            ) : (
+                                <MyButton
+                                    onClick={handleAddToCart}
+                                    style={{ maxWidth: '300px' }}
+                                    className="add-to-cart"
+                                    color={{ bgColor: 'orange' }}
+                                    fontSize={'1.6rem'}
+                                >
+                                    <AddShoppingCartSharpIcon sx={{ mr: '5px' }} /> Thêm vào giỏ hàng
+                                </MyButton>
+                            )}
                         </Box>
                     </Box>
                 </Inner>
             </Box>
-            <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
+            {/* <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
                 <Inner
                     sx={{
                         display: 'grid',
@@ -263,8 +261,8 @@ const Detail = () => {
                         chuyên dùng cho đồ hải sản nướng kêt hợp lại sẽ là món ăn níu kéo vị giác của bạn.
                     </Typography>
                 </Inner>
-            </Box>
-            <Box sx={{ borderBottom: '3px solid #efeef5' }}>
+            </Box> */}
+            <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
                 <Inner
                     sx={{
                         display: 'grid',
@@ -299,8 +297,8 @@ const Detail = () => {
                                     key={item.id}
                                     sx={{
                                         borderRadius: '6px',
-                                        padding: '10px',
-                                        backgroundColor: '#00000005',
+                                        padding: '10px 15px',
+                                        backgroundColor: '#fae0e069',
                                         border: '1px solid #0000000a',
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -346,7 +344,7 @@ const Detail = () => {
                     </Box>
                 </Inner>
             </Box>
-            <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
+            {/* <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
                 <Inner
                     sx={{
                         display: 'grid',
@@ -359,7 +357,7 @@ const Detail = () => {
                 >
                     <Box>Khu vực hỏi đáp</Box>
                 </Inner>
-            </Box>
+            </Box> */}
 
             <Box
                 sx={{

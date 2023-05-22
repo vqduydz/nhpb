@@ -9,3 +9,24 @@ export const catalogApi = (slug) => {
         return axiosService.get(url);
     }
 };
+
+export const createNewCatalogApi = (dataCatalog) => {
+    console.log({ dataCatalog });
+    const url = `/catalog`;
+    return axiosService.post(url, dataCatalog);
+};
+
+export const updateCatalogApi = (dataUpdate) => {
+    const url = `/catalog`;
+    return axiosService.patch(url, dataUpdate);
+};
+
+export const deleteCatalogApi = (id) => {
+    const url = `/catalog`;
+    return axiosService.delete(url, { data: { id } });
+};
+
+export const importCatalogsApi = (formData) => {
+    const url = `/catalog/import`;
+    return axiosService.post(url, formData);
+};

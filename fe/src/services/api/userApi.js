@@ -45,3 +45,8 @@ export const deleteUserApi = (id) => {
     const url = `/user`;
     return axiosService.delete(url, { data: { id } });
 };
+
+export const importUsersApi = (formData) => {
+    const url = `/user/import`;
+    return axiosService.post(url, formData);
+};

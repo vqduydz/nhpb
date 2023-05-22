@@ -24,3 +24,8 @@ export const deleteMenuApi = (id) => {
     const url = `/menu`;
     return axiosService.delete(url, { data: { id } });
 };
+
+export const importMenusApi = (formData) => {
+    const url = `/menu/import`;
+    return axiosService.post(url, formData);
+};

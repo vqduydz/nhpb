@@ -40,7 +40,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
 
-      image: {
+      avatar: {
         type: Sequelize.STRING,
       },
       role: {
@@ -50,10 +50,10 @@ module.exports = {
       birthday: {
         type: Sequelize.DATE,
       },
-      resetPasswordToken: {
+      token: {
         type: Sequelize.STRING,
       },
-      resetPasswordExpires: {
+      tokenExpires: {
         type: Sequelize.DATE,
       },
       createdAt: {

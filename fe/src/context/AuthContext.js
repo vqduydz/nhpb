@@ -33,7 +33,7 @@ function AuthContextProvider({ children }) {
     const [text, setText] = useState(vi);
     const [cartItems, setCartItems] = useState([]);
     const { currentUser, language, token, orderItems } = useSelector(selector.globalStates);
-    const { setLoading } = useThemMui();
+    const { setLoading, loading } = useThemMui();
     const [snackbar, setSnackbar] = useState({ open: false });
 
     // language
@@ -80,7 +80,6 @@ function AuthContextProvider({ children }) {
     socket.on('forceLogout', (userEmail) => {
         if (currentUser.email) {
             if (currentUser.email === userEmail) {
-                console.log(userEmail === currentUser.email);
                 dispatch(logout());
             }
         }
@@ -99,22 +98,21 @@ function AuthContextProvider({ children }) {
         dispatch(getCartItem(user_id))
             .then(unwrapResult)
             .then((res) => {
-                const cartItems = res.cartItem.map((item) => {
-                    const { Menu, id, user_id, menu_id, quantity } = item;
-                    const cartItem = { id, user_id, menu_id, quantity, ...Menu };
-
+                const cartItems = res.map((item) => {
+                    const { menu, id, user_id, menu_id, quantity } = item;
+                    const { id: _, ...menu_info } = menu;
+                    const cartItem = { id, user_id, menu_id, quantity, ...menu_info };
                     return cartItem;
                 });
                 setCartItems(cartItems);
             })
             .catch((error) => {
-                console.log(error);
                 setCartItems([]);
             });
     };
 
     useEffect(() => {
-        if (!currentUser) {
+        if (!currentUser || currentUser.role !== 'Customer') {
             setCartItems([]);
             return;
         } else {
@@ -122,7 +120,7 @@ function AuthContextProvider({ children }) {
             return;
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentUser]);
+    }, [currentUser, loading]);
 
     // add cart item
 

@@ -89,7 +89,7 @@ function App() {
                             );
                         })}
                     {currentUser?.role !== 'Customer' &&
-                        PrivateRoutes.map((route, index) => {
+                        PrivateRoutes().map((route, index) => {
                             const Page = route.comp;
                             let Layout = DesktopLayout;
                             if (route.layout) {

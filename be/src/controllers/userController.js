@@ -10,7 +10,6 @@ dotenv.config();
 const User = db.User;
 
 const getToken = async (req, res) => {
-  console.log(req.body);
   try {
     const { email, password } = req.body;
     // Tìm kiếm user trong database
@@ -30,15 +29,6 @@ const getToken = async (req, res) => {
       {
         id: user.id,
         role: user.role,
-        // email: user.email,
-        // firstName: user.firstName,
-        // lastName: user.lastName,
-        // phoneNumber: user.phoneNumber,
-        // gender: user.gender,
-        // address: user.address,
-        // image: user.image,
-        // birthday: user.birthday,
-        // position: user.position,
       },
       process.env.JWT_SECRET,
     );
@@ -62,7 +52,7 @@ const handleLogin = async (req, res) => {
       phoneNumber: user.phoneNumber,
       gender: user.gender,
       address: user.address,
-      image: user.image,
+      avatar: user.avatar,
       birthday: user.birthday,
       position: user.position,
     },
@@ -72,9 +62,8 @@ const handleLogin = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  console.log('75----,', req.body);
   try {
-    const { email, password, firstName, lastName, role, phoneNumber, gender, address, image } = req.body;
+    const { email, password, firstName, lastName, role, phoneNumber, gender, address, avatar } = req.body;
 
     // Tìm kiếm user trong database
     const user = await User.findOne({ where: { email } });
@@ -96,7 +85,7 @@ const createUser = async (req, res) => {
       phoneNumber,
       gender,
       address,
-      image,
+      avatar,
     });
 
     return res.status(200).json({ message: 'User created successfully' });
@@ -117,8 +106,8 @@ const forgotPassword = async (req, res) => {
 
     // generate token and save it to user's resetToken field
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000;
+    user.token = token;
+    user.tokenExpires = Date.now() + 3600000;
     await user.save();
 
     // send email with reset password link
@@ -161,12 +150,12 @@ const resetPassword = async (req, res) => {
       return res.status(404).json({ errorMessage: 'Invalid email' });
     }
 
-    if (user.resetPasswordToken !== token || !user.resetPasswordExpires || user.resetPasswordExpires <= new Date()) {
+    if (user.token !== token || !user.tokenExpires || user.tokenExpires <= new Date()) {
       return res.status(400).json({ errorMessage: 'Invalid or expired token' });
     }
 
     const hashedPassword = await bcrypt.hash(password, salt);
-    const dataUpdate = { password: hashedPassword, resetPasswordToken: null, resetPasswordExpires: null };
+    const dataUpdate = { password: hashedPassword, token: null, tokenExpires: null };
     await user.set(dataUpdate);
     await user.save();
     res.status(200).json({ message: 'Password reset successfully' });

@@ -5,7 +5,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import { Avatar, Box } from '@mui/material';
 import { Button } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
-import { delOrderItems, logout } from '_/redux/slices';
+import { setOrderItems, logout } from '_/redux/slices';
 import { routes } from '_/routes';
 import { useDispatch } from 'react-redux';
 
@@ -13,9 +13,8 @@ const UserBox = (props) => {
     const dispatch = useDispatch();
     const { currentUser } = useAuth();
     const { handleCloseUserMenu, anchorElUser } = props;
-
     const handleLogout = () => {
-        dispatch(delOrderItems());
+        dispatch(setOrderItems([]));
         dispatch(logout());
     };
     return (

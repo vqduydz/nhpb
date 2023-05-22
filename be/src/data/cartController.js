@@ -29,7 +29,7 @@ const getCart = async (req, res) => {
 
     return res.status(200).json({ cart });
   } catch (error) {
-    console.log('error,', error);
+    console.log('32----', error);
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };

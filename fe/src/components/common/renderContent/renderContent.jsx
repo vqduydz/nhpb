@@ -2,13 +2,14 @@ import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { Button } from '..';
 
-const renderContent = (content) => {
+const renderContent = (props) => {
+    const { items, imagePath } = props;
     const renderPrice = (price) => {
         if (!price) return;
         const options = { style: 'currency', currency: 'VND' };
         return `${price.toLocaleString('vi-VN', options)}`;
     };
-    return content.map((item) => (
+    return items.map((item) => (
         <Box
             key={item.slug}
             sx={{
@@ -41,7 +42,7 @@ const renderContent = (content) => {
                     <Box
                         className="image"
                         sx={{
-                            backgroundImage: `url(${item.image})`,
+                            backgroundImage: `url(${imagePath}${item.image_url})`,
                             paddingTop: '56.25%',
                             position: 'relative',
                             width: '100%',

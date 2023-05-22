@@ -4,22 +4,70 @@ import * as userAPI from '_/services/api/userApi';
 import * as menuAPI from '_/services/api/menuApi';
 import * as catalogAPI from '_/services/api/catalogApi';
 import * as cartItemAPI from '_/services/api/cartItemApi';
+import * as orderAPI from '_/services/api/orderApi';
 
 // order
+export const getOrder = createAsyncThunk('getOrder', async (user_id, thunkAPI) => {
+    try {
+        const res = await orderAPI.getOrderApi(user_id);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+
+export const createNewOrder = createAsyncThunk('createNewOrder', async (order, thunkAPI) => {
+    try {
+        const res = await orderAPI.createNewOrderApi(order);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+
+export const updateOrder = createAsyncThunk('updateOrder', async (updateData, thunkAPI) => {
+    try {
+        const res = await orderAPI.updateOrderApi(updateData);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+
+export const deleteOrder = createAsyncThunk('deleteOrder', async (id, thunkAPI) => {
+    try {
+        const res = await orderAPI.deleteOrderApi(id);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
 
 export const orderSlice = createSlice({
     name: 'orderItems',
     initialState: { orderItems: [] },
     reducers: {
-        getOrderItems: (state, action) => {
+        setOrderItems: (state, action) => {
             state.orderItems = action.payload;
         },
-        delOrderItems: (state) => {
-            state.orderItems = [];
-        },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase('getOrder', (state, action) => {
+                return (state.orders = action.payload.data);
+            })
+            .addCase('createNewOrder', (state, action) => {
+                return (state.orders = action.payload);
+            })
+            .addCase('updateOrder', (state, action) => {
+                return (state.orders = action.payload);
+            })
+            .addCase('deleteOrder', (state, action) => {
+                return (state.orders = action.payload);
+            });
     },
 });
-export const { getOrderItems, delOrderItems } = orderSlice.actions;
+export const { setOrderItems } = orderSlice.actions;
 const { reducer: orderItemsReducer } = orderSlice;
 export { orderItemsReducer };
 
@@ -94,6 +142,39 @@ export const getCatalog = createAsyncThunk('getCatalog', async (params, thunkAPI
     }
 });
 
+export const createNewCatalog = createAsyncThunk('createNewCatalog', async (dataCatalog, thunkAPI) => {
+    try {
+        const res = await catalogAPI.createNewCatalogApi(dataCatalog);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+export const updateCatalog = createAsyncThunk('updateCatalog', async (updateData, thunkAPI) => {
+    try {
+        const res = await catalogAPI.updateCatalogApi(updateData);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+export const deleteCatalog = createAsyncThunk('deleteCatalog', async (id, thunkAPI) => {
+    try {
+        const res = await catalogAPI.deleteCatalogApi(id);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+export const importCatalogs = createAsyncThunk('importCatalogs', async (formData, thunkAPI) => {
+    try {
+        const res = await catalogAPI.importCatalogsApi(formData);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+
 export const catalogSlice = createSlice({
     name: 'catalogs',
     initialState: {
@@ -105,13 +186,13 @@ export const catalogSlice = createSlice({
             .addCase('getCatalog', (state, action) => {
                 return (state.user = action.payload.data);
             })
-            .addCase('createNewMenu', (state, action) => {
+            .addCase('createNewCatalog', (state, action) => {
                 return (state.user = action.payload);
             })
-            .addCase('updateMenu', (state, action) => {
+            .addCase('updateCatalog', (state, action) => {
                 return (state.user = action.payload);
             })
-            .addCase('deleteMenu', (state, action) => {
+            .addCase('deleteCatalog', (state, action) => {
                 return (state.user = action.payload);
             });
     },
@@ -153,26 +234,34 @@ export const deleteMenu = createAsyncThunk('deleteMenu', async (id, thunkAPI) =>
         return thunkAPI.rejectWithValue(error);
     }
 });
+export const importMenus = createAsyncThunk('importMenus', async (formData, thunkAPI) => {
+    try {
+        const res = await menuAPI.importMenusApi(formData);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
 
 export const menusSlice = createSlice({
     name: 'menus',
     initialState: {
-        user: null,
+        menus: null,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
             .addCase('getMenu', (state, action) => {
-                return (state.user = action.payload.data);
+                return (state.menus = action.payload.data);
             })
             .addCase('createNewMenu', (state, action) => {
-                return (state.user = action.payload);
+                return (state.menus = action.payload);
             })
             .addCase('updateMenu', (state, action) => {
-                return (state.user = action.payload);
+                return (state.menus = action.payload);
             })
             .addCase('deleteMenu', (state, action) => {
-                return (state.user = action.payload);
+                return (state.menus = action.payload);
             });
     },
 });
@@ -208,6 +297,15 @@ export const updateUser = createAsyncThunk('updateUser', async (updateData, thun
 export const deleteUser = createAsyncThunk('deleteUser', async (id, thunkAPI) => {
     try {
         const res = await userAPI.deleteUserApi(id);
+        return res;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error);
+    }
+});
+
+export const importUsers = createAsyncThunk('importUsers', async (formData, thunkAPI) => {
+    try {
+        const res = await userAPI.importUsersApi(formData);
         return res;
     } catch (error) {
         return thunkAPI.rejectWithValue(error);

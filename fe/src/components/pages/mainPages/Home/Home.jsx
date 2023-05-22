@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import chiNhanh4 from '_/assets/images/Banner-khai-truong.png';
 import { Button } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
-import { getCatalog, getMenu } from '_/redux/slices';
+import { getCatalog } from '_/redux/slices';
 import Content from './Content';
 import MySlider from './MySlider';
 
@@ -14,24 +14,27 @@ function Home() {
     const dispatch = useDispatch();
     const [monMoi, setMonMoi] = useState([]);
     const [monDacBiet, setMonDacBiet] = useState([]);
-    const [catalog, setCatalog] = useState([]);
-
+    const [catalogs, setCatalogs] = useState([]);
+    const [imagePath, setImagePath] = useState('');
     useEffect(() => {
-        dispatch(getMenu())
-            .then(unwrapResult)
-            .then((res) => {
-                const { menu } = res;
-                setMonMoi(() => menu.filter((item) => item.catalog === 'Các món mới'));
-                setMonDacBiet(() => menu.filter((item) => item.catalog === 'Món đặc biệt'));
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-
         dispatch(getCatalog())
             .then(unwrapResult)
             .then((res) => {
-                setCatalog(res.catalog);
+                const { catalogsWithMenus, catalogs, imagePath } = res;
+                setCatalogs(catalogs);
+                if (catalogsWithMenus.length || catalogs.length) {
+                    setMonMoi(() => {
+                        const data = catalogsWithMenus.find((catalog) => catalog.slug === 'cac-mon-moi').menus;
+                        return data;
+                    });
+
+                    setMonDacBiet(() => {
+                        const data = catalogsWithMenus.find((catalog) => catalog.slug === 'mon-dac-biet').menus;
+                        return data;
+                    });
+                }
+
+                setImagePath(imagePath);
             })
             .catch((error) => {
                 console.log(error);
@@ -49,7 +52,7 @@ function Home() {
     //     },
     // };
 
-    return (
+    return catalogs.length ? (
         <Box>
             {/* <Box
                 sx={{
@@ -99,7 +102,7 @@ function Home() {
                 containerStyles={{ borderBottom: '3px solid #efeef5' }}
             >
                 {monDacBiet.map((item) => {
-                    return <Content key={item.slug} data={item} />;
+                    return <Content key={item.slug} data={{ item, imagePath }} />;
                 })}
             </MySlider>
 
@@ -116,7 +119,7 @@ function Home() {
                 containerStyles={{ borderBottom: '3px solid #efeef5', backgroundColor: '#f5f5f5' }}
             >
                 {monMoi.map((item) => {
-                    return <Content key={item.slug} data={item} />;
+                    return <Content key={item.slug} data={{ item, imagePath }} />;
                 })}
             </MySlider>
 
@@ -129,11 +132,53 @@ function Home() {
                 }}
                 containerStyles={{ borderBottom: '3px solid #efeef5' }}
             >
-                {catalog.map((item) => {
-                    return <Content key={item.slug} data={item} monChinh={true} />;
+                {catalogs.map((item) => {
+                    return <Content key={item.slug} data={{ item, imagePath }} monChinh={true} />;
                 })}
             </MySlider>
+        </Box>
+    ) : (
+        <Box>
+            <Inner>Chư có dữ liệu</Inner>
         </Box>
     );
 }
 export default Home;
+
+// [
+//     {
+//         id: 1,
+//         name: 'Cá Kho',
+
+//         menus: [],
+//     },
+//     {
+//         id: 2,
+//         name: 'Các Món Mới',
+
+//         menus: [],
+//     },
+//     {
+//         id: 3,
+//         name: 'Món Đặc Biệt',
+
+//         menus: [
+//             {
+//                 id: 13,
+//                 name: 'Mâm Hải Sản Bbq',
+//                 slug: 'mam-hai-san-bbq',
+//                 catalog: 'Món Đặc Biệt',
+//                 catalogSlug: 'mon-dac-biet',
+//                 price: 499000,
+//             },
+//             {
+//                 id: 14,
+//                 name: 'Duy Vũ Quốc',
+//                 slug: 'duy-vu-quoc',
+//                 catalog: 'Món Đặc Biệt',
+//                 catalogSlug: 'mon-dac-biet',
+//                 price: 222,
+//             },
+//         ],
+//     },
+// ];

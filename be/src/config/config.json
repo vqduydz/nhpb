@@ -6,6 +6,7 @@
     "host": "localhost",
     "dialect": "mssql",
     "timezone": "+07:00",
+    "logging": false,
     "dialectOptions": {
       "options": {
         "encrypt": true

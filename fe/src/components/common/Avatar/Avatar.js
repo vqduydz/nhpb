@@ -1,7 +1,7 @@
 import { Avatar } from '@mui/material';
 import { useAuth } from '_/context/AuthContext';
 
-function UserAvatar({ style, className }) {
+function UserAvatar({ style }) {
     const { currentUser } = useAuth();
     if (!currentUser) return;
     function stringToColor(string) {
@@ -34,8 +34,6 @@ function UserAvatar({ style, className }) {
         }
     }
 
-    const classes = { [className]: className };
-
     if (!currentUser) return;
     const { photoURL, avatarUrl, firstName, lastName } = currentUser;
     const displayName = firstName + ' ' + lastName;
@@ -46,7 +44,6 @@ function UserAvatar({ style, className }) {
             style={{ backgroundColor: stringToColor(displayName), color: '#fff' }}
             {...stringAvatar(displayName)}
             sx={style}
-            className={classes}
         />
     );
 }

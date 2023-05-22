@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { Button } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
+import { useThemMui } from '_/context/ThemeMuiContext';
 import { getCartItem, updateCartItem } from '_/redux/slices';
 import { memo, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -11,10 +12,12 @@ import { useDispatch } from 'react-redux';
 const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods }) => {
     const [quantity, setQuantity] = useState(sl);
     const dispatch = useDispatch();
+    const { setLoading } = useThemMui();
     const { handleGetCartItem, currentUser } = useAuth();
     const sltd = 5;
 
     const handleChangeQuantity = (quantity) => {
+        setLoading(true);
         const updateData = { id, quantity };
         dispatch(updateCartItem(updateData))
             .then(unwrapResult)
@@ -23,9 +26,10 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
                 dispatch(getCartItem(currentUser.id))
                     .then(unwrapResult)
                     .then((res) => {
-                        const cartItems = res.cartItem.map((item) => {
-                            const { Menu, id, user_id, menu_id, quantity } = item;
-                            const cartItem = { id, user_id, menu_id, quantity, ...Menu };
+                        const cartItems = res.map((item) => {
+                            const { menu, id, user_id, menu_id, quantity } = item;
+                            const { id: i, ...it } = menu;
+                            const cartItem = { id, user_id, menu_id, quantity, ...it };
                             return cartItem;
                         });
                         if (checked) {
@@ -33,13 +37,16 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
                             const updateCartItem = cartItems.filter((f) => f.menu_id === menu_id);
                             setSelectedFoods([...oldSelectedFoods, ...updateCartItem]);
                         }
+                        setLoading(false);
                     })
                     .catch((error) => {
                         console.log(error);
+                        setLoading(false);
                     });
             })
             .catch((error) => {
                 console.log(error);
+                setLoading(false);
             });
     };
 

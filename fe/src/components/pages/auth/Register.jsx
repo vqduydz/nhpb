@@ -35,11 +35,8 @@ export default function Register() {
                 email: data.get('email'),
                 password: data.get('password'),
                 confirmpassword: data.get('confirmpassword'),
-                // address: data.get('address'),
                 gender: data.get('gender'),
-                // birthday: data.get('birthday'),
                 phoneNumber: data.get('phoneNumber'),
-                image: data.get('image'),
                 role: 'Customer',
             };
 

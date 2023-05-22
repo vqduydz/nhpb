@@ -4,7 +4,8 @@ import ReactDOM from 'react-dom';
 import { Button } from '_/components/common';
 
 function Content({ data, monChinh = false }) {
-    const { image, name, slug, price } = data;
+    const { item, imagePath } = data;
+    const { image_url, name, slug, price } = item;
     const renderPrice = () => {
         if (!price) return;
         const options = { style: 'currency', currency: 'VND' };
@@ -58,7 +59,7 @@ function Content({ data, monChinh = false }) {
                     <Box
                         className="image"
                         sx={{
-                            backgroundImage: `url(${image})`,
+                            backgroundImage: `url(${imagePath}${image_url})`,
                             paddingTop: '56.25%',
                             position: 'relative',
                             width: '100%',

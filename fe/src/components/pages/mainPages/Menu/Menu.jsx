@@ -1,25 +1,40 @@
+import NorthIcon from '@mui/icons-material/North';
 import { Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
+import { MyButton, renderContent } from '_/components/common';
+import { Inner } from '_/components/common/CustomComponents/CustomMui';
+import { getCatalog } from '_/redux/slices';
+import { routes } from '_/routes';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import NorthIcon from '@mui/icons-material/North';
-import { Button, MyButton, renderContent } from '_/components/common';
-import { Inner } from '_/components/common/CustomComponents/CustomMui';
-import { getCatalog, getMenu } from '_/redux/slices';
-import { routes } from '_/routes';
 import MySingleSlider from '../Home/MySingleSlider';
 
 const Menu = () => {
     const dispatch = useDispatch();
     const [menu, setMenu] = useState([]);
-
+    const [imagePath, setImagePath] = useState('');
     useEffect(() => {
         dispatch(getCatalog())
             .then(unwrapResult)
             .then((res) => {
-                const { catalog: menu } = res;
+                const { catalogsWithMenus: menu, imagePath } = res;
+
+                menu.sort((a, b) => {
+                    if (a.slug === 'mon-dac-biet') return -1;
+                    if (b.slug === 'mon-dac-biet') return 1;
+                    if (a.slug === 'cac-mon-moi') return -1;
+                    if (b.slug === 'cac-mon-moi') return 1;
+                    if (a.room === 'nuoc-ngot') return 1;
+                    if (b.room === 'nuoc-ngot') return -1;
+                    if (a.room === 'bia') return 1;
+                    if (b.room === 'bia') return -1;
+                    if (a.room === 'ruou') return -1;
+                    if (b.room === 'ruou') return 1;
+                    return 0;
+                });
 
                 setMenu(menu);
+                setImagePath(imagePath);
             })
             .catch((error) => {
                 console.log(error);
@@ -42,8 +57,6 @@ const Menu = () => {
         var scrollTo = targetOffsetTop - 130;
         window.scrollTo(0, scrollTo);
     }, [menu]);
-
-    console.log({ menu });
 
     return (
         <Box>
@@ -128,7 +141,7 @@ const Menu = () => {
                                         },
                                     }}
                                 >
-                                    {renderContent(item.Menus)}
+                                    {renderContent({ items: item.menus, imagePath })}
                                 </Box>
                             </Inner>
                         </Box>

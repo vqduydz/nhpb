@@ -19,7 +19,13 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
-      image: {
+      image_url: {
+        type: Sequelize.STRING,
+      },
+      thumb_url: {
+        type: Sequelize.STRING,
+      },
+      poster_url: {
         type: Sequelize.STRING,
       },
       createdAt: {

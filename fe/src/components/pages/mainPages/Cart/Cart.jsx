@@ -5,7 +5,7 @@ import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { memo, useEffect, useMemo, useState } from 'react';
 import Quantity from './Quantity';
 import { useDispatch } from 'react-redux';
-import { deleteCartItem, getOrderItems } from '_/redux/slices';
+import { deleteCartItem, setOrderItems } from '_/redux/slices';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { useAuth } from '_/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +27,6 @@ const Cart = () => {
     });
 
     const { openDelete, idCartItemDelete, nameCartItemDelete } = cartItemDelete;
-
     const selectedFoodsMemo = useMemo(() => selectedFoods, [selectedFoods]);
 
     useEffect(() => {
@@ -58,6 +57,7 @@ const Cart = () => {
 
     const handleOrder = () => {
         const orderItems = selectedFoodsMemo.map((item) => ({
+            cartItemId: item.id,
             quantity: item.quantity,
             name: item.name,
             price: item.price,
@@ -65,7 +65,7 @@ const Cart = () => {
             slug: item.slug,
             total: item.quantity * item.price,
         }));
-        dispatch(getOrderItems(orderItems));
+        dispatch(setOrderItems(orderItems));
         navigate(routes.checkout);
     };
 

@@ -77,8 +77,6 @@ function DistrictDrop({ districts, setDistrictSelect, setReceiverUpdate, receive
             <MyTextField
                 required
                 size="small"
-                label="Chọn Quận/Huyện"
-                type="text"
                 fullWidth
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
@@ -90,7 +88,6 @@ function DistrictDrop({ districts, setDistrictSelect, setReceiverUpdate, receive
                     outline: 'none',
                     border: 'none',
                 }}
-                placeholder="Tìm Quận/Huyện"
             />
 
             {display && (

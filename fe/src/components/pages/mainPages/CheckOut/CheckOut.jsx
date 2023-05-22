@@ -5,17 +5,24 @@ import momo from '_/assets/icon/momo.png';
 import { MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { selector } from '_/redux/selector';
-import { delOrderItems } from '_/redux/slices';
+import { createNewOrder, setOrderItems, deleteCartItem } from '_/redux/slices';
 import { routes } from '_/routes';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Receiver from './Receiver';
+import { dateTimeFormate } from '_/utills';
+import removeVietnameseTones from '_/utills/removeVietnameseTones';
+import { unwrapResult } from '@reduxjs/toolkit';
+import { useThemMui } from '_/context/ThemeMuiContext';
+import { useAuth } from '_/context/AuthContext';
 
 const CheckOut = () => {
     const [total, setTotal] = useState();
-    const { orderItems, currentUser } = useSelector(selector.globalStates);
+    const { handleGetCartItem, currentUser } = useAuth();
+    const { orderItems, userID } = useSelector(selector.globalStates);
     const navigate = useNavigate();
+    const { setLoading } = useThemMui();
     const dispatch = useDispatch();
     const [shipFee, setShipFee] = useState(100000);
     const [updateModel, setUpdateModel] = useState({ orderer: false, receiver: false });
@@ -27,23 +34,57 @@ const CheckOut = () => {
         position: null,
     });
     useEffect(() => {
-        if (!orderItems.length) navigate(routes.cart);
-        const total = orderItems.reduce((accumulator, currentValue) => {
-            return accumulator + currentValue.total;
+        if (!orderItems.length) return;
+
+        const total = orderItems.reduce((acc, c) => {
+            return acc + c.total;
         }, 0);
         setTotal(total);
         total < 1000000 ? setShipFee(100000) : total >= 1000000 && total < 2000000 ? setShipFee(50000) : setShipFee(0);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [orderItems]);
 
-    const handlePay = (e) => {
+    const handlePay = async (e) => {
         e.preventDefault();
-        // Thực hiện hành động đặt hàng với danh sách các món ăn đã chọn.
-        console.log('handlePay');
+        setLoading(true);
+        const { name, phoneNumber, address } = receiver;
+        const orderData = {
+            id: userID + removeVietnameseTones(dateTimeFormate(new Date())).replace(/ /g, ''),
+            user_id: userID,
+            items: JSON.stringify(orderItems),
+            total_amount: orderItems.reduce((acc, c) => {
+                return acc + c.quantity;
+            }, 0),
+            payment: total,
+            ship_fee: shipFee,
+            total_payment: total + shipFee,
+            status: 'Đã đặt hàng',
+            history: JSON.stringify([{ time: new Date(), status: 'Tiếp nhận đơn hàng - chờ xác nhận' }]),
+            orderer: JSON.stringify({
+                name: currentUser.firstName + ' ' + currentUser.lastName,
+                phoneNumber: currentUser.phoneNumber,
+            }),
+            receiver: JSON.stringify({ name, phoneNumber, address }),
+        };
+
+        dispatch(createNewOrder(orderData))
+            .then(unwrapResult)
+            .then(() => {
+                orderItems.forEach((item) => {
+                    dispatch(deleteCartItem(item.cartItemId)).then(() => {
+                        dispatch(setOrderItems([]));
+                        setLoading(false);
+                    });
+                });
+            })
+            .catch((error) => {
+                console.log(error);
+                setLoading(false);
+            });
     };
 
     const handleCancle = () => {
-        dispatch(delOrderItems());
+        dispatch(setOrderItems([]));
         navigate(routes.cart);
     };
 
@@ -449,16 +490,30 @@ const CheckOut = () => {
                                 >
                                     Hủy
                                 </MyButton>
-                                <MyButton
-                                    type="submit"
-                                    style={{ width: '200px' }}
-                                    color={{ mainColor: '#fff', bgColor: 'green' }}
-                                    fontWeight={700}
-                                    padding={'4px 12px'}
-                                    fontSize={1.5}
-                                >
-                                    Đặt hàng
-                                </MyButton>
+                                {!receiver.status && !currentUser.address ? (
+                                    <MyButton
+                                        type="button"
+                                        style={{ width: '200px' }}
+                                        color={{ mainColor: '#fff', bgColor: 'green' }}
+                                        fontWeight={700}
+                                        padding={'4px 12px'}
+                                        fontSize={1.5}
+                                        disable
+                                    >
+                                        Đặt hàng
+                                    </MyButton>
+                                ) : (
+                                    <MyButton
+                                        type="submit"
+                                        style={{ width: '200px' }}
+                                        color={{ mainColor: '#fff', bgColor: 'green' }}
+                                        fontWeight={700}
+                                        padding={'4px 12px'}
+                                        fontSize={1.5}
+                                    >
+                                        Đặt hàng
+                                    </MyButton>
+                                )}
                             </Box>
                         </Box>
                     </form>

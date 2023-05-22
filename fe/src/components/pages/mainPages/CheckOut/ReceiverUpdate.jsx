@@ -10,12 +10,10 @@ import { tphcm } from '_/data/data';
 import useDebounce from '_/hook/useDebounce';
 import { login, updateUser } from '_/redux/slices';
 import { capitalize } from '_/utills';
-import { useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import DistrictDrop from './DistrictDrop';
-import WardDrop from './WardDrop';
 import axios from 'axios';
-import AddressDrop from './AddressDrop';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import DropDown from '../../Test/DropDown';
 
 const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
     const dispatch = useDispatch();
@@ -27,48 +25,41 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
         googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
         libraries,
     });
-
-    const districts = tphcm.districts.sort((a, b) => {
-        if (a.name < b.name) {
-            return -1;
-        }
-        if (a.name > b.name) {
-            return 1;
-        }
-        return 0;
-    });
+    // eslint-disable-next-line no-unused-vars
+    const [districts, setDistricts] = useState(
+        tphcm.districts.sort((a, b) => {
+            if (a.name < b.name) {
+                return -1;
+            }
+            if (a.name > b.name) {
+                return 1;
+            }
+            return 0;
+        }),
+    );
 
     const [searchValue, setSearchValue] = useState('');
     const debounce = useDebounce(searchValue, 500);
-    const [districtSelect, setDistrictSelect] = useState('');
-    const [wardSelect, setWardSelect] = useState('');
+    const [districtSelect, setDistrictSelect] = useState(
+        updateModel.orderer ? currentUser.district : districts[0].name,
+    );
     const [wardList, setWardList] = useState([]);
+    const [wardSelect, setWardSelect] = useState('');
     const [addressList, setAddressList] = useState([]);
-    const [position, setPosition] = useState(null);
-    const [receiverUpdate, setReceiverUpdate] = useState({
-        name: '',
-        phoneNumber: '',
-        address: {
-            specificAddress: '',
-            ward: '',
-            district: '',
-        },
-        specificPosition: position,
-    });
-    const receiverUpdateMeno = useMemo(() => receiverUpdate, [receiverUpdate]);
-    const { name, phoneNumber, address, specificPosition } = receiverUpdateMeno;
+    const [addressSelect, setAddressSelect] = useState('');
+    const [position, setPosition] = useState();
 
     const GOONG_API_KEY = process.env.REACT_APP_GOONG_API_KEY;
 
     const handleMarkerDragEnd = (event) => {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
-        setReceiverUpdate({ ...receiverUpdateMeno, specificPosition: { lat, lng } });
+        setPosition({ lat, lng });
     };
 
     useEffect(() => {
         if (isLoaded) {
-            const address = currentUser.address || tphcm.name;
+            const address = currentUser.address || `${wardSelect}, ${districtSelect}, ${tphcm.name}` || tphcm.name;
             const url = `https://rsapi.goong.io/geocode?address=${address}&api_key=${GOONG_API_KEY}`;
 
             axios.get(url).then((res) => {
@@ -77,37 +68,38 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoaded]);
+    }, [isLoaded, wardSelect, districtSelect]);
 
     useEffect(() => {
-        setWardList([]);
-
         if (!districtSelect) return;
-
-        setWardList(
-            districtSelect.wards.sort((a, b) => {
-                if (a.name < b.name) {
-                    return -1;
-                }
-                if (a.name > b.name) {
-                    return 1;
-                }
-                return 0;
-            }),
-        );
+        const district = { ...districts.filter((district) => district.name === districtSelect)[0] };
+        const wardList = district.wards.sort((a, b) => {
+            if (a.name < b.name) {
+                return -1;
+            }
+            if (a.name > b.name) {
+                return 1;
+            }
+            return 0;
+        });
+        setWardSelect(wardList[0].name);
+        setWardList(wardList);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [districtSelect]);
+
     const handleUpdate = async (event) => {
         event.preventDefault();
-        setLoading(true);
+
+        // setLoading(true);
         const data = new FormData(event.currentTarget);
-        const address = capitalize(data.get('address'));
         if (updateModel.orderer) {
             try {
                 const dataUpdate = {
                     id: currentUser.id,
-                    address: `${address}, ${wardSelect}, ${districtSelect.name}, ${tphcm.name}`,
-                    position: JSON.stringify(position) || JSON.stringify(specificPosition),
+                    address: `${addressSelect}, ${wardSelect}, ${districtSelect}, ${tphcm.name}`,
+                    position: JSON.stringify(position),
                 };
+
                 dispatch(updateUser(dataUpdate))
                     .then(unwrapResult)
                     .then(() => {
@@ -134,21 +126,21 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
         }
         const name = capitalize(data.get('name'));
         const phoneNumber = data.get('phoneNumber');
-        setLoading(false);
+        // setLoading(false);
         setReceiver({
             status: true,
             name,
             phoneNumber,
-            address: `${address}, ${wardSelect}, ${districtSelect.name}, ${tphcm.name}`,
-            position: specificPosition,
+            address: `${addressSelect}, ${wardSelect}, ${districtSelect}, ${tphcm.name}`,
+            position,
         });
         setUpdateModel(false);
     };
-
     // map
     useEffect(() => {
-        if (!address.specificAddress || !address.ward || !address.district) return;
-        const place = `${address.specificAddress},${address.ward}, ${address.district}, ${tphcm.name}`;
+        if (!debounce.trim()) return;
+        if (!debounce || !wardSelect) return;
+        const place = `${debounce},${wardSelect}, ${districtSelect}, ${tphcm.name}`;
         const url = `https://rsapi.goong.io/geocode?address=${place}&api_key=${GOONG_API_KEY}`;
         axios.get(url).then((res) => {
             const position = res.data.results[0].geometry.location;
@@ -157,31 +149,15 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
                 .slice(0, 2)
                 .map((item) => item.long_name)
                 .join(' ');
-
-            setAddressList([address.specificAddress, addressComp]);
+            setAddressList([searchValue, addressComp]);
             setPosition(position);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [address]);
-
-    const handleChangeName = (e) => {
-        const name = capitalize(e.target.value);
-        setReceiverUpdate({ ...receiverUpdateMeno, name });
-    };
+    }, [debounce]);
 
     useEffect(() => {
-        if (!debounce.trim()) return;
-        setReceiverUpdate({
-            ...receiverUpdateMeno,
-            address: {
-                ...receiverUpdateMeno.address,
-                specificAddress: debounce,
-            },
-            specificPosition: null,
-        });
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debounce]);
+        setSearchValue('');
+    }, [wardSelect, districtSelect]);
 
     return (
         <Box
@@ -265,7 +241,6 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
                                 }}
                             >
                                 <MyTextField
-                                    onChange={handleChangeName}
                                     sx={{ marginTop: '15px' }}
                                     size="small"
                                     label="Nhập họ & tên người nhận"
@@ -275,12 +250,8 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
                                     name="name"
                                     type="text"
                                     autoFocus
-                                    value={name}
                                 />
                                 <MyTextField
-                                    onChange={(e) =>
-                                        setReceiverUpdate({ ...receiverUpdateMeno, phoneNumber: e.target.value })
-                                    }
                                     sx={{ marginTop: '15px' }}
                                     size="small"
                                     label="Nhập số điện thoại người nhận"
@@ -289,7 +260,6 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
                                     type="number"
                                     id="phoneNumber"
                                     required
-                                    value={phoneNumber}
                                 />
                             </Box>
                         )}
@@ -299,6 +269,7 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
                         </Typography>
                         <Box
                             sx={{
+                                marginTop: '15px',
                                 display: 'flex',
                                 gap: '5px',
                                 alignItems: 'center',
@@ -307,7 +278,6 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
                         >
                             <MyTextField
                                 required
-                                sx={{ marginTop: '15px' }}
                                 size="small"
                                 label="Tỉnh/Thành Phố"
                                 fullWidth
@@ -319,37 +289,35 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
                                     readOnly: true,
                                 }}
                             />
-                            <DistrictDrop
-                                districts={districts}
-                                setDistrictSelect={setDistrictSelect}
-                                setReceiverUpdate={setReceiverUpdate}
-                                setSearchValue={setSearchValue}
-                                receiverUpdateMeno={receiverUpdateMeno}
+
+                            <DropDown
+                                dropList={districts.map((district) => district.name)}
+                                result={districtSelect}
+                                setResult={setDistrictSelect}
                             />
-                            <WardDrop
-                                wardList={wardList}
-                                districtSelect={districtSelect}
-                                setWardSelect={setWardSelect}
-                                setReceiverUpdate={setReceiverUpdate}
-                                setSearchValue={setSearchValue}
-                                receiverUpdateMeno={receiverUpdateMeno}
+
+                            <DropDown
+                                dropList={wardList.map((ward) => ward.name)}
+                                result={wardSelect}
+                                setResult={setWardSelect}
                             />
                         </Box>
-                        <AddressDrop
-                            setSearchValue={setSearchValue}
-                            searchValue={searchValue}
-                            addressList={addressList}
-                            setReceiverUpdate={setReceiverUpdate}
-                            receiverUpdateMeno={receiverUpdateMeno}
+
+                        <DropDown
+                            input={{
+                                status: true,
+                                inputLabel: 'Nhập địa chỉ',
+                                setSearchValue: setSearchValue,
+                                searchValue: searchValue,
+                            }}
+                            dropList={addressList}
+                            result={addressSelect}
+                            setResult={setAddressSelect}
                         />
 
-                        <GoogleMap
-                            mapContainerStyle={{ height: '500px', width: '100%' }}
-                            center={specificPosition || position}
-                            zoom={20}
-                        >
+                        <GoogleMap mapContainerStyle={{ height: '500px', width: '100%' }} center={position} zoom={20}>
                             <MarkerF
-                                position={specificPosition || position}
+                                position={currentUser.position || position}
                                 draggable
                                 onDragEnd={handleMarkerDragEnd}
                             />

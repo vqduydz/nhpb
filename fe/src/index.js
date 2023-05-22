@@ -1,6 +1,5 @@
 import { CssBaseline } from '@mui/material';
 import { StyledEngineProvider } from '@mui/material/styles';
-import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -11,6 +10,7 @@ import AuthContextProvider from './context/AuthContext';
 import ThemeMuiContextProvider from './context/ThemeMuiContext';
 import { persistor, store } from './redux/store';
 import reportWebVitals from './reportWebVitals';
+import React, { StrictMode } from 'react';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

@@ -19,10 +19,17 @@ export default function Login() {
     const text = message.auth;
 
     useEffect(() => {
-        if (currentUser) navigate(routes.home);
+        if (currentUser && currentUser.role === 'Customer') {
+            navigate(routes.home);
+            return;
+        }
+        if (currentUser && currentUser.role !== 'Customer') {
+            navigate(routes.manage);
+            return;
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUser]);
-    console.log({ currentUser });
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);

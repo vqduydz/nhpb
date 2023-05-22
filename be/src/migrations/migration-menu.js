@@ -34,8 +34,17 @@ module.exports = {
       unit: {
         type: Sequelize.STRING,
       },
-      image: {
+      image_url: {
         type: Sequelize.STRING,
+      },
+      thumb_url: {
+        type: Sequelize.STRING,
+      },
+      poster_url: {
+        type: Sequelize.STRING,
+      },
+      desc: {
+        type: Sequelize.TEXT,
       },
       createdAt: {
         type: Sequelize.DATE,
