@@ -3,16 +3,11 @@ import { Box, Rating, Typography } from '@mui/material';
 import { MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { routes } from '_/routes';
+import { renderPrice } from '_/utills';
 // import { useHistory, useLocation } from "react-router-dom";
 
 const Detail = ({ menu }) => {
     const { name, catalog, price, unit, image_url, catalogSlug, detail } = menu;
-
-    const renderPrice = (price) => {
-        if (!price) return;
-        const options = { style: 'currency', currency: 'VND' };
-        return `${price.toLocaleString('vi-VN', options)}`;
-    };
 
     return (
         <>

@@ -6,85 +6,91 @@ import multer from 'multer';
 import sharp from 'sharp';
 const xlsx = require('xlsx');
 dotenv.config();
-const FeedBack = db.FeedBack;
+const Feedback = db.Feedback;
 const Menu = db.Menu;
+const User = db.User;
 
-const createFeedBack = async (req, res) => {
+const createFeedback = async (req, res) => {
   try {
-    const { token } = req.params;
-    const { user_id, menu_id, point, content } = req.body;
+    const { point, feedback_content, feedback_code, menu_id, user_id } = req.body;
     // Tìm kiếm Menu trong database
-    const feedBack = await FeedBack.findOne({ where: { token, menu_id } });
+    const feedback = await Feedback.findOne({ where: { feedback_code } });
 
-    // Kiểm tra xem email của FeedBack có tồn tại không
-    if (feedBack) {
-      return res.status(422).json({ errorMessage: 'FeedBack already exists' });
+    // Kiểm tra xem email của Feedback có tồn tại không
+    if (feedback) {
+      return res.status(422).json({ errorMessage: 'Feedback already exists' });
     }
 
-    await FeedBack.create({ user_id, menu_id, point, content, token });
+    await Feedback.create({ point, feedback_content, feedback_code, menu_id, user_id });
 
-    return res.status(200).json({ message: 'FeedBack created successfully' });
+    return res.status(200).json({ message: 'Feedback created successfully' });
   } catch (error) {
     console.log('28----', error);
     return res.status(500).json({ error, errorMessage: 'Server error' });
   }
 };
 
-const getFeedBack = async (req, res) => {
+const getFeedback = async (req, res) => {
+  const { feedback_code, menu_id } = req.query;
+  console.log('36---', feedback_code, menu_id);
   try {
-    const feedBacks = await FeedBack.findAll({
-      order: [['id', 'ASC']],
-    });
+    if (feedback_code) {
+      const feedback = await Feedback.findOne({ where: { feedback_code } });
+      if (!feedback) return res.status(200).json({ feedbacked: false });
+      return res.status(200).json({ feedbacked: true });
+    }
+    if (menu_id) {
+      const feedbacks = await Feedback.findAll({ where: { menu_id }, order: [['id', 'DESC']] });
+      if (!feedbacks) return res.status(200).json([]);
+      // Lấy danh sách user_id của các feedbacks
+      const feedbacksUserID = feedbacks.map((feedback) => feedback.user_id);
 
-    // Lấy danh sách slug của các feedBacks
-    const feedBackSlugs = feedBacks.map((feedBack) => feedBack.slug);
+      const users = await User.findAll({
+        where: { id: feedbacksUserID },
+        order: [['id', 'ASC']],
+        attributes: ['id', 'firstName', 'lastName', 'avatar'],
+        raw: true,
+      });
 
-    // Lấy danh sách menu theo các slug của feedBacks
-    const menus = await Menu.findAll({
-      where: {
-        feedBackSlug: feedBackSlugs,
-      },
-      order: [['id', 'ASC']],
-    });
+      const feedbacksWithUser = feedbacks.map((feedback) => {
+        const feedbackUsers = users.filter((user) => user.id === feedback.user_id);
+        const data = { ...feedback.toJSON(), ...feedbackUsers[0] };
+        return data;
+      });
 
-    const feedBacksWithMenus = feedBacks.map((feedBack) => {
-      const feedBackMenus = menus.filter((menu) => menu.feedBackSlug === feedBack.slug);
-      return { ...feedBack.toJSON(), menus: feedBackMenus };
-    });
-
-    const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
-    return res.status(200).json({ feedBacks, feedBacksWithMenus, imagePath, feedBackSlugs, menus });
+      return res.status(200).json([...feedbacksWithUser]);
+    }
   } catch (error) {
     console.log('58----', error);
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
 
-const updateFeedBackById = async (req, res) => {
+const updateFeedbackById = async (req, res) => {
   const dataUpdate = req.body;
   try {
-    const feedBack = await FeedBack.findOne({ where: { id: dataUpdate.id } });
-    if (!feedBack) {
-      return res.status(404).json({ errorMessage: 'FeedBack does not exist' });
+    const feedback = await Feedback.findOne({ where: { id: dataUpdate.id } });
+    if (!feedback) {
+      return res.status(404).json({ errorMessage: 'Feedback does not exist' });
     }
     const { id, ...data } = dataUpdate;
-    await feedBack.set(data);
-    await feedBack.save();
-    return res.status(200).json({ message: 'FeedBack updated successfully' });
+    await feedback.set(data);
+    await feedback.save();
+    return res.status(200).json({ message: 'Feedback updated successfully' });
   } catch (error) {
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
 
-const deleteFeedBackById = async (req, res) => {
+const deleteFeedbackById = async (req, res) => {
   try {
     const { id } = req.body;
-    const feedBack = await FeedBack.findOne({ where: { id } });
-    if (!feedBack) {
-      return res.status(404).json({ errorMessage: 'FeedBack does not exist' });
+    const feedback = await Feedback.findOne({ where: { id } });
+    if (!feedback) {
+      return res.status(404).json({ errorMessage: 'Feedback does not exist' });
     }
 
-    const imageNames = [feedBack.image_url, feedBack.thumb_url, feedBack.poster_url]; // Danh sách tên các file cần xóa được gửi trong body của request
+    const imageNames = [feedback.image_url, feedback.thumb_url, feedback.poster_url]; // Danh sách tên các file cần xóa được gửi trong body của request
     // Duyệt qua danh sách các tên file và xóa từng file
     let delIamgeNoti = [];
     imageNames.map((imageName) => {
@@ -97,11 +103,11 @@ const deleteFeedBackById = async (req, res) => {
           delIamgeNoti.push(false);
         });
     });
-    await feedBack.destroy();
+    await feedback.destroy();
     return res.status(200).json({
       message: delIamgeNoti
-        ? 'images deleted, FeedBack deleted successfully'
-        : 'Failed to delete image, FeedBack deleted successfully',
+        ? 'images deleted, Feedback deleted successfully'
+        : 'Failed to delete image, Feedback deleted successfully',
     });
   } catch (error) {
     console.log('107---', error);
@@ -109,4 +115,4 @@ const deleteFeedBackById = async (req, res) => {
   }
 };
 
-export default { createFeedBack, getFeedBack, updateFeedBackById, deleteFeedBackById };
+export default { createFeedback, getFeedback, updateFeedbackById, deleteFeedbackById };

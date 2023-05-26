@@ -1,29 +1,27 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class FeedBack extends Model {
+  class Feedback extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
-      FeedBack.belongsTo(models.Catalog, { foreignKey: 'slug', sourceKey: 'catalogSlug' });
-    }
+    static associate(models) {}
   }
-  FeedBack.init(
+  Feedback.init(
     {
       user_id: DataTypes.INTEGER,
       menu_id: DataTypes.INTEGER,
       point: DataTypes.INTEGER,
-      content: DataTypes.TEXT,
-      token: DataTypes.STRING,
+      feedback_content: DataTypes.TEXT,
+      feedback_code: DataTypes.STRING,
     },
     {
       sequelize,
-      modelName: 'FeedBack',
+      modelName: 'Feedback',
       timestamps: true,
     },
   );
-  return FeedBack;
+  return Feedback;
 };

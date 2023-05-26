@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('feedBacks', {
+    await queryInterface.createTable('feedbacks', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -21,11 +21,12 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      content: {
+      feedback_content: {
         type: Sequelize.TEXT,
       },
-      token: {
+      feedback_code: {
         type: Sequelize.STRING,
+        unique: true,
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -40,6 +41,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('feedBacks');
+    await queryInterface.dropTable('feedbacks');
   },
 };

@@ -6,7 +6,7 @@ const Receiver = ({ updateModel, setUpdateModel, receiver, setReceiver }) => {
     return (
         <>
             {receiver.status && (
-                <Box sx={{ borderTop: '1px solid #0000001a', mt: '10px', pt: '10px' }}>
+                <>
                     <Box>
                         <Typography fontWeight={700}>NGƯỜI NHẬN</Typography>{' '}
                         <MyButton
@@ -24,15 +24,16 @@ const Receiver = ({ updateModel, setUpdateModel, receiver, setReceiver }) => {
                         <Typography fontWeight={500}>Số điện thoại: (+84){receiver.phoneNumber}</Typography>
                     </Box>
                     <Typography fontWeight={500}>Địa chỉ: {receiver.address}</Typography>
-                </Box>
+                </>
             )}
-
-            <ReceiverUpdate
-                receiver={receiver}
-                updateModel={updateModel}
-                setUpdateModel={setUpdateModel}
-                setReceiver={setReceiver}
-            />
+            {(updateModel.orderer || updateModel.receiver) && (
+                <ReceiverUpdate
+                    receiver={receiver}
+                    updateModel={updateModel}
+                    setUpdateModel={setUpdateModel}
+                    setReceiver={setReceiver}
+                />
+            )}
         </>
     );
 };

@@ -2,15 +2,11 @@ import { Box, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Button } from '_/components/common';
+import { renderPrice } from '_/utills';
 
 function Content({ data, monChinh = false }) {
     const { item, imagePath } = data;
     const { image_url, name, slug, price } = item;
-    const renderPrice = () => {
-        if (!price) return;
-        const options = { style: 'currency', currency: 'VND' };
-        return `${price.toLocaleString('vi-VN', options)}`;
-    };
 
     useEffect(() => {
         if (window.location.hash === '#id1') {

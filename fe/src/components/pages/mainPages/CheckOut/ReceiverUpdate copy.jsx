@@ -69,7 +69,7 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver }) => {
 
     useEffect(() => {
         if (isLoaded) {
-            const address = currentUser.address || tphcm.name;
+            const address = currentUser.place || tphcm.name;
             const url = `https://rsapi.goong.io/geocode?address=${address}&api_key=${GOONG_API_KEY}`;
 
             axios.get(url).then((res) => {

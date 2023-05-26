@@ -2,7 +2,6 @@ import React from 'react';
 import classNames from 'classnames/bind';
 import { Link } from 'react-router-dom';
 import styles from './MyButton.module.scss';
-import PropTypes from 'prop-types';
 
 const cx = classNames.bind(styles);
 
@@ -68,7 +67,7 @@ const MyButton = React.forwardRef(
             [className]: className,
         });
 
-        return (
+        return effect ? (
             <Comp
                 className={classes}
                 {...props}
@@ -93,6 +92,24 @@ const MyButton = React.forwardRef(
                 <b aria-hidden="true">{children}</b>
                 <b aria-hidden="true">{children}</b>
                 <b aria-hidden="true">{children}</b>
+            </Comp>
+        ) : (
+            <Comp
+                className={classes}
+                {...props}
+                style={{
+                    ...style,
+                    '--fontSize': fontSize,
+                    '--fontWeight': fontWeight,
+                    '--padding': padding,
+                    '--borderWidth': borderWidth,
+                    '--bgColor': color.bgColor,
+                    '--mainColor': color.mainColor,
+                    '--subColor': color.subColor,
+                    '--borderColor': color.borderColor,
+                }}
+            >
+                {children}
             </Comp>
         );
     },

@@ -1,136 +1,136 @@
 .dbe-btn {
-    --mainColor: #fff;
-    --bgColor: #000;
-    --subColor: var(--bgColor);
-    --borderColor: transparent;
-    background: var(--textBgColor, var(--bgColor));
-    border: calc(var(--borderWidth, 1) * 1px) solid var(--textBgColor, var(--borderColor));
-    border-radius: var(--borderRadius, 4px);
-    text-align: center;
-    line-height: 24px;
-    color: var(--mainColor);
-    cursor: pointer;
-    font-size: calc(var(--fontSize, 1.3) * 1rem);
-    font-weight: var(--fontWeight, 500);
-    outline: transparent;
-    padding: var(--padding, 3px 6px);
-    position: relative;
-    text-decoration: none;
-    min-height: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    transition: transform 0.2s;
-    transform: translate(0, calc(var(--y, 0) * 1%)) scale(var(--scale, 1));
-    * {
-        overflow-wrap: break-word;
-        word-break: break-word;
-        white-space: normal;
-    }
-    opacity: var(--opacity, 0.9);
-    &:hover {
-        opacity: 1;
-    }
-    width: fit-content;
+ --mainColor: #fff;
+ --bgColor: #000;
+ --subColor: var(--bgColor);
+ --borderColor: transparent;
+ background: var(--textBgColor, var(--bgColor));
+ border: calc(var(--borderWidth, 1) * 1px) solid var(--textBgColor, var(--borderColor));
+ border-radius: var(--borderRadius, 4px);
+ text-align: center;
+ line-height: 24px;
+ color: var(--mainColor);
+ cursor: pointer;
+ font-size: calc(var(--fontSize, 1.6) * 1rem);
+ font-weight: var(--fontWeight, 500);
+ outline: transparent;
+ padding: var(--padding, 3px 6px);
+ position: relative;
+ text-decoration: none;
+ min-height: 10px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ min-width: 20px;
+ transition: transform 0.2s;
+ transform: translate(0, calc(var(--y, 0) * 1%)) scale(var(--scale, 1));
+ * {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+ }
+ opacity: var(--opacity, 0.9);
+ &:hover {
+  opacity: 1;
+ }
+ width: fit-content;
 }
 .dbe-btn span {
-    -webkit-clip-path: var(--clip);
-    bottom: calc(var(--borderWidth, 1) * -1px);
-    clip-path: var(--clip);
-    left: calc(var(--borderWidth, 1) * -1px);
-    position: absolute;
-    right: calc(var(--borderWidth, 1) * -1px);
-    top: calc(var(--borderWidth, 1) * -1px);
-    z-index: 1;
+ -webkit-clip-path: var(--clip);
+ bottom: calc(var(--borderWidth, 1) * -1px);
+ clip-path: var(--clip);
+ left: calc(var(--borderWidth, 1) * -1px);
+ position: absolute;
+ right: calc(var(--borderWidth, 1) * -1px);
+ top: calc(var(--borderWidth, 1) * -1px);
+ z-index: 1;
 }
 .dbe-btn.effect span:nth-of-type(1):hover,
 .dbe-btn.effect span:nth-of-type(2):hover,
 .dbe-btn.effect span:nth-of-type(3):hover,
 .dbe-btn.effect span:nth-of-type(4):hover {
-    --clip: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    z-index: 2;
+ --clip: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+ z-index: 2;
 }
 .dbe-btn.effect span:nth-of-type(1):hover ~ b:nth-of-type(1),
 .dbe-btn.effect span:nth-of-type(2):hover ~ b:nth-of-type(2),
 .dbe-btn.effect span:nth-of-type(3):hover ~ b:nth-of-type(3),
 .dbe-btn.effect span:nth-of-type(4):hover ~ b:nth-of-type(4) {
-    --clip: inset(0 0 0 0);
+ --clip: inset(0 0 0 0);
 }
 .dbe-btn span:nth-of-type(1) {
-    --clip: polygon(0 0, 100% 0, 50% 50%, 50% 50%);
+ --clip: polygon(0 0, 100% 0, 50% 50%, 50% 50%);
 }
 .dbe-btn span:nth-of-type(2) {
-    --clip: polygon(100% 0, 100% 100%, 50% 50%);
+ --clip: polygon(100% 0, 100% 100%, 50% 50%);
 }
 .dbe-btn span:nth-of-type(3) {
-    --clip: polygon(0 100%, 100% 100%, 50% 50%);
+ --clip: polygon(0 100%, 100% 100%, 50% 50%);
 }
 .dbe-btn span:nth-of-type(4) {
-    --clip: polygon(0 0, 0 100%, 50% 50%);
+ --clip: polygon(0 0, 0 100%, 50% 50%);
 }
 .dbe-btn b {
-    -webkit-clip-path: var(--clip);
-    background: var(--bgActive, var(--textBgColor, var(--mainColor)));
-    border: calc(var(--borderWidth, 1) * 1px) solid var(--textBgColor, var(--borderColor));
-    bottom: calc(var(--borderWidth, 1) * -1px);
-    font-weight: var(--fontWeight, 500);
-    clip-path: var(--clip);
-    color: var(--colorActive, var(--subColor));
-    left: calc(var(--borderWidth, 1) * -1px);
-    padding: var(--padding, 3px 6px);
-    position: absolute;
-    right: calc(var(--borderWidth, 1) * -1px);
-    top: calc(var(--borderWidth, 1) * -1px);
-    transition: -webkit-clip-path 0.25s ease;
-    transition: clip-path 0.25s ease;
-    transition: clip-path 0.25s ease, -webkit-clip-path 0.25s ease;
-    border-radius: var(--borderRadius, 4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+ -webkit-clip-path: var(--clip);
+ background: var(--bgActive, var(--textBgColor, var(--mainColor)));
+ border: calc(var(--borderWidth, 1) * 1px) solid var(--textBgColor, var(--borderColor));
+ bottom: calc(var(--borderWidth, 1) * -1px);
+ font-weight: var(--fontWeight, 500);
+ clip-path: var(--clip);
+ color: var(--colorActive, var(--subColor));
+ left: calc(var(--borderWidth, 1) * -1px);
+ padding: var(--padding, 3px 6px);
+ position: absolute;
+ right: calc(var(--borderWidth, 1) * -1px);
+ top: calc(var(--borderWidth, 1) * -1px);
+ transition: -webkit-clip-path 0.25s ease;
+ transition: clip-path 0.25s ease;
+ transition: clip-path 0.25s ease, -webkit-clip-path 0.25s ease;
+ border-radius: var(--borderRadius, 4px);
+ display: flex;
+ align-items: center;
+ justify-content: center;
 }
 .dbe-btn b:nth-of-type(1) {
-    --clip: inset(0 0 100% 0);
+ --clip: inset(0 0 100% 0);
 }
 .dbe-btn b:nth-of-type(2) {
-    --clip: inset(0 0 0 100%);
+ --clip: inset(0 0 0 100%);
 }
 .dbe-btn b:nth-of-type(3) {
-    --clip: inset(100% 0 0 0);
+ --clip: inset(100% 0 0 0);
 }
 .dbe-btn b:nth-of-type(4) {
-    --clip: inset(0 100% 0 0);
+ --clip: inset(0 100% 0 0);
 }
 
 .effect {
-    --mainColor: #000;
-    --bgColor: #fff;
-    --borderColor: var(--mainColor);
-    --opacity: 1;
+ --mainColor: #000;
+ --bgColor: #fff;
+ --borderColor: var(--mainColor);
+ --opacity: 1;
 }
 
 .text {
-    --subColor: red;
-    --padding: 0;
-    --mainColor: #337ab7;
-    --textBgColor: transparent;
+ --subColor: red;
+ --padding: 0;
+ --mainColor: #337ab7;
+ --textBgColor: transparent;
 }
 
 .scale {
-    &:hover {
-        transform: scale(1.04);
-    }
+ &:hover {
+  transform: scale(1.04);
+ }
 }
 
 a.dbe-btn {
-    display: inline-flex;
+ display: inline-flex;
 }
 
 .disable {
-    pointer-events: none;
-    cursor: not-allowed;
-    opacity: 0.5;
+ pointer-events: none;
+ cursor: not-allowed;
+ opacity: 0.5;
 }
 // .active {
 //     --colorActive: #00ff46;

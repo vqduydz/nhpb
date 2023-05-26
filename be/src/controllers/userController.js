@@ -51,7 +51,7 @@ const handleLogin = async (req, res) => {
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
       gender: user.gender,
-      address: user.address,
+      place: user.place,
       avatar: user.avatar,
       birthday: user.birthday,
       position: user.position,
@@ -63,7 +63,7 @@ const handleLogin = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, phoneNumber, gender, address, avatar } = req.body;
+    const { email, password, firstName, lastName, role, phoneNumber, gender, place, avatar } = req.body;
 
     // Tìm kiếm user trong database
     const user = await User.findOne({ where: { email } });
@@ -84,7 +84,7 @@ const createUser = async (req, res) => {
       role,
       phoneNumber,
       gender,
-      address,
+      place,
       avatar,
     });
 

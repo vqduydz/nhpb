@@ -1,7 +1,12 @@
 import { axiosService } from './axiosClient';
 
 export const getOrderApi = (user_id) => {
-    const url = `/order/${user_id}`;
+    const url = `/orders/${user_id}`;
+    return axiosService.get(url);
+};
+
+export const getOrderByOrderCodeApi = (order_code) => {
+    const url = `/order/${order_code}`;
     return axiosService.get(url);
 };
 

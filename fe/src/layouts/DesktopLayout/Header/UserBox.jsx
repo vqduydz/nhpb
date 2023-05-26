@@ -90,7 +90,12 @@ const UserBox = (props) => {
                             >
                                 Quản lý tài khoản
                             </Button>
-                            <Button leftIcon={<ListAltIcon />} className="user-action" onClick={handleCloseUserMenu}>
+                            <Button
+                                to={routes.orders}
+                                leftIcon={<ListAltIcon />}
+                                className="user-action"
+                                onClick={handleCloseUserMenu}
+                            >
                                 Đơn hàng của tôi
                             </Button>
                             <Button

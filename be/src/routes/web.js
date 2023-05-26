@@ -1,5 +1,12 @@
 import express from 'express';
-import { catalogController, menuController, userController, cartItemController, orderController } from '../controllers';
+import {
+  catalogController,
+  menuController,
+  userController,
+  cartItemController,
+  orderController,
+  feedbackController,
+} from '../controllers';
 import { verifyToken, checkRole } from '../middlewares/middleware';
 import multer from 'multer';
 import path from 'path';
@@ -31,6 +38,8 @@ export const initWebRoutes = (app) => {
   // sign up - create user
   router.post('/user', userController.createUser);
 
+  //________user________________________________________________________
+
   // get user
   router.get('/user', verifyToken, checkRole(['Root', 'Admin', 'UserManage', 'Customer']), userController.getUser);
   // update user data
@@ -48,6 +57,8 @@ export const initWebRoutes = (app) => {
     userController.deleteUserById,
   );
 
+  //________menu________________________________________________________
+
   // get menu
   router.get('/menu/:slug?', menuController.getMenu);
   // create menu
@@ -64,6 +75,8 @@ export const initWebRoutes = (app) => {
     upload.single('file'),
     menuController.importMenus,
   );
+
+  //________catalog________________________________________________________
 
   // get catalog
   router.get('/catalog/:slug?', catalogController.getCatalog);
@@ -92,6 +105,24 @@ export const initWebRoutes = (app) => {
     catalogController.importCatalogs,
   );
 
+  //_______feedback_________________________________________________________
+
+  // get feedback
+  router.get('/feedback', feedbackController.getFeedback);
+  // create feedback
+  router.post('/feedback', verifyToken, checkRole(['Customer']), feedbackController.createFeedback);
+  // update feedback data
+  router.patch('/feedback', verifyToken, checkRole(['Customer']), feedbackController.updateFeedbackById);
+  // delete feedback
+  router.delete(
+    '/feedback',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage']),
+    feedbackController.deleteFeedbackById,
+  );
+
+  //_______cart item_________________________________________________________
+
   /// cart item
   // get
   router.get('/cartitem/:user_id', cartItemController.getCartItemByCartId);
@@ -102,15 +133,20 @@ export const initWebRoutes = (app) => {
   // add
   router.post('/cartitem', cartItemController.addCartItem);
 
+  //________order________________________________________________________
+
   /// order
   // get
-  router.get('/order/:user_id', orderController.getOrders);
+  router.get('/orders/:user_id', verifyToken, checkRole(['Customer']), orderController.getOrders);
+  router.get('/order/:order_code', verifyToken, checkRole(['Customer']), orderController.getOrderByOrderCode);
   // // update
   // router.patch('/order', orderController.updateOrderById);
   // // delete
   // router.delete('/order', orderController.deleteOrderById);
   // add
   router.post('/order', verifyToken, checkRole(['Customer']), orderController.createNewOrder);
+
+  //__________image______________________________________________________
 
   // upload image
   router.post('/upload', upload.single('image'), (req, res, next) => {
@@ -169,6 +205,8 @@ export const initWebRoutes = (app) => {
     const filePath = path.join(imagePath, filename);
     res.sendFile(filePath);
   });
+
+  //________________________________________________________________
 
   // Khởi chạy server
   app.listen(3001, () => {

@@ -26,7 +26,7 @@ function Profile() {
 
     const handleDelete = async () => {};
     if (!currentUser) return;
-    const { id, email, firstName, lastName, phoneNumber, gender, address, image, role, birthday, createdAt } =
+    const { id, email, firstName, lastName, phoneNumber, gender, place, image, role, birthday, createdAt } =
         currentUser;
     const displayName = firstName + ' ' + lastName;
 
@@ -70,12 +70,12 @@ function Profile() {
                             </Box>
                             <Box className={cx('account')}>
                                 <span className={cx('title')}>Mobile number :</span>
-                                <span className={cx('msg')}>(+84){phoneNumber}</span>
+                                <span className={cx('msg')}> {phoneNumber}</span>
                             </Box>
 
                             <Box className={cx('account')}>
                                 <span className={cx('title')}>Address :</span>
-                                <span className={cx('msg')}>{address}</span>
+                                <span className={cx('msg')}>{place}</span>
                             </Box>
 
                             <Box className={cx('acction')}>

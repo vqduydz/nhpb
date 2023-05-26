@@ -1,14 +1,11 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { Button } from '..';
+import { renderPrice } from '_/utills';
 
 const renderContent = (props) => {
     const { items, imagePath } = props;
-    const renderPrice = (price) => {
-        if (!price) return;
-        const options = { style: 'currency', currency: 'VND' };
-        return `${price.toLocaleString('vi-VN', options)}`;
-    };
+
     return items.map((item) => (
         <Box
             key={item.slug}

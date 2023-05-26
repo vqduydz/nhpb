@@ -33,8 +33,8 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      address: {
-        type: Sequelize.STRING,
+      place: {
+        type: Sequelize.TEXT,
       },
       position: {
         type: Sequelize.STRING,

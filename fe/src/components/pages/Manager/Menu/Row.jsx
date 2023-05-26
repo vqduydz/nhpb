@@ -9,7 +9,7 @@ import { MyButton } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
 import { deleteMenu } from '_/redux/slices';
-import { dateTimeFormate } from '_/utills';
+import { dateTimeFormate, renderPrice } from '_/utills';
 
 export default function Row(props) {
     const dispatch = useDispatch();
@@ -44,11 +44,7 @@ export default function Row(props) {
             setSnackbar({ open: true, message: 'Cancel delete', status: 'info' });
         }
     };
-    const renderPrice = (price) => {
-        if (!price) return;
-        const options = { style: 'currency', currency: 'VND' };
-        return `${price.toLocaleString('vi-VN', options)}`;
-    };
+
     return (
         <>
             <TableRow

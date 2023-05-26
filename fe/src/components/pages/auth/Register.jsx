@@ -160,28 +160,7 @@ export default function Register() {
                     id="phoneNumber"
                     autoComplete="phoneNumber"
                 />
-                {/* <MyTextField
-                    sx={{ marginTop: '15px' }}
-                    size="small"
-                    label={text.enterAddress}
-                    fullWidth
-                    name="address"
-                    type=""
-                    id="address"
-                    autoComplete="address"
-                /> */}
-                {/* <FormLabel sx={{ margin: '10px 0 0 0' }} htmlFor="birthday" id="gender">
-                    {text.birthday}
-                </FormLabel>
-                <MyTextField
-                    required
-                    size="small"
-                    fullWidth
-                    name="birthday"
-                    type="date"
-                    id="birthday"
-                    autoComplete="birthday"
-                /> */}
+
                 <Box sx={{ marginTop: '15px', display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <FormLabel id="gender">{text.gender}</FormLabel>
                     <RadioGroup defaultValue="Female" row aria-labelledby="gender" name="gender">
