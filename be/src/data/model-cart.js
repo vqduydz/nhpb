@@ -9,13 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Cart.hasMany(models.CartItem, { foreignKey: 'cart_id', sourceKey: 'id' });
-      // Cart.belongsTo(models.User, { foreignKey: 'id', sourceKey: 'user_id' });
+      // Cart.belongsTo(models.User, { foreignKey: 'id', sourceKey: 'customer_id' });
       // define association here
     }
   }
   Cart.init(
     {
-      user_id: DataTypes.INTEGER,
+      customer_id: DataTypes.INTEGER,
     },
     {
       sequelize,

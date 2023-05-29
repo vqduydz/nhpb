@@ -29,12 +29,14 @@ const getToken = async (req, res) => {
       {
         id: user.id,
         role: user.role,
+        email: user.email,
       },
       process.env.JWT_SECRET,
     );
     // Trả về token cho user
     return res.json({ token });
   } catch (error) {
+    console.log('39---', error);
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
@@ -196,20 +198,6 @@ const updateUserById = async (req, res) => {
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
-
-// const deleteUserById = async (req, res) => {
-//   try {
-//     const { id } = req.body;
-//     const user = await User.findOne({ where: { id } });
-//     if (!user) {
-//       return res.status(404).json({ errorMessage: 'User does not exist' });
-//     }
-//     await user.destroy();
-//     return res.status(200).json({ message: 'User deleted successfully' });
-//   } catch (error) {
-//     return res.status(500).json({ errorMessage: 'Server error' });
-//   }
-// };
 
 const deleteUserById = async (req, res) => {
   try {

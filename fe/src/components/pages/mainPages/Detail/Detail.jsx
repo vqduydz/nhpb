@@ -67,7 +67,7 @@ const Detail = () => {
 
   const handleAddToCart = () => {
     if (currentUser) {
-      const cartItem = { user_id: currentUser.id, menu_id: id, quantity: 1 };
+      const cartItem = { customer_id: currentUser.id, menu_id: id, quantity: 1 };
       addToCart(cartItem);
       return;
     } else {

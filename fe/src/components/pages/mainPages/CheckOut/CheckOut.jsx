@@ -64,7 +64,7 @@ const CheckOut = () => {
     const orderData = {
       payment_methods: data.get('payment-methods'),
       order_code: `${userID}${removeVietnameseTones(dateTimeFormate(new Date())).replace(/ /g, '')}`,
-      user_id: userID,
+      customer_id: userID,
       items: JSON.stringify(orderItems),
       total_amount: orderItems.reduce((acc, c) => {
         return acc + c.quantity;
@@ -72,8 +72,34 @@ const CheckOut = () => {
       payment: total,
       ship_fee: shipFee,
       total_payment: total + shipFee,
-      status: 'Đã đặt hàng',
-      history: JSON.stringify([{ time: new Date(), status: 'Tiếp nhận đơn hàng - chờ xác nhận' }]),
+      status: 'Chờ xác nhận',
+      history: JSON.stringify([
+        {
+          time: null,
+          status: 'Hoàn thành',
+          stt_code: 5,
+        },
+        {
+          time: null,
+          status: 'Giao hàng thành công',
+          stt_code: 4,
+        },
+        {
+          time: null,
+          status: 'Đã chuẩn bị hàng - Bắt đầu giao hàng',
+          stt_code: 3,
+        },
+        {
+          time: null,
+          status: 'Đã xác nhận đơn hàng - Bắt đầu chuẩn bị hàng',
+          stt_code: 2,
+        },
+        {
+          time: new Date(),
+          status: 'Đã đặt hàng - chờ xác nhận',
+          stt_code: 1,
+        },
+      ]),
       orderer: JSON.stringify({
         name: currentUser.firstName + ' ' + currentUser.lastName,
         phoneNumber: currentUser.phoneNumber,

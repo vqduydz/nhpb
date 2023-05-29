@@ -11,9 +11,11 @@ module.exports = (sequelize, DataTypes) => {
   }
   Order.init(
     {
+      deliver_id: DataTypes.INTEGER,
+      handler_id: DataTypes.INTEGER,
       payment_methods: DataTypes.STRING,
       order_code: DataTypes.STRING,
-      user_id: DataTypes.INTEGER,
+      customer_id: DataTypes.INTEGER,
       status: DataTypes.STRING,
       payment: DataTypes.INTEGER,
       ship_fee: DataTypes.INTEGER,

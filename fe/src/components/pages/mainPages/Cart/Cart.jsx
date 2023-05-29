@@ -73,7 +73,6 @@ const Cart = () => {
     navigate(routes.checkout);
   };
 
-  console.log({ selectedFoodsMemo });
   // handle select
 
   const TransitionDown = (props) => {

@@ -78,9 +78,9 @@ export const getOrderByOrderCode = createAsyncThunk('getOrder', async (order_cod
   }
 });
 
-export const getOrder = createAsyncThunk('getOrder', async (user_id, thunkAPI) => {
+export const getOrder = createAsyncThunk('getOrder', async (customer_id, thunkAPI) => {
   try {
-    const res = await orderAPI.getOrderApi(user_id);
+    const res = await orderAPI.getOrderApi(customer_id);
     return res;
   } catch (error) {
     return thunkAPI.rejectWithValue(error);
@@ -144,9 +144,9 @@ export { orderItemsReducer };
 
 // cart item
 
-export const getCartItem = createAsyncThunk('getCartItem', async (user_id, thunkAPI) => {
+export const getCartItem = createAsyncThunk('getCartItem', async (customer_id, thunkAPI) => {
   try {
-    const res = await cartItemAPI.getCartItemApi(user_id);
+    const res = await cartItemAPI.getCartItemApi(customer_id);
     return res;
   } catch (error) {
     return thunkAPI.rejectWithValue(error);

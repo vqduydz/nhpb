@@ -12,7 +12,8 @@ AppOrderTimeline.propTypes = {
   list: PropTypes.array.isRequired,
 };
 
-export default function AppOrderTimeline({ subheader, list, ...other }) {
+export default function AppOrderTimeline({ deliver, handler, subheader, list, ...other }) {
+  console.log({ list });
   return (
     <Card
       {...other}
@@ -32,9 +33,29 @@ export default function AppOrderTimeline({ subheader, list, ...other }) {
         }}
       >
         <Timeline>
-          {list?.map((item, index) => (
-            <OrderItem key={index} item={item} type={`order${index + 1}`} isLast={index === list.length - 1} />
-          ))}
+          {list?.map((item, index) => {
+            if (item.stt_code === 2)
+              return (
+                <OrderItem
+                  key={index}
+                  handler={handler}
+                  item={item}
+                  type={`order${index + 1}`}
+                  isLast={index === list.length - 1}
+                />
+              );
+            if (item.stt_code === 3)
+              return (
+                <OrderItem
+                  key={index}
+                  deliver={deliver}
+                  item={item}
+                  type={`order${index + 1}`}
+                  isLast={index === list.length - 1}
+                />
+              );
+            return <OrderItem key={index} item={item} type={`order${index + 1}`} isLast={index === list.length - 1} />;
+          })}
         </Timeline>
       </CardContent>
     </Card>
@@ -52,7 +73,7 @@ OrderItem.propTypes = {
   type: PropTypes.string,
 };
 
-function OrderItem({ item, isLast, type }) {
+function OrderItem({ item, isLast, type, handler, deliver }) {
   const { status, time } = item;
   const color = time
     ? (type === 'order1' && 'success') ||
@@ -69,9 +90,12 @@ function OrderItem({ item, isLast, type }) {
       </TimelineSeparator>
       <TimelineContent>
         <Typography fontWeight={700}>{status}</Typography>
-
         <Typography color="grey" fontSize={'1.4rem'}>
-          {time ? dateTimeFormate(time) : '........'}
+          <i>
+            {time ? dateTimeFormate(time) : '........'}
+            {handler && ` - Người xác nhận: ${handler.firstName}${handler.lastName}`}
+            {deliver && ` - Người giao hàng: ${deliver.firstName}${deliver.lastName}`}
+          </i>
         </Typography>
       </TimelineContent>
     </TimelineItem>

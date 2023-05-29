@@ -2,7 +2,6 @@ import { Badge, Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
-import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
 import { getOrder } from '_/redux/slices';
 import { routes } from '_/routes';
@@ -10,9 +9,8 @@ import { dateTimeFormate, renderPrice } from '_/utills';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const Orders = () => {
+const OrdersManage = () => {
   const dispatch = useDispatch();
-  const { currentUser } = useAuth();
   const { setLoading } = useThemMui();
   const [orders, setOrders] = useState([]);
   const [waitConfirmOrders, setWaitConfirmOrders] = useState([]);
@@ -20,10 +18,12 @@ const Orders = () => {
   const [deliveringOrders, setDeliveringOrders] = useState([]);
   const [completeOrders, setCompleteOrders] = useState([]);
   const [cancleOrders, setCancleOrders] = useState([]);
+
   const [tab, setTab] = useState(0);
+
   useEffect(() => {
     setLoading(true);
-    dispatch(getOrder(currentUser.id))
+    dispatch(getOrder())
       .then(unwrapResult)
       .then((res) => {
         setOrders(res.orders);
@@ -115,8 +115,8 @@ const Orders = () => {
             style={{ width: '100%' }}
             padding={'0 0'}
             key={item.id}
-            to={routes.orders + '/' + item.order_code}
-            target="_blank"
+            to={routes.ordersmanage + '/' + item.order_code}
+            // target="_blank"
           >
             <Box
               sx={{
@@ -158,9 +158,6 @@ const Orders = () => {
         <Typography fontSize={'2rem'} fontWeight={700} color={'grey'}>
           {`Hiện tại không có đơn "${content.toLowerCase()}"`}
         </Typography>
-        <MyButton to={routes.home} padding={'5px 10px'} fontSize={1.6} color={{ mainColor: '#fff', bgColor: 'orange' }}>
-          Mua hàng
-        </MyButton>
       </Box>
     );
   };
@@ -209,4 +206,4 @@ const Orders = () => {
   );
 };
 
-export default Orders;
+export default OrdersManage;

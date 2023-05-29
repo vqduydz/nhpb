@@ -6,12 +6,12 @@ const CartItem = db.CartItem;
 const Menu = db.Menu;
 
 const getCartItemByCartId = async (req, res) => {
-  const { user_id } = req.params;
+  const { customer_id } = req.params;
   try {
     const cartItems = await CartItem.findAll({
-      where: { user_id },
+      where: { customer_id },
 
-      attributes: ['id', 'user_id', 'menu_id', 'quantity'],
+      attributes: ['id', 'customer_id', 'menu_id', 'quantity'],
       order: [['createdAt', 'ASC']],
     });
 
@@ -79,16 +79,16 @@ const deleteCartItemById = async (req, res) => {
 };
 
 const addCartItem = async (req, res) => {
-  const { user_id, menu_id, quantity } = req.body;
+  const { customer_id, menu_id, quantity } = req.body;
   try {
     const cartItem = await CartItem.findOne({
-      where: { menu_id, user_id },
+      where: { menu_id, customer_id },
     });
     if (cartItem) {
       return res.status(442).json({ errorMessage: 'CartItem already exists' });
     }
     await CartItem.create({
-      user_id,
+      customer_id,
       menu_id,
       quantity,
     });

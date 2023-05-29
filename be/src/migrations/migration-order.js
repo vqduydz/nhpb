@@ -9,6 +9,12 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
+      deliver_id: {
+        type: Sequelize.INTEGER,
+      },
+      handler_id: {
+        type: Sequelize.INTEGER,
+      },
       payment_methods: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -17,7 +23,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      user_id: {
+      customer_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },

@@ -12,7 +12,7 @@ const User = db.User;
 
 const createFeedback = async (req, res) => {
   try {
-    const { point, feedback_content, feedback_code, menu_id, user_id } = req.body;
+    const { point, feedback_content, feedback_code, menu_id, customer_id } = req.body;
     // Tìm kiếm Menu trong database
     const feedback = await Feedback.findOne({ where: { feedback_code } });
 
@@ -21,7 +21,7 @@ const createFeedback = async (req, res) => {
       return res.status(422).json({ errorMessage: 'Feedback already exists' });
     }
 
-    await Feedback.create({ point, feedback_content, feedback_code, menu_id, user_id });
+    await Feedback.create({ point, feedback_content, feedback_code, menu_id, customer_id });
 
     return res.status(200).json({ message: 'Feedback created successfully' });
   } catch (error) {
@@ -31,9 +31,8 @@ const createFeedback = async (req, res) => {
 };
 
 const getFeedback = async (req, res) => {
-  const { feedback_code, menu_id } = req.query;
-  console.log('36---', feedback_code, menu_id);
   try {
+    const { feedback_code, menu_id } = req.query;
     if (feedback_code) {
       const feedback = await Feedback.findOne({ where: { feedback_code } });
       if (!feedback) return res.status(200).json({ feedbacked: false });
@@ -42,8 +41,8 @@ const getFeedback = async (req, res) => {
     if (menu_id) {
       const feedbacks = await Feedback.findAll({ where: { menu_id }, order: [['id', 'DESC']] });
       if (!feedbacks) return res.status(200).json([]);
-      // Lấy danh sách user_id của các feedbacks
-      const feedbacksUserID = feedbacks.map((feedback) => feedback.user_id);
+      // Lấy danh sách customer_id của các feedbacks
+      const feedbacksUserID = feedbacks.map((feedback) => feedback.customer_id);
 
       const users = await User.findAll({
         where: { id: feedbacksUserID },
@@ -53,7 +52,7 @@ const getFeedback = async (req, res) => {
       });
 
       const feedbacksWithUser = feedbacks.map((feedback) => {
-        const feedbackUsers = users.filter((user) => user.id === feedback.user_id);
+        const feedbackUsers = users.filter((user) => user.id === feedback.customer_id);
         const data = { ...feedback.toJSON(), ...feedbackUsers[0] };
         return data;
       });

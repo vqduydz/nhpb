@@ -7,11 +7,11 @@ const CartItem = db.CartItem;
 const Menu = db.Menu;
 
 const getCart = async (req, res) => {
-  const { user_id } = req.params;
+  const { customer_id } = req.params;
 
   try {
     const cart = await Cart.findOne({
-      where: { user_id },
+      where: { customer_id },
       include: {
         model: CartItem,
         include: {

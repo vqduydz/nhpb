@@ -17,7 +17,7 @@ export const verifyToken = (req, res, next) => {
       return res.status(403).json({ errorMessage: 'Invalid Token' });
     }
 
-    const user = await User.findOne({ where: { id: decoded.id } });
+    const user = await User.findOne({ where: { email: decoded.email } });
 
     if (!user) {
       return res.status(401).json({ errorMessage: 'Access Denied' });

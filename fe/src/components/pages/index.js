@@ -21,7 +21,8 @@ export { default as UserManage } from '_/components/pages/Manager/User/UserManag
 export { default as MenuManage } from '_/components/pages/Manager/Menu/MenuManage';
 export { default as CatalogManage } from '_/components/pages/Manager/Catalog/CatalogManage';
 export { default as ContentManage } from '_/components/pages/Manager/ContentManage';
-export { default as OrderManage } from '_/components/pages/Manager/OrderManage';
+export { default as OrdersManage } from '_/components/pages/Manager/Orders/OrdersManage';
+export { default as OrderManage } from '_/components/pages/Manager/Orders/OrderManage';
 
 // other
 export { default as NotFoundPage } from '_/components/pages/NotFoundPage';

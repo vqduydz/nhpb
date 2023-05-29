@@ -22,7 +22,7 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
       feedback_content: data.get('content'),
       feedback_code: `${order_code}${cartItemId}`,
       menu_id,
-      user_id: currentUser.id,
+      customer_id: currentUser.id,
     };
     createNewFeedbackApi(feedbackData)
       .then(() => {

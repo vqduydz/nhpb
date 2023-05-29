@@ -3,21 +3,22 @@ import { unwrapResult } from '@reduxjs/toolkit';
 import { MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { useThemMui } from '_/context/ThemeMuiContext';
-import { getFeedback, getOrderByOrderCode } from '_/redux/slices';
+import { getOrderByOrderCode } from '_/redux/slices';
 import { routes } from '_/routes';
 import { renderPrice } from '_/utills';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import AppOrderTimeline from './AppOrderTimeline';
-import CustomizedTables from './CustomizedTables';
-import Feedback from './FeedBack';
-import * as feedbackAPI from '_/services/api/feedbackApi';
+import { useNavigate, useParams } from 'react-router-dom';
+import CustomizedTables from '../../mainPages/Orders/CustomizedTables';
+import { updateOrderApi } from '_/services/api/orderApi';
+import { useAuth } from '_/context/AuthContext';
 
-const Order = () => {
+const OrderManage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { order_code: _order_code } = useParams();
   const { loading } = useThemMui();
+  const { currentUser } = useAuth();
   const [order, setOrder] = useState({});
   const {
     deliver,
@@ -27,15 +28,13 @@ const Order = () => {
     status,
     payment,
     ship_fee,
+    history,
     total_amount,
     total_payment,
     items,
     receiver,
+    orderer,
   } = order;
-  const [list, setList] = useState([]);
-  const [feedback, setfeedback] = useState({ open: false, orderItem: {} });
-  const { open } = feedback;
-  const [orderItems, setOrderItems] = useState([]);
 
   useEffect(() => {
     dispatch(getOrderByOrderCode(_order_code))
@@ -53,10 +52,10 @@ const Order = () => {
           total_payment,
           items,
           history,
+          orderer,
           receiver,
           createdAt,
         } = res;
-        setList(JSON.parse(history));
         setOrder({
           deliver,
           handler,
@@ -67,7 +66,9 @@ const Order = () => {
           ship_fee,
           total_amount,
           total_payment,
+          history: JSON.parse(history),
           items: JSON.parse(items),
+          orderer: { name: JSON.parse(orderer).name, phoneNumber: JSON.parse(orderer).phoneNumber },
           receiver: {
             name: JSON.parse(receiver).name,
             phoneNumber: JSON.parse(receiver).phoneNumber,
@@ -82,25 +83,6 @@ const Order = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
-  useEffect(() => {
-    if (!items) return;
-    (async () => {
-      const promises = items.map(async (item) => {
-        try {
-          const res = await feedbackAPI.getFeedbackApi({ feedback_code: `${order_code}${item.cartItemId}` });
-          return { ...item, feedbacked: res.feedbacked };
-        } catch (error) {
-          console.log(error);
-          return item;
-        }
-      });
-
-      const result = await Promise.all(promises);
-      setOrderItems(result);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
-
   function createData(name, value) {
     return { name, value };
   }
@@ -113,8 +95,27 @@ const Order = () => {
     createData('Phương thức Thanh toán', payment_methods),
   ];
 
-  const handlefeedback = (item) => {
-    setfeedback({ open: true, orderItem: item });
+  const confirmOrder = async () => {
+    try {
+      const updatedHistory = history.map((item) => {
+        if (item.status === 'Đã xác nhận đơn hàng - Bắt đầu chuẩn bị hàng' && status === 'Chờ xác nhận') {
+          return { ...item, time: new Date() };
+        }
+        return item;
+      });
+      const dataUpdate = {
+        handler_id: currentUser.id,
+        order_code,
+        status: 'Đang chuẩn bị',
+        history: JSON.stringify(updatedHistory),
+      };
+      console.log({ dataUpdate, order });
+      await updateOrderApi(dataUpdate).then(() => {
+        navigate(routes.ordersmanage);
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -160,6 +161,28 @@ const Order = () => {
                 </Typography>
               </Box>
               <Typography sx={{ mt: 2, pt: 2, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
+                <u> Người đặt</u>
+              </Typography>
+              <Box
+                sx={{
+                  flexDirection: 'column',
+                  display: 'flex',
+                  '& p': {
+                    fontWeight: 500,
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: '10px',
+                  }}
+                >
+                  <Typography>{orderer?.name}</Typography>
+                  <Typography>(+84){orderer?.phoneNumber}</Typography>
+                </Box>
+              </Box>
+              <Typography sx={{ mt: 2, pt: 2, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
                 <u> Người nhận</u>
               </Typography>
               <Box
@@ -203,13 +226,10 @@ const Order = () => {
                   <Typography sx={{ width: '100px', fontWeight: 700 }}>Đơn giá</Typography>
                   <Typography sx={{ width: '30px', fontWeight: 700 }}>SL</Typography>
                   <Typography sx={{ width: '100px', fontWeight: 700 }}>Thành tiền</Typography>
-                  {status === 'hoàn thành' && (
-                    <Typography sx={{ width: '120px', fontWeight: 700 }}>Thao tác</Typography>
-                  )}
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', gap: '2px', flexDirection: 'column', '& p': { fontWeight: 500 } }}>
-                {orderItems?.map((item, index) => (
+                {items?.map((item, index) => (
                   <Box
                     key={item.cartItemId}
                     sx={{
@@ -289,30 +309,6 @@ const Order = () => {
                           <Typography sx={{ width: '100px' }} color={'#fe2c55'}>
                             {renderPrice(item.price * item.quantity)}
                           </Typography>
-                          {status === 'hoàn thành' &&
-                            (item?.feedbacked ? (
-                              <MyButton
-                                style={{ width: '120px' }}
-                                disable
-                                color={{ mainColor: '#fff', bgColor: 'green' }}
-                                fontWeight={500}
-                                padding={'4px 12px'}
-                                fontSize={1.5}
-                              >
-                                Đã đánh giá
-                              </MyButton>
-                            ) : (
-                              <MyButton
-                                style={{ width: '120px' }}
-                                onClick={() => handlefeedback(item)}
-                                color={{ mainColor: '#fff', bgColor: 'green' }}
-                                fontWeight={500}
-                                padding={'4px 12px'}
-                                fontSize={1.5}
-                              >
-                                Đánh giá
-                              </MyButton>
-                            ))}
                         </Box>
                       </Box>
                     </Box>
@@ -320,27 +316,28 @@ const Order = () => {
                 ))}
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: '5px' }}>
-              <Box
+            <Box sx={{ backgroundColor: '#00000005' }}>
+              <CustomizedTables
                 sx={{
-                  backgroundColor: '#00000005',
-                  border: '1px solid #0000000a',
-                  flex: 1,
-                  display: 'flex',
+                  backgroundColor: 'transparent',
+                  width: '100%',
+                  '& td': { borderColor: '#0000000a', fontWeight: 500, fontSize: '1.6rem', padding: '10px' },
                 }}
-              >
-                <AppOrderTimeline title="Order Timeline" list={list} deliver={deliver} handler={handler} />
-              </Box>
-              <Box sx={{ backgroundColor: '#00000005' }}>
-                <CustomizedTables sx={{ backgroundColor: 'transparent', minWidth: '400px' }} rows={rows} />
-              </Box>
+                rows={rows}
+              />
             </Box>
+            {status === 'Chờ xác nhận' && (
+              <Box sx={{ display: 'flex', justifyContent: 'end' }}>
+                <MyButton onClick={confirmOrder} color={{ bgColor: 'orange' }}>
+                  Xác nhận đơn hàng
+                </MyButton>
+              </Box>
+            )}
           </Box>
         </Inner>
       </Box>
-      {open && <Feedback feedback={feedback} setfeedback={setfeedback} order_code={order_code} />}
     </>
   );
 };
 
-export default Order;
+export default OrderManage;

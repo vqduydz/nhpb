@@ -14,12 +14,13 @@ import {
   Manage,
   UserManage,
   ContentManage,
-  OrderManage,
+  OrdersManage,
   BackHome,
   MenuManage,
   CatalogManage,
   Order,
   Orders,
+  OrderManage,
 } from '_/components/pages';
 import { ContentOnlyLayout, ManageLayout } from '_/layouts';
 import { selector } from '_/redux/selector';
@@ -42,7 +43,8 @@ const routes = {
   menumanage: '/manage/menu',
   catalogmanage: '/manage/catalog',
   contentmanage: '/manage/a',
-  ordermanage: '/manage/b',
+  ordersmanage: '/manage/ordermanage',
+  ordermanage: '/manage/ordermanage/:order_code',
   forgotpassword: '/forgotpassword',
   resetPassword: '/reset-password/:token',
   profile: '/profile',
@@ -120,7 +122,8 @@ function PrivateRoutes() {
     menumanage: '/manage/menu',
     catalogmanage: '/manage/catalog',
     contentmanage: '/manage/a',
-    ordermanage: '/manage/b',
+    ordersmanage: '/manage/ordermanage',
+    ordermanage: '/manage/ordermanage/:order_code',
     profile: '/profile',
     notfoundpage: '*',
   };
@@ -137,8 +140,8 @@ function PrivateRoutes() {
     { path: privateRoutes.menumanage, comp: MenuManage, layout: ManageLayout },
     { path: privateRoutes.catalogmanage, comp: CatalogManage, layout: ManageLayout },
     { path: privateRoutes.contentmanage, comp: ContentManage, layout: ManageLayout },
+    { path: privateRoutes.ordersmanage, comp: OrdersManage, layout: ManageLayout },
     { path: privateRoutes.ordermanage, comp: OrderManage, layout: ManageLayout },
-    { path: privateRoutes.notfoundpage, comp: BackHome, layout: ManageLayout },
   ];
 }
 

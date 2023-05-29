@@ -1,26 +1,31 @@
 import { axiosService } from './axiosClient';
 
-export const getOrderApi = (user_id) => {
-    const url = `/orders/${user_id}`;
+export const getOrderApi = (customer_id) => {
+  if (!customer_id) {
+    const url = `/orders`;
     return axiosService.get(url);
+  } else {
+    const url = `/orders/${customer_id}`;
+    return axiosService.get(url);
+  }
 };
 
 export const getOrderByOrderCodeApi = (order_code) => {
-    const url = `/order/${order_code}`;
-    return axiosService.get(url);
+  const url = `/order/${order_code}`;
+  return axiosService.get(url);
 };
 
 export const createNewOrderApi = (order) => {
-    const url = `/order`;
-    return axiosService.post(url, order);
+  const url = `/order`;
+  return axiosService.post(url, order);
 };
 
 export const updateOrderApi = (dataUpdate) => {
-    const url = `/order`;
-    return axiosService.patch(url, dataUpdate);
+  const url = `/order`;
+  return axiosService.patch(url, dataUpdate);
 };
 
 export const deleteOrderApi = (id) => {
-    const url = `/order`;
-    return axiosService.delete(url, { data: { id } });
+  const url = `/order`;
+  return axiosService.delete(url, { data: { id } });
 };

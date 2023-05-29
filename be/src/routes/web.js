@@ -125,7 +125,7 @@ export const initWebRoutes = (app) => {
 
   /// cart item
   // get
-  router.get('/cartitem/:user_id', cartItemController.getCartItemByCartId);
+  router.get('/cartitem/:customer_id', cartItemController.getCartItemByCartId);
   // update
   router.patch('/cartitem', cartItemController.updateCartItemById);
   // delete
@@ -137,12 +137,22 @@ export const initWebRoutes = (app) => {
 
   /// order
   // get
-  router.get('/orders/:user_id', verifyToken, checkRole(['Customer']), orderController.getOrders);
-  router.get('/order/:order_code', verifyToken, checkRole(['Customer']), orderController.getOrderByOrderCode);
+  router.get(
+    '/orders/:customer_id?',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage', 'Customer']),
+    orderController.getOrders,
+  );
+  router.get(
+    '/order/:order_code',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage', 'Customer']),
+    orderController.getOrderByOrderCode,
+  );
   // // update
-  // router.patch('/order', orderController.updateOrderById);
+  router.patch('/order', verifyToken, orderController.updateOrderById);
   // // delete
-  // router.delete('/order', orderController.deleteOrderById);
+  // router.delete('/order',    verifyToken, orderController.deleteOrderById);
   // add
   router.post('/order', verifyToken, checkRole(['Customer']), orderController.createNewOrder);
 

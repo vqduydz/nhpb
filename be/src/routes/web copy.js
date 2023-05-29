@@ -68,7 +68,7 @@ export const initWebRoutes = (app) => {
 
   /// cart item
   // get
-  router.get('/cartitem/:user_id', cartItemController.getCartItemByCartId);
+  router.get('/cartitem/:customer_id', cartItemController.getCartItemByCartId);
   // update
   router.patch('/cartitem', cartItemController.updateCartItemById);
   // delete
