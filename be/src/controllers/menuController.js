@@ -42,6 +42,7 @@ const createMenu = async (req, res) => {
 const getMenu = async (req, res) => {
   try {
     const { slug } = req.params;
+    const { page } = req.params;
     const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
     if (slug) {
       const menu = await Menu.findOne({ where: { slug }, raw: true });
@@ -51,8 +52,21 @@ const getMenu = async (req, res) => {
 
       return res.status(200).json({ ...menu, imagePath });
     }
-    const menu = await Menu.findAll();
-    return res.status(200).json({ menu, imagePath });
+
+    const limit = 20;
+    let currentPage = 1;
+    let offset;
+    if (page) {
+      currentPage = page;
+      offset = (currentPage - 1) * limit; // Tính toán vị trí bắt đầu
+    } else {
+      offset = 0;
+    }
+
+    const menus = await Menu.findAndCountAll({ limit, offset });
+    const totalCount = menus.count; // Tổng số lượng người dùng
+    const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
+    return res.status(200).json({ menus: menus.rows, totalCount, totalPages, currentPage, imagePath });
   } catch (error) {
     return res.status(500).json({ errorMessage: 'Server error' });
   }

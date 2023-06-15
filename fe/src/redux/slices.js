@@ -14,6 +14,7 @@ export const getFeedback = createAsyncThunk('getFeedback', async (feedback, thun
     const res = await feedbackAPI.getFeedbackApi({ feedback });
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -23,6 +24,7 @@ export const createNewFeedback = createAsyncThunk('createNewFeedback', async (fe
     const res = await feedbackAPI.createNewFeedbackApi(feedback);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -32,6 +34,7 @@ export const updateFeedback = createAsyncThunk('updateFeedback', async (updateDa
     const res = await feedbackAPI.updateFeedbackApi(updateData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -41,6 +44,7 @@ export const deleteFeedback = createAsyncThunk('deleteFeedback', async (id, thun
     const res = await feedbackAPI.deleteFeedbackApi(id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -74,6 +78,7 @@ export const getOrderByOrderCode = createAsyncThunk('getOrder', async (order_cod
     const res = await orderAPI.getOrderByOrderCodeApi(order_code);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -83,6 +88,7 @@ export const getOrder = createAsyncThunk('getOrder', async (customer_id, thunkAP
     const res = await orderAPI.getOrderApi(customer_id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -92,6 +98,7 @@ export const createNewOrder = createAsyncThunk('createNewOrder', async (order, t
     const res = await orderAPI.createNewOrderApi(order);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -101,6 +108,7 @@ export const updateOrder = createAsyncThunk('updateOrder', async (updateData, th
     const res = await orderAPI.updateOrderApi(updateData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -110,6 +118,7 @@ export const deleteOrder = createAsyncThunk('deleteOrder', async (id, thunkAPI) 
     const res = await orderAPI.deleteOrderApi(id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -149,6 +158,7 @@ export const getCartItem = createAsyncThunk('getCartItem', async (customer_id, t
     const res = await cartItemAPI.getCartItemApi(customer_id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -158,6 +168,7 @@ export const handleAddToCart = createAsyncThunk('handleAddToCart', async (cartIt
     const res = await cartItemAPI.handleAddToCartApi(cartItem);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -167,6 +178,7 @@ export const updateCartItem = createAsyncThunk('updateCartItem', async (updateDa
     const res = await cartItemAPI.updateCartItemApi(updateData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -176,6 +188,7 @@ export const deleteCartItem = createAsyncThunk('deleteCartItem', async (id, thun
     const res = await cartItemAPI.deleteCartItemApi(id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -209,6 +222,7 @@ export const getCatalog = createAsyncThunk('getCatalog', async (params, thunkAPI
     const res = await catalogAPI.catalogApi(params);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -218,6 +232,7 @@ export const createNewCatalog = createAsyncThunk('createNewCatalog', async (data
     const res = await catalogAPI.createNewCatalogApi(dataCatalog);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -226,6 +241,7 @@ export const updateCatalog = createAsyncThunk('updateCatalog', async (updateData
     const res = await catalogAPI.updateCatalogApi(updateData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -234,6 +250,7 @@ export const deleteCatalog = createAsyncThunk('deleteCatalog', async (id, thunkA
     const res = await catalogAPI.deleteCatalogApi(id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -242,6 +259,7 @@ export const importCatalogs = createAsyncThunk('importCatalogs', async (formData
     const res = await catalogAPI.importCatalogsApi(formData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -277,6 +295,7 @@ export const getMenu = createAsyncThunk('getMenu', async (params, thunkAPI) => {
     const res = await menuAPI.menuApi(params);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -286,6 +305,7 @@ export const createNewMenu = createAsyncThunk('createNewMenu', async (dataMenu, 
     const res = await menuAPI.createNewMenuApi(dataMenu);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -294,6 +314,7 @@ export const updateMenu = createAsyncThunk('updateMenu', async (updateData, thun
     const res = await menuAPI.updateMenuApi(updateData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -302,6 +323,7 @@ export const deleteMenu = createAsyncThunk('deleteMenu', async (id, thunkAPI) =>
     const res = await menuAPI.deleteMenuApi(id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -310,6 +332,7 @@ export const importMenus = createAsyncThunk('importMenus', async (formData, thun
     const res = await menuAPI.importMenusApi(formData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -345,6 +368,7 @@ export const getUser = createAsyncThunk('getUser', async (params, thunkAPI) => {
     const res = await userAPI.userApi(params);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -354,6 +378,7 @@ export const createNewUser = createAsyncThunk('createNewUser', async (dataUser, 
     const res = await userAPI.createNewUserApi(dataUser);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -362,6 +387,7 @@ export const updateUser = createAsyncThunk('updateUser', async (updateData, thun
     const res = await userAPI.updateUserApi(updateData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -370,6 +396,7 @@ export const deleteUser = createAsyncThunk('deleteUser', async (id, thunkAPI) =>
     const res = await userAPI.deleteUserApi(id);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -379,6 +406,7 @@ export const importUsers = createAsyncThunk('importUsers', async (formData, thun
     const res = await userAPI.importUsersApi(formData);
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });
@@ -417,6 +445,7 @@ export const getToken = createAsyncThunk('user/gettoken', async (loginInfo, thun
     const res = response.data;
     return res;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error.response.data);
   }
 });
@@ -429,6 +458,7 @@ export const login = createAsyncThunk('user/login', async (token, thunkAPI) => {
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
+    console.log({ error });
     return thunkAPI.rejectWithValue(error);
   }
 });

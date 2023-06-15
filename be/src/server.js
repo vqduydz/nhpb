@@ -15,9 +15,9 @@ const config = require(__dirname + '/./config/config.json')[env];
 
 let app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(
   cors({
     origin: true,

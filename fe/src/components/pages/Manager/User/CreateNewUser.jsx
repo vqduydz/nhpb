@@ -80,9 +80,9 @@ export default function CreateNewUser1({ setAddUser }) {
           margin: '0 auto',
           backgroundColor: '#fff',
           position: 'fixed',
-          top: '10%',
+          top: '50%',
           left: '50%',
-          transform: 'translateX(-50%)',
+          transform: 'translate(-50%,-50%)',
           boxShadow: '0 0 10px 5px #00000012',
           '& .btn': {
             marginBottom: '15px',

@@ -1,9 +1,7 @@
 import dotenv from 'dotenv';
 import { unlink } from 'node:fs/promises';
-import db, { sequelize } from '../models';
 import path from 'path';
-import multer from 'multer';
-import sharp from 'sharp';
+import db from '../models';
 const xlsx = require('xlsx');
 dotenv.config();
 const Catalog = db.Catalog;
@@ -58,7 +56,7 @@ const getCatalog = async (req, res) => {
     });
 
     const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
-    return res.status(200).json({ catalogs, catalogsWithMenus, imagePath, catalogSlugs, menus });
+    return res.status(200).json({ catalogsWithMenus, imagePath });
   } catch (error) {
     console.log('63---,', error);
     return res.status(500).json({ errorMessage: 'Server error' });
@@ -73,7 +71,6 @@ const updateCatalogById = async (req, res) => {
       return res.status(404).json({ errorMessage: 'Catalog does not exist' });
     }
     const { id, ...data } = dataUpdate;
-    console.log('77---', data);
     await catalog.set(data);
     await catalog.save();
     return res.status(200).json({ message: 'Catalog updated successfully' });
@@ -90,7 +87,8 @@ const deleteCatalogById = async (req, res) => {
       return res.status(404).json({ errorMessage: 'Catalog does not exist' });
     }
 
-    const imageNames = [catalog.image_url, catalog.thumb_url, catalog.poster_url]; // Danh sách tên các file cần xóa được gửi trong body của request
+    // Danh sách tên các file cần xóa được gửi trong body của request
+    const imageNames = [catalog.image_url, catalog.thumb_url, catalog.poster_url];
     // Duyệt qua danh sách các tên file và xóa từng file
     let delIamgeNoti = [];
     imageNames.map((imageName) => {

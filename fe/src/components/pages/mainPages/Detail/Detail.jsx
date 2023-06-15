@@ -50,9 +50,8 @@ const Detail = () => {
           .then((data) => {
             const { catalogsWithMenus, imagePath } = data;
             let suggest;
-
             catalogsWithMenus.forEach((item) => {
-              if (item.name === res.catalog) {
+              if (item.slug === res.catalogSlug) {
                 suggest = item.menus.filter((item) => item.name !== res.name);
               }
             });
@@ -189,158 +188,129 @@ const Detail = () => {
           </Box>
         </Inner>
       </Box>
-      {/* <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
-                <Inner
-                    sx={{
-                        display: 'grid',
-                        paddingTop: '20px',
-                        paddingBottom: '30px',
-                        paddingRight: { 0: 0, 640: '1.5rem' },
-                        paddingLeft: { 0: 0, 640: '1.5rem' },
-                        gap: '10px',
-                    }}
-                >
-                    <Typography fontSize="1.8rem" fontWeight={700}>
-                        Mô tả về "{name}"
-                    </Typography>
 
-                    <Typography>
-                        Một chút cay nồng của ớt, một chút dai ngon của thịt tôm, vị mặn đậm đà của muối, tất cả hòa
-                        quyện và được nướng trên bếp than hồng thơm phức, cùng với đồ chấm là muối ớt xanh - nước chấm
-                        chuyên dùng cho đồ hải sản nướng kêt hợp lại sẽ là món ăn níu kéo vị giác của bạn.
-                    </Typography>
-                </Inner>
-            </Box> */}
-      <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
-        <Inner
-          sx={{
-            display: 'grid',
-            paddingTop: '20px',
-            paddingBottom: '30px',
-            paddingRight: { 0: 0, 640: '1.5rem' },
-            paddingLeft: { 0: 0, 640: '1.5rem' },
-            gap: '20px',
-          }}
-        >
-          <Typography fontSize="1.8rem" fontWeight={700}>
-            Đánh giá và nhận xét về "{name}" của khách hàng
-          </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              gap: '10px',
-              alignItems: 'center',
-              borderBottom: '2px solid #efeef5',
-              paddingBottom: '20px',
-            }}
-          >
-            <Box sx={{ display: 'flex' }}>
-              <Rating name="read-only" value={trunbinh} readOnly precision={0.1} />
-            </Box>
-            <Box> {trunbinh}</Box> - <Box> {soluot} đánh giá</Box>
-          </Box>
-          <Box sx={{ display: 'flex', gap: '5px', flexDirection: 'column' }}>
-            {feedbacks.map((item) => {
-              return (
-                <Box
-                  key={item.feedback_code}
-                  sx={{
-                    borderRadius: '6px',
-                    padding: '10px 15px',
-                    backgroundColor: '#fae0e069',
-                    border: '1px solid #0000000a',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', gap: '10px' }}>
-                      <Rating
-                        sx={{ fontSize: '1.6rem' }}
-                        name="read-only"
-                        value={item.point}
-                        readOnly
-                        precision={0.1}
-                      />
-                      <img
-                        className="verifyImg"
-                        width="15"
-                        height="16"
-                        src="//lzd-img-global.slatic.net/g/tps/tfs/TB1bOqBeb_I8KJjy1XaXXbsxpXa-30-32.png"
-                        alt=""
-                      />
-                      <Typography display={{ 0: 'none', 560: 'unset' }} fontSize={'1.4rem'} color={'green'}>
-                        Chứng nhận đã mua hàng
-                      </Typography>
-                    </Box>
-                    <Typography fontSize={'1.4rem'}>{dateTimeFormate(item.createdAt)}</Typography>
-                  </Box>
-                  <Typography display={'inline-flex'} fontSize={'1.6rem'} fontWeight={500}>
-                    Bởi :&nbsp;{`${item.firstName} ${item.lastName}`}
-                  </Typography>
-                  {item.feedback_content && (
-                    <Typography display={'inline-flex'} fontSize={'1.6rem'} fontWeight={500}>
-                      Nhận xét :&nbsp;{item.feedback_content}
-                    </Typography>
-                  )}
+      {currentUser && currentUser.role !== 'Customer' ? (
+        <Box></Box>
+      ) : (
+        <>
+          <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
+            <Inner
+              sx={{
+                display: 'grid',
+                paddingTop: '20px',
+                paddingBottom: '30px',
+                paddingRight: { 0: 0, 640: '1.5rem' },
+                paddingLeft: { 0: 0, 640: '1.5rem' },
+                gap: '20px',
+              }}
+            >
+              <Typography fontSize="1.8rem" fontWeight={700}>
+                Đánh giá và nhận xét về "{name}" của khách hàng
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: '10px',
+                  alignItems: 'center',
+                  borderBottom: '2px solid #efeef5',
+                  paddingBottom: '20px',
+                }}
+              >
+                <Box sx={{ display: 'flex' }}>
+                  <Rating name="read-only" value={trunbinh} readOnly precision={0.1} />
                 </Box>
-              );
-            })}
+                <Box> {trunbinh}</Box> - <Box> {soluot} đánh giá</Box>
+              </Box>
+              <Box sx={{ display: 'flex', gap: '5px', flexDirection: 'column' }}>
+                {feedbacks.map((item) => {
+                  return (
+                    <Box
+                      key={item.feedback_code}
+                      sx={{
+                        borderRadius: '6px',
+                        padding: '10px 15px',
+                        backgroundColor: '#fae0e069',
+                        border: '1px solid #0000000a',
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', gap: '10px' }}>
+                          <Rating
+                            sx={{ fontSize: '1.6rem' }}
+                            name="read-only"
+                            value={item.point}
+                            readOnly
+                            precision={0.1}
+                          />
+                          <img
+                            className="verifyImg"
+                            width="15"
+                            height="16"
+                            src="//lzd-img-global.slatic.net/g/tps/tfs/TB1bOqBeb_I8KJjy1XaXXbsxpXa-30-32.png"
+                            alt=""
+                          />
+                          <Typography display={{ 0: 'none', 560: 'unset' }} fontSize={'1.4rem'} color={'green'}>
+                            Chứng nhận đã mua hàng
+                          </Typography>
+                        </Box>
+                        <Typography fontSize={'1.4rem'}>{dateTimeFormate(item.createdAt)}</Typography>
+                      </Box>
+                      <Typography display={'inline-flex'} fontSize={'1.6rem'} fontWeight={500}>
+                        Bởi :&nbsp;{`${item.firstName} ${item.lastName}`}
+                      </Typography>
+                      {item.feedback_content && (
+                        <Typography display={'inline-flex'} fontSize={'1.6rem'} fontWeight={500}>
+                          Nhận xét :&nbsp;{item.feedback_content}
+                        </Typography>
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Inner>
           </Box>
-        </Inner>
-      </Box>
-      {/* <Box sx={{ backgroundColor: '#f5f5f5', borderBottom: '3px solid #efeef5' }}>
-                <Inner
-                    sx={{
-                        display: 'grid',
-                        paddingTop: '20px',
-                        paddingBottom: '30px',
-                        paddingRight: { 0: 0, 640: '1.5rem' },
-                        paddingLeft: { 0: 0, 640: '1.5rem' },
-                        gap: '20px',
-                    }}
-                >
-                    <Box>Khu vực hỏi đáp</Box>
-                </Inner>
-            </Box> */}
 
-      <Box
-        sx={{
-          paddingTop: '20px',
-          paddingBottom: '30px',
-          borderBottom: '3px solid #efeef5',
-        }}
-      >
-        <Inner>
-          <Typography
-            sx={{
-              fontSize: '2rem',
-              fontWeight: 700,
-              mb: '10px',
-              textTransform: 'uppercase',
-              color: 'grey',
-            }}
-          >
-            Gợi ý cùng danh mục ({menu.catalog})
-          </Typography>
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat( auto-fill, minmax(300px, 1fr))',
-              gridAutoRows: 'auto',
-              gap: {
-                0: '4px',
-                720: '5px',
-                960: '10px',
-                1360: '15px',
-                1600: '20px',
-              },
+              paddingTop: '20px',
+              paddingBottom: '30px',
+              borderBottom: '3px solid #efeef5',
             }}
           >
-            {renderContent(suggest)}
+            <Inner>
+              <Typography
+                sx={{
+                  fontSize: '2rem',
+                  fontWeight: 700,
+                  mb: '10px',
+                  textTransform: 'uppercase',
+                  color: 'grey',
+                }}
+              >
+                Gợi ý cùng danh mục ({menu.catalog})
+              </Typography>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat( auto-fill, minmax(300px, 1fr))',
+                  gridAutoRows: 'auto',
+                  gap: {
+                    0: '4px',
+                    720: '5px',
+                    960: '10px',
+                    1360: '15px',
+                    1600: '20px',
+                  },
+                }}
+              >
+                {renderContent(suggest)}
+              </Box>
+            </Inner>
           </Box>
-        </Inner>
-      </Box>
+        </>
+      )}
     </>
   );
 };

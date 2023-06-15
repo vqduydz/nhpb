@@ -168,7 +168,7 @@ const resetPassword = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id, page } = req.body;
     if (id) {
       const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } });
       if (!user) {
@@ -176,8 +176,28 @@ const getUser = async (req, res) => {
       }
       return res.status(200).json({ user });
     }
-    const user = await User.findAll({ attributes: { exclude: ['password'] }, order: [['createdAt', 'DESC']] });
-    return res.status(200).json({ user });
+
+    const limit = 20;
+    let currentPage = 1;
+    let offset;
+    if (page) {
+      currentPage = page;
+      offset = (currentPage - 1) * limit; // Tính toán vị trí bắt đầu
+    } else {
+      offset = 0;
+    }
+
+    const users = await User.findAndCountAll({
+      limit,
+      offset,
+      attributes: { exclude: ['password'] },
+      order: [['createdAt', 'DESC']],
+    });
+    const totalCount = users.count; // Tổng số lượng người dùng
+    const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
+
+    console.log('200---', page, limit, currentPage, offset);
+    return res.status(200).json({ users: users.rows, totalCount, totalPages, currentPage });
   } catch (error) {
     return res.status(500).json({ errorMessage: 'Server error' });
   }

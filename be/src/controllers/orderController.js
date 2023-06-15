@@ -25,7 +25,6 @@ const createNewOrder = async (req, res) => {
       where: { order_code },
     });
 
-    console.log({ order_code, order });
     if (order) {
       return res.status(442).json({ errorMessage: 'Order already exists' });
     }

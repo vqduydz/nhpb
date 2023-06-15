@@ -22,15 +22,12 @@ const OrdersManage = () => {
   const [tab, setTab] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
     dispatch(getOrder())
       .then(unwrapResult)
       .then((res) => {
         setOrders(res.orders);
-        setLoading(false);
       })
       .catch((error) => {
-        setLoading(false);
         console.log(error);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -163,45 +160,57 @@ const OrdersManage = () => {
   };
 
   return (
-    <Box sx={{ pb: '20px', pt: '20px' }}>
-      <Inner>
-        <Box>
-          <Box
-            sx={{
-              borderRadius: '6px',
-              display: 'flex',
-              gap: '5px',
-              justifyContent: 'start',
-              padding: '10px',
-              mb: '10px',
-              backgroundColor: '#00000005',
-              border: '1px solid #0000000a',
-            }}
-          >
-            {btnContent.map((btn) => (
-              <Badge
-                key={btn.tab}
-                sx={{ cursor: 'pointer' }}
-                variant={btn.badgeContent && btn.badgeContent > 0 ? 'dot' : 'none'}
-                color="error"
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        '&  .btn': {
+          fontSize: '1.2rem',
+          padding: '10px',
+          '& *': { justifyContent: 'center' },
+        },
+      }}
+    >
+      <Box>
+        <Typography fontSize={'2.4rem'} fontWeight={700}>
+          Danh sách món ăn - đồ uống
+        </Typography>
+        <Box
+          sx={{
+            borderRadius: '6px',
+            display: 'flex',
+            gap: '5px',
+            justifyContent: 'start',
+            padding: '10px',
+            mt: '10px',
+            mb: '10px',
+            backgroundColor: '#00000005',
+            border: '1px solid #0000000a',
+          }}
+        >
+          {btnContent.map((btn) => (
+            <Badge
+              key={btn.tab}
+              sx={{ cursor: 'pointer' }}
+              variant={btn.badgeContent && btn.badgeContent > 0 ? 'dot' : 'none'}
+              color="error"
+            >
+              <MyButton
+                text
+                fontWeight={700}
+                color={{ mainColor: btn.color }}
+                style={{ borderBottom: btn.tab === tab ? `2px solid ${btn.color}` : '2px solid transparent' }}
+                padding={'1px 9px'}
+                onClick={() => setTab(btn.tab)}
               >
-                <MyButton
-                  text
-                  fontWeight={700}
-                  color={{ mainColor: btn.color }}
-                  style={{ borderBottom: btn.tab === tab ? `2px solid ${btn.color}` : '2px solid transparent' }}
-                  padding={'1px 9px'}
-                  onClick={() => setTab(btn.tab)}
-                >
-                  {btn.content}
-                </MyButton>
-              </Badge>
-            ))}
-          </Box>
-
-          {render(tab)}
+                {btn.content}
+              </MyButton>
+            </Badge>
+          ))}
         </Box>
-      </Inner>
+
+        {render(tab)}
+      </Box>
     </Box>
   );
 };

@@ -11,6 +11,7 @@ import { useThemMui } from '_/context/ThemeMuiContext';
 import { useAuth } from '_/context/AuthContext';
 import { createNewMenu } from '_/redux/slices';
 import { unwrapResult } from '@reduxjs/toolkit';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 const CreateNewMenu = ({ setAddMenu }) => {
   const dispatch = useDispatch();
@@ -94,16 +95,16 @@ const CreateNewMenu = ({ setAddMenu }) => {
     <Box
       sx={{
         borderRadius: { 768: '10px' },
-        padding: '20px 20px 37px',
-        maxWidth: '1440px',
+        padding: '20px',
+        maxWidth: '768px',
         width: '100%',
-        minWidth: '768px',
+        minWidth: '480px',
         margin: '0 auto',
         backgroundColor: '#fff',
         position: 'fixed',
-        top: '10%',
+        top: '50%',
         left: '50%',
-        transform: 'translateX(-50%)',
+        transform: 'translate(-50%,-50%)',
         boxShadow: '0 0 10px 5px #00000012',
         '& .btn': {
           marginBottom: '15px',
@@ -148,10 +149,27 @@ const CreateNewMenu = ({ setAddMenu }) => {
         >
           <MyTextField size="small" label="Đơn giá" fullWidth id="price" name="price" type="number" required />
           <MyTextField size="small" label="Đơn vị tính" fullWidth id="unit" name="unit" required type="" />
-          <MyTextField required fullWidth type="file" onChange={handleImageChange} />
+          {/* <MyTextField required fullWidth type="file" onChange={handleImageChange} /> */}
+          <label
+            style={{
+              border: '1px solid #0000003b',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              minWidth: '200px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.4rem',
+              padding: '5px',
+            }}
+            htmlFor="upload-image"
+          >
+            <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+          </label>
+          <input hidden id="upload-image" name="uploadImage" required type="file" onChange={handleImageChange} />
         </Box>
-        <Editor outRef={editorRef} />
-        <Box sx={{ margin: '15px 0', display: 'flex', gap: '10px' }}>
+        {/* <Editor outRef={editorRef} /> */}
+        <Box sx={{ margin: '15px 0', display: 'flex', gap: '10px', justifyContent: 'end' }}>
           <MyButton color={{ bgColor: 'orange' }} type="submit">
             Lưu
           </MyButton>

@@ -50,6 +50,7 @@ export const initWebRoutes = (app) => {
     userController.updateUserById,
   );
   // delete user
+
   router.delete(
     '/user',
     verifyToken,

@@ -10,54 +10,49 @@ import {
   Typography,
 } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { MyButton } from '_/components/common';
 import { muiCustomStyles } from '_/components/common/CustomComponents/CustomMui';
 import { useThemMui } from '_/context/ThemeMuiContext';
-import { getUser } from '_/redux/slices';
-import CreateNewUser from './CreateNewUser';
-import Edit from './EditUser';
+import { getMenu } from '_/redux/slices';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import FileUpload from '../FileUpload';
+import CreateNewUser from './CreateNewMenu';
+import EditMenu from './EditMenu';
 import Row from './Row';
 
-export default function UserManage() {
+export default function MenuManage() {
   const [edit, setEdit] = useState({ stt: false, value: {} });
-  const [addUser, setAddUser] = useState(false);
+  const [addMenu, setAddMenu] = useState(false);
+  const [upload, setUpload] = useState(false);
   const [overLay, setOverLay] = useState(false);
   const [sideNav, setSideNav] = useState(false);
-  const [allUser, setAllUser] = useState([]);
-  const [tab, setTab] = useState(0);
+  const [menus, setMenus] = useState({ items: [], pathImage: '' });
+  const [access, setAccess] = useState({ permission: false, message: '' });
   const { loading } = useThemMui();
   const dispatch = useDispatch();
-
+  const { items, imagePath } = menus;
+  const { permission, message } = access;
   useEffect(() => {
-    if (!sideNav && !addUser && !edit.stt) {
+    if (!sideNav && !addMenu && !edit.stt) {
       setOverLay(false);
       return;
     }
     setOverLay(true);
-  }, [addUser, edit.stt, sideNav]);
+  }, [addMenu, edit?.stt, sideNav]);
 
   useEffect(() => {
-    dispatch(getUser())
+    dispatch(getMenu())
       .then(unwrapResult)
       .then((result) => {
-        setAllUser(result.users);
+        setAccess({ permission: true });
+        setMenus({ items: result.menus, imagePath: result.imagePath });
       })
       .catch((error) => {
-        console.log({ error });
+        setAccess({ permission: false, message: error.errorMessage });
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
-
-  const btnContent = [
-    { tab: 0, content: 'Tất cả', color: 'green' },
-    { tab: 1, content: 'Root', color: '#ed6c02' },
-    { tab: 2, content: 'Admin', color: '#0288d1' },
-    { tab: 3, content: 'Quản lý', color: '#0a66b7' },
-    { tab: 4, content: 'Người giao hàng', color: 'green' },
-    { tab: 5, content: 'Khách hàng', color: '#fe2c55' },
-  ];
 
   return (
     <Box sx={{ ...muiCustomStyles }}>
@@ -72,7 +67,6 @@ export default function UserManage() {
             sx={{
               display: 'flex',
               justifyContent: 'space-between',
-              pb: '10px',
               '&  .btn': {
                 fontSize: '1.2rem',
                 padding: '10px',
@@ -81,55 +75,41 @@ export default function UserManage() {
             }}
           >
             <Typography fontSize={'2.4rem'} fontWeight={700}>
-              Danh sách người dùng
+              Danh sách món ăn - đồ uống
             </Typography>
-            <MyButton
-              effect
-              color={{ mainColor: 'green' }}
-              onClick={() => setAddUser(true)}
-              style={{ padding: '3px 8px' }}
-              className="btn"
-            >
-              Tạo mới
-            </MyButton>
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '6px',
-              display: 'flex',
-              gap: '5px',
-              justifyContent: 'start',
-              padding: '10px',
-              mb: '10px',
-              backgroundColor: '#00000005',
-              border: '1px solid #0000000a',
-            }}
-          >
-            {btnContent.map((btn) => (
+            <Box sx={{ display: 'flex', gap: '10px' }}>
               <MyButton
-                key={btn.tab}
-                text
-                fontWeight={700}
-                color={{ mainColor: btn.color }}
-                style={{ borderBottom: btn.tab === tab ? `2px solid ${btn.color}` : '2px solid transparent' }}
-                padding={'1px 9px'}
-                onClick={() => setTab(btn.tab)}
+                effect
+                color={{ mainColor: 'green' }}
+                onClick={() => setAddMenu(true)}
+                style={{ padding: '3px 8px' }}
+                className="btn"
               >
-                {btn.content}
+                Tạo mới
               </MyButton>
-            ))}
+              <MyButton
+                effect
+                color={{ mainColor: 'blue' }}
+                onClick={() => setUpload(true)}
+                style={{ padding: '3px 8px' }}
+                className="btn"
+              >
+                Import
+              </MyButton>
+            </Box>
           </Box>
+
           <Table
             sx={{
               mt: '10px',
+              border: '1px solid #00000024',
               width: '100%',
               '& span.Mui-checked , span.MuiCheckbox-indeterminate': {
                 color: '#333 !important ',
               },
               '& *': {
                 '& .MuiTableCell-root': {
-                  padding: '5px',
-                  borderBottomColor: '#00000024',
+                  padding: '5px 1px',
                 },
               },
             }}
@@ -138,23 +118,32 @@ export default function UserManage() {
             <TableHead
               sx={{
                 backgroundColor: '#f9f9f9',
-                border: '1px solid #0000000a',
+                borderRadius: '6px 6px 0 0',
                 '& *': { fontWeight: '700 !important' },
               }}
             >
               <TableRow>
-                <TableCell align="center" sx={{ width: '45px' }}>
+                <TableCell align="center" sx={{ minWidth: '30px' }}>
                   STT
                 </TableCell>
-                <TableCell>Email address</TableCell>
-                <TableCell align="right">Name</TableCell>
-                <TableCell align="right">Role</TableCell>
-                <TableCell align="right">Create date</TableCell>
+                <TableCell sx={{ width: '90px' }} align="center">
+                  Hình ảnh
+                </TableCell>
+                <TableCell>Tên món ăn</TableCell>
+                <TableCell align="center">Đơn giá</TableCell>
+                <TableCell align="center">Đơn vị</TableCell>
+                <TableCell sx={{ width: '90px' }} align="center">
+                  Ngày tạo
+                </TableCell>
+
+                <TableCell sx={{ minWidth: '60px' }} align="center">
+                  Hành động
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {allUser.map((user, index) => {
-                return <Row setEdit={setEdit} key={user.id} user={user} STT={index + 1} />;
+              {items.map((menu, index) => {
+                return <Row imagePath={imagePath} setEdit={setEdit} key={menu.id} menu={menu} STT={index + 1} />;
               })}
             </TableBody>
           </Table>
@@ -175,14 +164,15 @@ export default function UserManage() {
           }}
           onClick={() => {
             setEdit(false);
-            setAddUser(false);
+            setAddMenu(false);
             setSideNav(false);
           }}
         />
       )}
-      {edit.stt && <Edit setEdit={setEdit} edit={edit} />}
-      {/* {addUser && <CreateNewUser setAddUser={setAddUser} edit={edit} />} */}
-      {addUser && <CreateNewUser setAddUser={setAddUser} edit={edit} />}
+      {edit.stt && <EditMenu setEdit={setEdit} edit={edit} />}
+      {/* {addMenu && <CreateNewUser setAddMenu={setAddMenu} edit={edit} />} */}
+      {addMenu && <CreateNewUser setAddMenu={setAddMenu} edit={edit} />}
+      {upload && <FileUpload setUpload={setUpload} menus />}
     </Box>
   );
 }

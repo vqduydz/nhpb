@@ -33,7 +33,6 @@ const routes = {
   cart: '/cart',
   checkout: '/checkout',
   orders: '/order',
-  order: '/order/:order_code',
   test: '/test',
 
   login: '/login',
@@ -119,21 +118,24 @@ function PrivateRoutes() {
   const privateRoutes = {
     home: '/',
     usermanage: '/manage/user',
+    manage: '/manage',
     menumanage: '/manage/menu',
     catalogmanage: '/manage/catalog',
     contentmanage: '/manage/a',
     ordersmanage: '/manage/ordermanage',
     ordermanage: '/manage/ordermanage/:order_code',
     profile: '/profile',
+    detail: '/mon-an/:slug',
+
     notfoundpage: '*',
   };
   return [
-    // { path: routes.login, comp: Login, layout: ContentOnlyLayout },
+    { path: routes.login, comp: Login, layout: ContentOnlyLayout },
     // { path: routes.home, comp: Home },
     // { path: routes.menu, comp: Menu },
     // { path: routes.home, comp: Home, layout: ManageLayout },
     { path: routes.menu, comp: Menu, layout: ManageLayout },
-    { path: routes.detail, comp: Detail, layout: ManageLayout },
+    { path: privateRoutes.detail, comp: Detail, layout: ManageLayout },
     { path: privateRoutes.profile, comp: Profile },
     { path: privateRoutes.home, comp: Manage, layout: ManageLayout },
     { path: privateRoutes.usermanage, comp: UserManage, layout: ManageLayout },

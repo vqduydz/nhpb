@@ -186,9 +186,9 @@
 //                                                 },
 //                                             }}
 //                                         >
-//                                             <Button className="delete-btn" style={{ padding: 0 }}>
+//                                             <MyButton className="delete-btn" style={{ padding: 0 }}>
 //                                                 <DeleteIcon />
-//                                             </Button>
+//                                             </MyButton>
 //                                         </Box>
 //                                     </Box>
 //                                 </Box>

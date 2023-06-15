@@ -279,9 +279,9 @@
 //                         />
 //                     </RadioGroup>
 
-//                     <Button primary className={cx('auth-btn')} type="submit" onClick={handleSubmit}>
+//                     <MyButton primary className={cx('auth-btn')} type="submit" onClick={handleSubmit}>
 //                         Submit
-//                     </Button>
+//                     </MyButton>
 //                 </FormControl>
 //             </div>
 //         </div>

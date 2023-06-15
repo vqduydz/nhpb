@@ -2,7 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { Box } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { Button } from '_/components/common';
+import { MyButton } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
 import { getCartItem, updateCartItem } from '_/redux/slices';
@@ -67,7 +67,7 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
         },
       }}
     >
-      <Button
+      <MyButton
         disable={quantity <= 1}
         onClick={() => {
           let res = quantity - 1;
@@ -84,7 +84,7 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
         }}
       >
         <RemoveIcon />
-      </Button>
+      </MyButton>
       <input
         className="so-luong"
         style={{
@@ -103,7 +103,7 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
         height="100%"
         readOnly
       />
-      <Button
+      <MyButton
         disable={quantity >= sltd}
         onClick={() => {
           let res = quantity + 1;
@@ -120,7 +120,7 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
         }}
       >
         <AddIcon />
-      </Button>
+      </MyButton>
     </Box>
   );
 };

@@ -1,6 +1,6 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Alert, Box, Slide, Snackbar, Typography } from '@mui/material';
-import { Button, MyButton } from '_/components/common';
+import { MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { memo, useEffect, useMemo, useState } from 'react';
 import Quantity from './Quantity';
@@ -276,11 +276,11 @@ const Cart = () => {
                         alignItems: 'center',
                       }}
                     >
-                      <Button to={`/mon-an/${item.slug}`} target="_blank">
+                      <MyButton to={`/mon-an/${item.slug}`} target="_blank">
                         <Typography color={'#337ab7'} textAlign={'left'} fontSize={'1.6rem'} fontWeight={500}>
                           {item.name}
                         </Typography>
-                      </Button>
+                      </MyButton>
                       <Box
                         sx={{
                           display: 'flex',
@@ -319,7 +319,7 @@ const Cart = () => {
                             },
                           }}
                         >
-                          <Button
+                          <MyButton
                             onClick={() => {
                               delCartItem(item.id, item.name);
                             }}
@@ -327,7 +327,7 @@ const Cart = () => {
                             style={{ padding: 0 }}
                           >
                             <DeleteIcon />
-                          </Button>
+                          </MyButton>
                         </Box>
                       </Box>
                     </Box>
