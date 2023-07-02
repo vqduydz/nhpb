@@ -1,24 +1,21 @@
 import dotenv from 'dotenv';
 import { unlink } from 'node:fs/promises';
 import path from 'path';
+import { renameImg } from '../feature/renameImg';
 import db from '../models';
-import multer from 'multer';
-import sharp from 'sharp';
+const { Op } = require('sequelize');
+const fs = require('fs');
 const xlsx = require('xlsx');
 dotenv.config();
 const Menu = db.Menu;
 
 const createMenu = async (req, res) => {
   try {
-    const { name, slug, catalog, catalogSlug, price, unit, image_url, thumb_url, poster_url, desc } = req.body;
-    // Tìm kiếm Menu trong database
+    const { name, slug, catalog, catalogSlug, price, unit, image_url, desc } = req.body;
     const menu = await Menu.findOne({ where: { slug } });
-
-    // Kiểm tra xem email của menu có tồn tại không
     if (menu) {
       return res.status(422).json({ errorMessage: 'Menu already exists' });
     }
-
     await Menu.create({
       name,
       slug,
@@ -27,11 +24,8 @@ const createMenu = async (req, res) => {
       price,
       unit,
       image_url,
-      thumb_url,
-      poster_url,
       desc,
     });
-
     return res.status(200).json({ message: 'Menu created successfully' });
   } catch (error) {
     console.log('37----,', error);
@@ -41,33 +35,48 @@ const createMenu = async (req, res) => {
 
 const getMenu = async (req, res) => {
   try {
-    const { slug } = req.params;
-    const { page } = req.params;
+    const { name, slug, page, limit_per_page } = req.query;
     const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
+
+    if (name) {
+      const menus = await Menu.findAll({
+        where: {
+          slug: {
+            [Op.like]: `%${name}%`,
+          },
+        },
+      });
+      return res.status(200).json({ menus, imagePath });
+    }
+
     if (slug) {
       const menu = await Menu.findOne({ where: { slug }, raw: true });
       if (!menu) {
         return res.status(404).json({ errorMessage: 'Menu does not exist' });
       }
-
       return res.status(200).json({ ...menu, imagePath });
     }
+    let currentPage = 1,
+      limit,
+      offset;
 
-    const limit = 20;
-    let currentPage = 1;
-    let offset;
+    if (limit_per_page) {
+      limit = Number(limit_per_page);
+    } else {
+      limit = 20;
+    }
     if (page) {
       currentPage = page;
       offset = (currentPage - 1) * limit; // Tính toán vị trí bắt đầu
     } else {
       offset = 0;
     }
-
     const menus = await Menu.findAndCountAll({ limit, offset });
     const totalCount = menus.count; // Tổng số lượng người dùng
     const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
-    return res.status(200).json({ menus: menus.rows, totalCount, totalPages, currentPage, imagePath });
+    return res.status(200).json({ menus: menus.rows, totalCount, totalPages, currentPage, imagePath, limit_per_page });
   } catch (error) {
+    console.log('71--', error);
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
@@ -80,10 +89,22 @@ const updateMenuById = async (req, res) => {
       return res.status(404).json({ errorMessage: 'Menu does not exist' });
     }
     const { id, ...data } = dataUpdate;
-    await menu.set(data);
-    await menu.save();
-    return res.status(200).json({ message: 'Menu updated successfully' });
+    if (menu.slug !== data.slug) {
+      renameImg(menu.image_url, data.image_url).then(async (result) => {
+        if (!result) {
+          return res.status(500).json({ message: 'Error renaming' });
+        }
+        await menu.set(data);
+        await menu.save();
+        return res.status(200).json({ message: 'Menu updated successfully', menu });
+      });
+    } else {
+      await menu.set(data);
+      await menu.save();
+      return res.status(200).json({ message: 'Menu updated successfully', menu });
+    }
   } catch (error) {
+    console.log('100---', error);
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
@@ -95,26 +116,11 @@ const deleteMenuById = async (req, res) => {
     if (!menu) {
       return res.status(404).json({ errorMessage: 'Menu does not exist' });
     }
-
-    const imageNames = [menu.image_url, menu.thumb_url, menu.poster_url]; // Danh sách tên các file cần xóa được gửi trong body của request
-    // Duyệt qua danh sách các tên file và xóa từng file
-    let delIamgeNoti = [];
-    imageNames.map((imageName) => {
-      const imagePath = path.join(__dirname, '../../uploads', imageName);
-      unlink(imagePath)
-        .then(() => {
-          delIamgeNoti.push(true);
-        })
-        .catch(() => {
-          delIamgeNoti.push(false);
-        });
-    });
-
+    const imagePath = path.join(__dirname, '../../uploads', menu.image_url);
+    await unlink(imagePath);
     await menu.destroy();
     return res.status(200).json({
-      message: delIamgeNoti
-        ? 'images deleted, Menu deleted successfully'
-        : 'Failed to delete image, Menu deleted successfully',
+      message: 'images deleted, Menu deleted successfully',
     });
   } catch (error) {
     return res.status(500).json({ error, errorMessage: 'Server error' });
@@ -128,18 +134,15 @@ const importMenus = async (req, res) => {
     if (!file) {
       return res.status(400).json({ error: 'Invalid file' });
     }
-
     // Đọc dữ liệu từ file Excel
     const workbook = xlsx.read(file.buffer, { type: 'buffer' });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
-
     // kiểm tra trùng dữ liệu
     const existingSlugs = await Menu.findAll({ attributes: ['slug'] });
     const existingSlugSet = new Set(existingSlugs.map((menu) => menu.slug));
     // lọc dữ liệu trùng lặp
     const newData = data.filter((row) => !existingSlugSet.has(row.slug));
-
     // Lưu vào database
     Menu.bulkCreate(newData)
       .then(() => {

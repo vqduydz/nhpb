@@ -34,13 +34,8 @@ module.exports = {
       unit: {
         type: Sequelize.STRING,
       },
+
       image_url: {
-        type: Sequelize.STRING,
-      },
-      thumb_url: {
-        type: Sequelize.STRING,
-      },
-      poster_url: {
         type: Sequelize.STRING,
       },
       desc: {

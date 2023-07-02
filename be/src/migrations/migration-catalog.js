@@ -22,12 +22,6 @@ module.exports = {
       image_url: {
         type: Sequelize.STRING,
       },
-      thumb_url: {
-        type: Sequelize.STRING,
-      },
-      poster_url: {
-        type: Sequelize.STRING,
-      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

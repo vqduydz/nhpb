@@ -1,21 +1,20 @@
 import express from 'express';
-import {
-  catalogController,
-  menuController,
-  userController,
-  cartItemController,
-  orderController,
-  feedbackController,
-} from '../controllers';
-import { verifyToken, checkRole } from '../middlewares/middleware';
 import multer from 'multer';
 import path from 'path';
 import sharp from 'sharp';
+import {
+  cartItemController,
+  catalogController,
+  feedbackController,
+  menuController,
+  orderController,
+  userController,
+} from '../controllers';
+import { checkRole, verifyToken } from '../middlewares/middleware';
 
 const sql = require('mssql');
 
 const router = express.Router();
-
 const app = express();
 const port = 3000;
 
@@ -38,8 +37,7 @@ export const initWebRoutes = (app) => {
   // sign up - create user
   router.post('/user', userController.createUser);
 
-  //________user________________________________________________________
-
+  //________user______________________________________
   // get user
   router.get('/user', verifyToken, checkRole(['Root', 'Admin', 'UserManage', 'Customer']), userController.getUser);
   // update user data
@@ -58,10 +56,9 @@ export const initWebRoutes = (app) => {
     userController.deleteUserById,
   );
 
-  //________menu________________________________________________________
-
+  //________menu______________________________________
   // get menu
-  router.get('/menu/:slug?', menuController.getMenu);
+  router.get('/menu', menuController.getMenu);
   // create menu
   router.post('/menu', verifyToken, checkRole(['Root', 'Admin', 'UserManage']), menuController.createMenu);
   // update menu data
@@ -77,8 +74,7 @@ export const initWebRoutes = (app) => {
     menuController.importMenus,
   );
 
-  //________catalog________________________________________________________
-
+  //________catalog______________________________________
   // get catalog
   router.get('/catalog/:slug?', catalogController.getCatalog);
   // create catalog
@@ -106,8 +102,7 @@ export const initWebRoutes = (app) => {
     catalogController.importCatalogs,
   );
 
-  //_______feedback_________________________________________________________
-
+  //_______feedback_______________________________________
   // get feedback
   router.get('/feedback', feedbackController.getFeedback);
   // create feedback
@@ -122,8 +117,7 @@ export const initWebRoutes = (app) => {
     feedbackController.deleteFeedbackById,
   );
 
-  //_______cart item_________________________________________________________
-
+  //_______cart item_______________________________________
   /// cart item
   // get
   router.get('/cartitem/:customer_id', cartItemController.getCartItemByCartId);
@@ -134,8 +128,7 @@ export const initWebRoutes = (app) => {
   // add
   router.post('/cartitem', cartItemController.addCartItem);
 
-  //________order________________________________________________________
-
+  //________order______________________________________
   /// order
   // get
   router.get(
@@ -157,68 +150,35 @@ export const initWebRoutes = (app) => {
   // add
   router.post('/order', verifyToken, checkRole(['Customer']), orderController.createNewOrder);
 
-  //__________image______________________________________________________
-
+  //__________image____________________________________
   // upload image
   router.post('/upload', upload.single('image'), (req, res, next) => {
     const inputFile = req.file.buffer;
-    // Đường dẫn lưu poster
-    const posterOutputFile = 'uploads/' + req.file.originalname + '-poster' + '.png';
-    // Đường dẫn lưu poster
     const outputFile = 'uploads/' + req.file.originalname + '.png';
-    // Đường dẫn lưu thumb
-    const thumbOutputFile = 'uploads/' + req.file.originalname + '-thumb' + '.png';
-
-    // Thực hiện xử lý và lưu poster
     sharp(inputFile)
       .resize(800, 600)
-      .toFile(posterOutputFile, (err, info) => {
+      .webp()
+      .toFile(outputFile, (err, info) => {
         if (err) {
           console.error(err);
           res.status(500).send('Có lỗi xảy ra trong quá trình xử lý hình ảnh');
         } else {
-          // Thực hiện xử lý và lưu thumb
-          sharp(inputFile)
-            .resize(200, 150)
-            .toFile(thumbOutputFile, (err, info) => {
-              if (err) {
-                console.error(err);
-                res.status(500).send('Có lỗi xảy ra trong quá trình xử lý hình ảnh');
-              } else {
-                // Thực hiện xử lý và lưu image
-                sharp(inputFile)
-                  .resize(500, 300)
-                  .toFile(outputFile, (err, info) => {
-                    if (err) {
-                      console.error(err);
-                      res.status(500).send('Có lỗi xảy ra trong quá trình xử lý hình ảnh');
-                    } else {
-                      res.status(200).json({
-                        image_url: req.file.originalname + '.png',
-                        thumb_url: req.file.originalname + '-thumb' + '.png',
-                        poster_url: req.file.originalname + '-poster' + '.png',
-                      });
-                    }
-                  });
-              }
-            });
+          res.status(200).json(req.file.originalname + '.png');
         }
       });
   });
 
   // get image
-  // Khai báo đường dẫn tới thư mục chứa hình ảnh
-  const imagePath = path.join(__dirname, '../../uploads');
-
   // API endpoint để truy cập hình ảnh
   router.get('/images/:filename', (req, res) => {
+    // Khai báo đường dẫn tới thư mục chứa hình ảnh
+    const imagePath = path.join(__dirname, '../../uploads');
     const { filename } = req.params;
     const filePath = path.join(imagePath, filename);
     res.sendFile(filePath);
   });
 
-  //________________________________________________________________
-
+  //______________________________________________
   // Khởi chạy server
   app.listen(3001, () => {
     console.log('Server is running on port 3000');

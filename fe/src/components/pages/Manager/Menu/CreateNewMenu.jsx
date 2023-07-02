@@ -1,50 +1,57 @@
-import { Editor, MyButton } from '_/components/common';
-import { useRef, useState } from 'react';
-import { Box } from '@mui/material';
-import axios from 'axios';
-import { capitalize } from '_/utills';
-// import Detail from './Detail';
-import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
-import removeVietnameseTones from '_/utills/removeVietnameseTones';
-import { useDispatch } from 'react-redux';
-import { useThemMui } from '_/context/ThemeMuiContext';
-import { useAuth } from '_/context/AuthContext';
-import { createNewMenu } from '_/redux/slices';
-import { unwrapResult } from '@reduxjs/toolkit';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import { Box, Typography } from '@mui/material';
+import { unwrapResult } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
-const CreateNewMenu = ({ setAddMenu }) => {
+import { MyButton } from '_/components/common';
+import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
+import { useAuth } from '_/context/AuthContext';
+import { useThemMui } from '_/context/ThemeMuiContext';
+import { createNewMenu } from '_/redux/slices';
+import { capitalize } from '_/utills';
+import removeVietnameseTones from '_/utills/removeVietnameseTones';
+import CatalogDrop from './CatalogDrop';
+
+const CreateNewMenu = ({ setAddMenu, cataloglist }) => {
   const dispatch = useDispatch();
   const { setLoading } = useThemMui();
   const { setSnackbar } = useAuth();
   const editorRef = useRef(null);
   const [image, setImage] = useState(null);
+  const [catalog, setCatalog] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    if (!image) {
+      setLoading(false);
+      alert('Vui lòng chọn hình ảnh.');
+      return;
+    }
+    if (!catalog.trim()) {
+      setLoading(false);
+      alert('Vui lòng chọn catalog.');
+      return;
+    }
     try {
       const data = new FormData(e.currentTarget);
-      const name = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
-      await uploadImage(name)
-        .then((res) => {
-          const { image_url, thumb_url, poster_url } = res;
+      const slug = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
+
+      await uploadImage(slug)
+        .then((image_url) => {
           const menuData = {
             name: capitalize(data.get('name')),
-            slug: removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-'),
+            slug,
             catalog: capitalize(data.get('catalog')),
             catalogSlug: removeVietnameseTones(data.get('catalog')).toLowerCase().replace(/ /g, '-'),
             desc: editorRef.current ? editorRef.current.value : '',
             price: data.get('price'),
             unit: data.get('unit'),
             image_url,
-            thumb_url,
-            poster_url,
           };
-          return menuData;
-        })
-        .then((menu) => {
-          dispatch(createNewMenu(menu))
+          dispatch(createNewMenu(menuData))
             .then(unwrapResult)
             .then((result) => {
               setLoading(false);
@@ -79,10 +86,10 @@ const CreateNewMenu = ({ setAddMenu }) => {
     setImage(e.target.files[0]);
   };
 
-  const uploadImage = async (name) => {
+  const uploadImage = async (slug) => {
     try {
       const formData = new FormData();
-      formData.append('image', image, name);
+      formData.append('image', image, slug);
       const url = `${process.env.REACT_APP_API_ENDPOINT}/upload`;
       const response = await axios.post(url, formData);
       return response.data;
@@ -106,22 +113,6 @@ const CreateNewMenu = ({ setAddMenu }) => {
         left: '50%',
         transform: 'translate(-50%,-50%)',
         boxShadow: '0 0 10px 5px #00000012',
-        '& .btn': {
-          marginBottom: '15px',
-          padding: '5px',
-          width: '100%',
-          boxShadow: '0 0 3px 1px #00000012',
-          '&:hover': {
-            backgroundColor: '#888888',
-          },
-          span: {
-            justifyContent: 'center',
-          },
-        },
-
-        '& .tox': {
-          '& .tox-statusbar': { display: 'none' },
-        },
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -136,7 +127,7 @@ const CreateNewMenu = ({ setAddMenu }) => {
           }}
         >
           <MyTextField size="small" label="Tên món ăn" fullWidth id="name" name="name" type="" autoFocus required />
-          <MyTextField size="small" label="catalog" fullWidth id="catalog" name="catalog" type="" required />
+          <CatalogDrop cataloglist={cataloglist} catalog={catalog} setCatalog={setCatalog} />
         </Box>
         <Box
           sx={{
@@ -149,7 +140,6 @@ const CreateNewMenu = ({ setAddMenu }) => {
         >
           <MyTextField size="small" label="Đơn giá" fullWidth id="price" name="price" type="number" required />
           <MyTextField size="small" label="Đơn vị tính" fullWidth id="unit" name="unit" required type="" />
-          {/* <MyTextField required fullWidth type="file" onChange={handleImageChange} /> */}
           <label
             style={{
               border: '1px solid #0000003b',
@@ -164,11 +154,16 @@ const CreateNewMenu = ({ setAddMenu }) => {
             }}
             htmlFor="upload-image"
           >
-            <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+            <input hidden id="upload-image" type="file" accept="image/*" onChange={handleImageChange} />
+            {image ? (
+              <Typography> {image?.name} </Typography>
+            ) : (
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+              </Typography>
+            )}
           </label>
-          <input hidden id="upload-image" name="uploadImage" required type="file" onChange={handleImageChange} />
         </Box>
-        {/* <Editor outRef={editorRef} /> */}
         <Box sx={{ margin: '15px 0', display: 'flex', gap: '10px', justifyContent: 'end' }}>
           <MyButton color={{ bgColor: 'orange' }} type="submit">
             Lưu
@@ -178,11 +173,6 @@ const CreateNewMenu = ({ setAddMenu }) => {
           </MyButton>
         </Box>
       </form>
-      {/* {menu.preView && (
-                <Box sx={{ border: '1px solid #333', padding: '10px' }}>
-                    <Detail menu={menu} />
-                </Box>
-            )} */}
     </Box>
   );
 };

@@ -290,9 +290,9 @@ const { reducer: catalogsReducer } = catalogSlice;
 export { catalogsReducer };
 
 // menu
-export const getMenu = createAsyncThunk('getMenu', async (params, thunkAPI) => {
+export const getMenu = createAsyncThunk('getMenu', async (query, thunkAPI) => {
   try {
-    const res = await menuAPI.menuApi(params);
+    const res = await menuAPI.menuApi({ ...query });
     return res;
   } catch (error) {
     console.log({ error });

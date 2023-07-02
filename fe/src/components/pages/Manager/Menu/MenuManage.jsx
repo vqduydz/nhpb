@@ -2,49 +2,79 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { MyButton } from '_/components/common';
-import { useAuth } from '_/context/AuthContext';
-import { useThemMui } from '_/context/ThemeMuiContext';
-import { deleteMenu, getMenu } from '_/redux/slices';
-import { renderPrice } from '_/utills';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+
+import { MyButton, PaginationCustom } from '_/components/common';
+import { useAuth } from '_/context/AuthContext';
+import { useThemMui } from '_/context/ThemeMuiContext';
+import { deleteMenu, getCatalog, getMenu } from '_/redux/slices';
+import { renderPrice } from '_/utills';
 import FileUpload from '../FileUpload';
+import { Wrapper } from '../Wrapper';
 import CreateNewUser from './CreateNewMenu';
 import EditMenu from './EditMenu';
+import Preview from './Preview';
+import SearchBox from './SearchBox';
 
 export default function MenuManage() {
-  const [edit, setEdit] = useState({ stt: false, value: {} });
-  const { setLoading } = useThemMui();
+  const { loading, setLoading } = useThemMui();
   const { setSnackbar } = useAuth();
+  const dispatch = useDispatch();
+  const [edit, setEdit] = useState({ stt: false, value: {} });
   const [addMenu, setAddMenu] = useState(false);
   const [upload, setUpload] = useState(false);
   const [overLay, setOverLay] = useState(false);
   const [sideNav, setSideNav] = useState(false);
-  const [menus, setMenus] = useState({ items: [], pathImage: '' });
-  const { loading } = useThemMui();
-  const dispatch = useDispatch();
-  const { items, imagePath } = menus;
+  const [page, setPage] = useState(1);
+  const [limit_per_page, setlimit_per_page] = useState(20);
+  const [menus, setMenus] = useState({ items: [], pathImage: '', totalPages: 1, limitPerPage: limit_per_page });
+  const { items, imagePath, totalPages, limitPerPage } = menus;
+  const [preview, setPreview] = useState({ slug: '', open: false });
+  const { open, slug } = preview;
+  const [catalogs, setCatalogs] = useState([]);
+  const [searchValue, setSearchValue] = useState('');
+  const [menusSearch, setMenusSearch] = useState({ items: [], imagePath: '' });
 
   useEffect(() => {
-    if (!sideNav && !addMenu && !edit.stt) {
+    if (!sideNav && !addMenu && !edit.stt && !open) {
       setOverLay(false);
       return;
     }
     setOverLay(true);
-  }, [addMenu, edit?.stt, sideNav]);
+  }, [addMenu, edit?.stt, sideNav, open]);
 
   useEffect(() => {
-    dispatch(getMenu())
+    dispatch(getMenu({ page, limit_per_page }))
       .then(unwrapResult)
       .then((result) => {
-        setMenus({ items: result.menus, imagePath: result.imagePath });
+        setMenus({
+          items: result.menus,
+          imagePath: result.imagePath,
+          totalPages: result.totalPages,
+          limitPerPage: result.limit_per_page,
+        });
       })
       .catch((error) => {
         console.log({ error });
       });
+    dispatch(getCatalog())
+      .then(unwrapResult)
+      .then((res) => {
+        const catalogs = res.catalogs;
+        const cataloglist = catalogs.map((catalog) => catalog.name);
+        setCatalogs(cataloglist);
+      })
+      .catch((error) => {
+        console.log({ error });
+      });
+    window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
+  }, [loading, page, limit_per_page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [limit_per_page]);
 
   const handleDelete = (id) => {
     // eslint-disable-next-line no-restricted-globals
@@ -69,13 +99,15 @@ export default function MenuManage() {
           setSnackbar({ open: true, message: 'unknow error', status: 'error' });
         });
     } else {
+      setLoading(false);
       setSnackbar({ open: true, message: 'Cancel delete', status: 'info' });
     }
   };
 
-  const render = () =>
-    items.map((item, index) => {
-      const { id, slug, name, catalog, price, unit, thumb_url } = item;
+  const render = () => {
+    const menusRender = searchValue ? menusSearch.items : items;
+    return menusRender.map((item, index) => {
+      const { id, slug, name, catalog, price, unit, image_url } = item;
       return (
         <Box
           key={index}
@@ -100,11 +132,11 @@ export default function MenuManage() {
             }}
           >
             <Typography sx={{ minWidth: '30px' }} textAlign={'center'}>
-              {index + 1}
+              {page > 1 ? (page - 1) * limitPerPage + (index + 1) : index + 1}
             </Typography>
             <Box
               sx={{
-                backgroundImage: `url(${imagePath}${thumb_url})`,
+                backgroundImage: `url(${imagePath}${image_url})`,
                 minWidth: '80px',
                 height: '60px',
                 backgroundPosition: 'center center',
@@ -113,8 +145,10 @@ export default function MenuManage() {
               }}
             />
             <MyButton
+              onClick={() => {
+                setPreview({ slug, open: true });
+              }}
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}
-              to={`/mon-an/${slug}`}
               text
             >
               <Typography fontSize={'1.6rem'} sx={{ textAlign: 'left' }}>
@@ -147,9 +181,9 @@ export default function MenuManage() {
                 gap: '5px',
                 justifyContent: 'center',
                 '& .icon': {
-                  fontSize: '1.6rem !important',
+                  fontSize: '2rem !important',
                 },
-                ' * ': {
+                '* ': {
                   borderRadius: '3px',
                 },
               }}
@@ -157,22 +191,23 @@ export default function MenuManage() {
               <MyButton
                 effect
                 color={{ mainColor: 'orange' }}
+                padding={'5px 8px'}
                 onClick={() => {
                   setEdit({ stt: true, value: item });
                 }}
                 aria-label="delete"
-                className={' btn edit-btn'}
+                className={'btn edit-btn'}
               >
                 <EditIcon className="icon" />
               </MyButton>
               <MyButton
                 effect
-                color={{ mainColor: 'red' }}
-                padding="2px 4px"
+                color={{ mainColor: '#fe2c55' }}
+                padding={'5px 8px'}
                 onClick={() => {
                   handleDelete(id);
                 }}
-                className={' btn del-btn'}
+                className={'btn del-btn'}
                 aria-label="delete"
               >
                 <DeleteIcon className="icon" />
@@ -182,23 +217,18 @@ export default function MenuManage() {
         </Box>
       );
     });
+  };
 
   return (
-    <Box
-      sx={{
-        pt: '10px',
-        border: '1px solid #0000000a',
-      }}
-    >
+    <Wrapper>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           mb: '10px',
           padding: '0 10px',
-          '&  .btn': {
+          '& .btn': {
             fontSize: '1.2rem',
-            padding: '10px',
             '& *': { justifyContent: 'center' },
           },
         }}
@@ -211,7 +241,7 @@ export default function MenuManage() {
             effect
             color={{ mainColor: 'green' }}
             onClick={() => setAddMenu(true)}
-            style={{ padding: '3px 8px' }}
+            padding={'3px 8px'}
             className="btn"
           >
             Tạo mới
@@ -220,13 +250,36 @@ export default function MenuManage() {
             effect
             color={{ mainColor: 'blue' }}
             onClick={() => setUpload(true)}
-            style={{ padding: '3px 8px' }}
+            padding={'3px 8px'}
             className="btn"
           >
             Import
           </MyButton>
         </Box>
       </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          gap: '10px',
+          justifyContent: 'start',
+          borderRadius: '6px',
+          border: '1px solid #f7d800',
+          width: '100%',
+          position: 'sticky',
+          top: '107px',
+          zIndex: '2',
+          mb: '1vh',
+        }}
+      >
+        <SearchBox
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          menusSearch={menusSearch}
+          setMenusSearch={setMenusSearch}
+        />
+      </Box>
+
       <Box
         sx={{
           padding: '15px 10px',
@@ -276,29 +329,48 @@ export default function MenuManage() {
       </Box>
 
       {render()}
-      {overLay && (
-        <Box
-          sx={{
-            // display: { 0: 'block', 768: 'none' },
-            position: 'fixed',
-            top: 0,
-            bottom: 0,
-            right: 0,
-            left: 0,
-            opacity: 0.6,
-            transition: 'bottom 0.3s linear 0s',
-            backgroundColor: '#212121',
-          }}
-          onClick={() => {
-            setEdit(false);
-            setAddMenu(false);
-            setSideNav(false);
-          }}
-        />
+
+      {!searchValue && (
+        <Box sx={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
+          <PaginationCustom
+            limit_per_page={limit_per_page}
+            setlimit_per_page={setlimit_per_page}
+            total_page={totalPages}
+            page={page}
+            setPage={setPage}
+          />
+        </Box>
       )}
-      {edit.stt && <EditMenu setEdit={setEdit} edit={edit} />}
-      {addMenu && <CreateNewUser setAddMenu={setAddMenu} edit={edit} />}
-      {upload && <FileUpload setUpload={setUpload} menus />}
-    </Box>
+
+      {(overLay || edit.stt || addMenu || upload || open) && (
+        <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
+          {overLay && (
+            <Box
+              sx={{
+                // display: { 0: 'block', 768: 'none'},
+                position: 'fixed',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+                opacity: 0.6,
+                transition: 'bottom 0.3s linear 0s',
+                backgroundColor: '#212121',
+              }}
+              onClick={() => {
+                setPreview({ ...preview, open: false });
+                setEdit(false);
+                setAddMenu(false);
+                setSideNav(false);
+              }}
+            />
+          )}
+          {open && <Preview slug={slug} setPreview={setPreview} />}
+          {edit.stt && <EditMenu cataloglist={catalogs} setEdit={setEdit} edit={edit} />}
+          {addMenu && <CreateNewUser cataloglist={catalogs} setAddMenu={setAddMenu} edit={edit} />}
+          {upload && <FileUpload setUpload={setUpload} menus />}
+        </Box>
+      )}
+    </Wrapper>
   );
 }

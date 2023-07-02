@@ -43,7 +43,18 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
     5: 'Tuyệt vời',
   };
   return (
-    <Box>
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        opacity: 0.6,
+        backgroundColor: '#999',
+        zIndex: 1,
+      }}
+    >
       <Box
         sx={{
           position: 'fixed',
@@ -51,7 +62,6 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: '#555',
         }}
         onClick={() => setfeedback({ open: false })}
       />
@@ -78,7 +88,7 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
           <Box
             sx={{
               borderRadius: '6px',
-              padding: '10px',
+              padding: '5px',
               backgroundColor: '#00000005',
               border: '1px solid #0000000a',
               display: 'flex',
@@ -114,6 +124,7 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
               >
                 <Box
                   sx={{
+                    flex: 1,
                     '& p': {
                       fontWeight: 700,
                       '& i': {
@@ -138,12 +149,18 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
                 <Box
                   sx={{
                     display: 'flex',
-                    gap: '10px',
+                    flexDirection: 'column',
+                    gap: '5px',
                     justifyContent: 'end',
                     alignItems: 'center',
+                    '& p': {
+                      fontWeight: 500,
+                    },
                   }}
                 >
-                  <Typography color={'#fe2c55'}>Chất lượng</Typography>
+                  <Typography width={'100px'} color={'#337ab7'}>
+                    Đánh giá
+                  </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                     <Rating
                       name="point"
@@ -153,26 +170,26 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
                         setValue(parseFloat(event.target.value));
                       }}
                     />
+                    {value !== null && (
+                      <Typography
+                        sx={{
+                          ml: '5px',
+                          width: '130px',
+                          textAlign: 'left',
+                          color: '#fe2c55',
+                        }}
+                      >
+                        {labels[value]}
+                      </Typography>
+                    )}
                   </Box>
-                  {value !== null && (
-                    <Typography
-                      sx={{
-                        ml: '5px',
-                        width: '130px',
-                        textAlign: 'left',
-                        color: 'orange',
-                      }}
-                    >
-                      {labels[value]}
-                    </Typography>
-                  )}
                 </Box>
               </Box>
             </Box>
           </Box>
           <textarea
             name="content"
-            placeholder="Đánh giá ...."
+            placeholder="Nhập đánh giá ...."
             autoFocus
             style={{ width: '100%', height: '100px', maxHeight: '100px', padding: '10px' }}
           />

@@ -1,5 +1,14 @@
-import { Inner } from '_/components/common/CustomComponents/CustomMui';
+import { Box } from '@mui/material';
 
-export const Wrapper = () => {
-  return <Inner sx={{ maxWidth: '768px', paddingRight: '0.1rem', paddingLeft: '0.1rem' }}></Inner>;
+export const Wrapper = ({ children }) => {
+  return (
+    <Box
+      sx={{
+        pt: '10px',
+        border: '1px solid #0000000a',
+      }}
+    >
+      {children}
+    </Box>
+  );
 };

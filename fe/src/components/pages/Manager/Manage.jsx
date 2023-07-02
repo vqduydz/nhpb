@@ -1,10 +1,14 @@
 import { Box } from '@mui/material';
-import { MyButton } from '_/components/common';
+import { Loading, MyButton } from '_/components/common';
 import { useState } from 'react';
 import { CatalogManage, MenuManage, OrdersManage, UserManage } from '..';
+import { useEffect } from 'react';
+import { useThemMui } from '_/context/ThemeMuiContext';
 
 export default function Manage() {
   const [tab, setTab] = useState(0);
+  const [bl, setBl] = useState(false);
+  const { loading } = useThemMui();
   const btnContent = [
     { tab: 0, content: 'QL người dùng' },
     { tab: 1, content: 'QL món ăn - đồ uống' },
@@ -31,9 +35,14 @@ export default function Manage() {
     }
     return Comp;
   };
+  useEffect(() => {
+    setBl(!bl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   return (
     <Box sx={{ pt: '20px' }}>
+      {loading && <Loading />}
       <Box
         sx={{
           display: 'flex',

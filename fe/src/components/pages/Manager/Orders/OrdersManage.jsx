@@ -1,17 +1,16 @@
 import { Badge, Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { MyButton } from '_/components/common';
-import { Inner } from '_/components/common/CustomComponents/CustomMui';
-import { useThemMui } from '_/context/ThemeMuiContext';
-import { getOrder } from '_/redux/slices';
-import { routes } from '_/routes';
-import { dateTimeFormate, renderPrice } from '_/utills';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { dateTimeFormate, renderPrice } from '_/utills';
+import { MyButton } from '_/components/common';
+import { getOrder } from '_/redux/slices';
+import { routes } from '_/routes';
+import { Wrapper } from '../Wrapper';
+
 const OrdersManage = () => {
   const dispatch = useDispatch();
-  const { setLoading } = useThemMui();
   const [orders, setOrders] = useState([]);
   const [waitConfirmOrders, setWaitConfirmOrders] = useState([]);
   const [prepareOrders, setPrepareOrders] = useState([]);
@@ -37,8 +36,8 @@ const OrdersManage = () => {
     setWaitConfirmOrders(() => orders.filter((order) => order.status === 'Chờ xác nhận'));
     setPrepareOrders(() => orders.filter((order) => order.status === 'Đang chuẩn bị'));
     setDeliveringOrders(() => orders.filter((order) => order.status === 'Đang giao hàng'));
-    setCompleteOrders(() => orders.filter((order) => order.status === 'Đã hoàn thành'));
-    setCancleOrders(() => orders.filter((order) => order.status === 'Đã huyr'));
+    setCompleteOrders(() => orders.filter((order) => order.status === 'Hoàn thành'));
+    setCancleOrders(() => orders.filter((order) => order.status === 'Đã hủy'));
   }, [orders]);
 
   const btnContent = [
@@ -160,58 +159,60 @@ const OrdersManage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        '&  .btn': {
-          fontSize: '1.2rem',
-          padding: '10px',
-          '& *': { justifyContent: 'center' },
-        },
-      }}
-    >
-      <Box>
-        <Typography fontSize={'2.4rem'} fontWeight={700}>
-          Danh sách món ăn - đồ uống
-        </Typography>
-        <Box
-          sx={{
-            borderRadius: '6px',
-            display: 'flex',
-            gap: '5px',
-            justifyContent: 'start',
+    <Wrapper>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          '&  .btn': {
+            fontSize: '1.2rem',
             padding: '10px',
-            mt: '10px',
-            mb: '10px',
-            backgroundColor: '#00000005',
-            border: '1px solid #0000000a',
-          }}
-        >
-          {btnContent.map((btn) => (
-            <Badge
-              key={btn.tab}
-              sx={{ cursor: 'pointer' }}
-              variant={btn.badgeContent && btn.badgeContent > 0 ? 'dot' : 'none'}
-              color="error"
-            >
-              <MyButton
-                text
-                fontWeight={700}
-                color={{ mainColor: btn.color }}
-                style={{ borderBottom: btn.tab === tab ? `2px solid ${btn.color}` : '2px solid transparent' }}
-                padding={'1px 9px'}
-                onClick={() => setTab(btn.tab)}
+            '& *': { justifyContent: 'center' },
+          },
+        }}
+      >
+        <Box>
+          <Typography padding={'0 10px'} fontSize={'2.4rem'} fontWeight={700}>
+            Danh sách đơn hàng
+          </Typography>
+          <Box
+            sx={{
+              borderRadius: '6px',
+              display: 'flex',
+              gap: '5px',
+              justifyContent: 'start',
+              padding: '10px',
+              mt: '10px',
+              mb: '10px',
+              backgroundColor: '#00000005',
+              border: '1px solid #0000000a',
+            }}
+          >
+            {btnContent.map((btn) => (
+              <Badge
+                key={btn.tab}
+                sx={{ cursor: 'pointer' }}
+                variant={btn.badgeContent && btn.badgeContent > 0 ? 'dot' : 'none'}
+                color="error"
               >
-                {btn.content}
-              </MyButton>
-            </Badge>
-          ))}
-        </Box>
+                <MyButton
+                  text
+                  fontWeight={700}
+                  color={{ mainColor: btn.color }}
+                  style={{ borderBottom: btn.tab === tab ? `2px solid ${btn.color}` : '2px solid transparent' }}
+                  padding={'1px 9px'}
+                  onClick={() => setTab(btn.tab)}
+                >
+                  {btn.content}
+                </MyButton>
+              </Badge>
+            ))}
+          </Box>
 
-        {render(tab)}
+          {render(tab)}
+        </Box>
       </Box>
-    </Box>
+    </Wrapper>
   );
 };
 

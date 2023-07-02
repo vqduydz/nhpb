@@ -196,7 +196,6 @@ const getUser = async (req, res) => {
     const totalCount = users.count; // Tổng số lượng người dùng
     const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
 
-    console.log('200---', page, limit, currentPage, offset);
     return res.status(200).json({ users: users.rows, totalCount, totalPages, currentPage });
   } catch (error) {
     return res.status(500).json({ errorMessage: 'Server error' });

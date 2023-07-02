@@ -26,14 +26,14 @@ const getCartItemByCartId = async (req, res) => {
         id: cartItem_menu_id,
       },
       raw: true,
-      attributes: ['id', 'name', 'slug', 'catalog', 'catalogSlug', 'price', 'unit', 'thumb_url'],
+      attributes: ['id', 'name', 'slug', 'catalog', 'catalogSlug', 'price', 'unit', 'image_url'],
       order: [['id', 'ASC']],
     });
 
     const cartItemsWithMenu = cartItems.map((cartItem) => {
       const catalogMenus = menus.filter((menu) => menu.id === cartItem.menu_id);
-      const { thumb_url, ...catalogMenu } = catalogMenus[0];
-      return { ...cartItem.toJSON(), menu: { ...catalogMenu, image: imagePath + thumb_url } };
+      const { image_url, ...catalogMenu } = catalogMenus[0];
+      return { ...cartItem.toJSON(), menu: { ...catalogMenu, image: imagePath + image_url } };
     });
 
     return res.status(200).json(cartItemsWithMenu);

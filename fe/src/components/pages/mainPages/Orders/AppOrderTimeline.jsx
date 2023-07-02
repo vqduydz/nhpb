@@ -88,13 +88,13 @@ function OrderItem({ item, isLast, type, handler, deliver }) {
         <TimelineDot color={color} />
         {isLast ? null : <TimelineConnector />}
       </TimelineSeparator>
-      <TimelineContent>
+      <TimelineContent sx={{ padding: '7px 16px' }}>
         <Typography fontWeight={700}>{status}</Typography>
         <Typography color="grey" fontSize={'1.4rem'}>
           <i>
             {time ? dateTimeFormate(time) : '........'}
-            {handler && ` - Người xác nhận: ${handler.firstName}${handler.lastName}`}
-            {deliver && ` - Người giao hàng: ${deliver.firstName}${deliver.lastName}`}
+            {handler && ` - Người xác nhận: ${handler.firstName} ${handler.lastName}`}
+            {deliver && ` - Người giao hàng: ${deliver.firstName} ${deliver.lastName}`}
           </i>
         </Typography>
       </TimelineContent>

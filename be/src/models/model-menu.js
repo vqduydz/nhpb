@@ -20,8 +20,6 @@ module.exports = (sequelize, DataTypes) => {
       price: DataTypes.INTEGER,
       unit: DataTypes.STRING,
       image_url: DataTypes.STRING,
-      thumb_url: DataTypes.STRING,
-      poster_url: DataTypes.STRING,
       desc: DataTypes.TEXT,
     },
     {

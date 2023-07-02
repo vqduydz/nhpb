@@ -3,7 +3,7 @@ import { unwrapResult } from '@reduxjs/toolkit';
 import { MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { useThemMui } from '_/context/ThemeMuiContext';
-import { getOrderByOrderCode } from '_/redux/slices';
+import { getOrderByOrderCode, getUser } from '_/redux/slices';
 import { routes } from '_/routes';
 import { renderPrice } from '_/utills';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import CustomizedTables from '../../mainPages/Orders/CustomizedTables';
 import { updateOrderApi } from '_/services/api/orderApi';
 import { useAuth } from '_/context/AuthContext';
+import DeliverDrop from './DeliverDrop';
 
 const OrderManage = () => {
   const dispatch = useDispatch();
@@ -20,6 +21,10 @@ const OrderManage = () => {
   const { loading } = useThemMui();
   const { currentUser } = useAuth();
   const [order, setOrder] = useState({});
+
+  const [deliverUsers, setDeliverUsers] = useState([]);
+  const [deliverSelect, setDeliverSelect] = useState({ deliver_name: '', deliver_id: null });
+
   const {
     deliver,
     handler,
@@ -80,6 +85,16 @@ const OrderManage = () => {
       .catch((error) => {
         console.log(error);
       });
+
+    dispatch(getUser())
+      .then(unwrapResult)
+      .then((result) => {
+        setDeliverUsers(() => result.users.filter((user) => user.role === 'Deliver'));
+      })
+      .catch((error) => {
+        console.log({ error });
+      });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
@@ -109,7 +124,49 @@ const OrderManage = () => {
         status: 'Đang chuẩn bị',
         history: JSON.stringify(updatedHistory),
       };
-      console.log({ dataUpdate, order });
+      await updateOrderApi(dataUpdate).then(() => {
+        navigate(routes.ordersmanage);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const confirmDeliver = async () => {
+    try {
+      const updatedHistory = history.map((item) => {
+        if (item.status === 'Đã chuẩn bị hàng - Bắt đầu giao hàng' && status === 'Đang chuẩn bị') {
+          return { ...item, time: new Date() };
+        }
+        return item;
+      });
+      const dataUpdate = {
+        deliver_id: deliverSelect.deliver_id,
+        order_code,
+        status: 'Đang giao hàng',
+        history: JSON.stringify(updatedHistory),
+      };
+      await updateOrderApi(dataUpdate).then(() => {
+        navigate(routes.ordersmanage);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const confirmCompleted = async () => {
+    try {
+      const updatedHistory = history.map((item) => {
+        if (item.status === 'Giao hàng thành công' && status === 'Đang giao hàng') {
+          return { ...item, time: new Date() };
+        }
+        return item;
+      });
+      const dataUpdate = {
+        order_code,
+        status: 'Hoàn thành',
+        history: JSON.stringify(updatedHistory),
+      };
       await updateOrderApi(dataUpdate).then(() => {
         navigate(routes.ordersmanage);
       });
@@ -233,7 +290,6 @@ const OrderManage = () => {
                   <Box
                     key={item.cartItemId}
                     sx={{
-                      borderRadius: '6px',
                       padding: '10px',
                       backgroundColor: '#00000005',
                       border: '1px solid #0000000a',
@@ -281,15 +337,11 @@ const OrderManage = () => {
                             },
                           }}
                         >
-                          <Typography textAlign={'left'}>
-                            <MyButton to={`${routes.detail}/${item.slug}`} text target="_blank">
-                              {item.name}
-                            </MyButton>
+                          <Typography color={'#337ab7'} textAlign={'left'}>
+                            {item.name}
                           </Typography>
                           <Typography textAlign={'left'}>
-                            <MyButton to={`${routes.menu}#${item.catalog_slug}`} text target="_blank">
-                              <i>{item.catalog}</i>
-                            </MyButton>
+                            <i>{item.catalog}</i>
                           </Typography>
                         </Box>
                         <Box
@@ -321,18 +373,40 @@ const OrderManage = () => {
                 sx={{
                   backgroundColor: 'transparent',
                   width: '100%',
-                  '& td': { borderColor: '#0000000a', fontWeight: 500, fontSize: '1.6rem', padding: '10px' },
+                  '& td': { borderColor: '#0000000a', fontWeight: 500, fontSize: '1.6rem', padding: '8px' },
                 }}
                 rows={rows}
               />
             </Box>
-            {status === 'Chờ xác nhận' && (
-              <Box sx={{ display: 'flex', justifyContent: 'end' }}>
+            <Box sx={{ mt: '10px', display: 'flex', justifyContent: 'end' }}>
+              {status === 'Chờ xác nhận' && (
                 <MyButton onClick={confirmOrder} color={{ bgColor: 'orange' }}>
                   Xác nhận đơn hàng
                 </MyButton>
-              </Box>
-            )}
+              )}
+              {status === 'Đang chuẩn bị' && (
+                <Box sx={{ display: 'flex' }}>
+                  <DeliverDrop
+                    deliverlist={deliverUsers}
+                    deliverSelect={deliverSelect}
+                    setDeliverSelect={setDeliverSelect}
+                  />
+                  <MyButton
+                    disable={!deliverSelect}
+                    style={{ width: '150px' }}
+                    onClick={confirmDeliver}
+                    color={{ bgColor: 'orange' }}
+                  >
+                    Xác nhận giao hàng
+                  </MyButton>
+                </Box>
+              )}
+              {status === 'Đang giao hàng' && (
+                <MyButton style={{ width: '280px' }} onClick={confirmCompleted} color={{ bgColor: 'orange' }}>
+                  Xác nhận hoàn thành đơn hàng
+                </MyButton>
+              )}
+            </Box>
           </Box>
         </Inner>
       </Box>

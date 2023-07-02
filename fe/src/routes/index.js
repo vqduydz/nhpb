@@ -37,7 +37,7 @@ const routes = {
 
   login: '/login',
   register: '/register',
-  manage: '/manage',
+  manage: '/',
   usermanage: '/manage/user',
   menumanage: '/manage/menu',
   catalogmanage: '/manage/catalog',
@@ -144,6 +144,7 @@ function PrivateRoutes() {
     { path: privateRoutes.contentmanage, comp: ContentManage, layout: ManageLayout },
     { path: privateRoutes.ordersmanage, comp: OrdersManage, layout: ManageLayout },
     { path: privateRoutes.ordermanage, comp: OrderManage, layout: ManageLayout },
+    { path: privateRoutes.notfoundpage, comp: BackHome },
   ];
 }
 

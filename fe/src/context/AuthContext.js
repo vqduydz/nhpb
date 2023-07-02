@@ -114,10 +114,8 @@ function AuthContextProvider({ children }) {
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'Customer') {
       setCartItems([]);
-      return;
     } else {
       handleGetCartItem(currentUser.id);
-      return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, loading]);

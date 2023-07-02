@@ -1,25 +1,25 @@
-import { Box } from '@mui/material';
-import { Editor, MyButton } from '_/components/common';
-import { capitalize } from '_/utills';
-import axios from 'axios';
-import { useRef, useState } from 'react';
-// import Detail from './Detail';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import { Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+
+import { MyButton } from '_/components/common';
 import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
 import { updateMenu } from '_/redux/slices';
+import { capitalize } from '_/utills';
 import removeVietnameseTones from '_/utills/removeVietnameseTones';
-import { useDispatch } from 'react-redux';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CatalogDrop from './CatalogDrop';
 
-const EditMenu = ({ edit, setEdit }) => {
+const EditMenu = ({ edit, setEdit, cataloglist }) => {
   const { value } = edit;
-  const { id, name, catalog, price, unit, desc } = value;
+  const { id, name, price, unit } = value;
   const dispatch = useDispatch();
   const { setLoading } = useThemMui();
   const { setSnackbar } = useAuth();
-  const editorRef = useRef(null);
   const [image, setImage] = useState(null);
   const [menu, setMenu] = useState({
     name: null,
@@ -31,48 +31,31 @@ const EditMenu = ({ edit, setEdit }) => {
     unit: null,
     image: null,
   });
+  const [catalog, setCatalog] = useState(value.catalog);
 
-  const handleSubmit = async (e) => {
+  const handleUpdateMenu = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const data = new FormData(e.currentTarget);
-      const name = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
-      await uploadImage(name)
+      const slug = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
+      await uploadImage(slug)
         .then((res) => {
-          console.log({ res });
-          const menuData =
-            //  !editorRef.current.value
-            //   ?
-            {
-              id,
-              name: capitalize(data.get('name')),
-              slug: removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-'),
-              catalog: capitalize(data.get('catalog')),
-              catalogSlug: removeVietnameseTones(data.get('catalog')).toLowerCase().replace(/ /g, '-'),
-              price: data.get('price'),
-              unit: capitalize(data.get('unit')),
-              ...res,
-            };
-          // : {
-          //     id,
-          //     name: capitalize(data.get('name')),
-          //     slug: removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-'),
-          //     catalog: capitalize(data.get('catalog')),
-          //     catalogSlug: removeVietnameseTones(data.get('catalog')).toLowerCase().replace(/ /g, '-'),
-          //     desc: editorRef.current.value,
-          //     price: data.get('price'),
-          //     unit: capitalize(data.get('unit')),
-          //     ...res,
-          //   };
+          const image_url = `${slug}.png`;
+          const menuData = {
+            id,
+            name: capitalize(data.get('name')),
+            slug,
+            catalog: capitalize(data.get('catalog')),
+            catalogSlug: removeVietnameseTones(data.get('catalog')).toLowerCase().replace(/ /g, '-'),
+            price: data.get('price'),
+            unit: capitalize(data.get('unit')),
+            image_url,
+          };
           setMenu(menuData);
-          return menuData;
-        })
-        .then((menu) => {
-          dispatch(updateMenu(menu))
+          dispatch(updateMenu(menuData))
             .then(unwrapResult)
             .then((result) => {
-              setLoading(false);
               let message, status;
               if (result.error) {
                 message = result.error;
@@ -139,25 +122,9 @@ const EditMenu = ({ edit, setEdit }) => {
         left: '50%',
         transform: 'translate(-50%,-50%)',
         boxShadow: '0 0 10px 5px #00000012',
-        '& .btn': {
-          marginBottom: '15px',
-          padding: '5px',
-          width: '100%',
-          boxShadow: '0 0 3px 1px #00000012',
-          '&:hover': {
-            backgroundColor: '#888888',
-          },
-          span: {
-            justifyContent: 'center',
-          },
-        },
-
-        '& .tox': {
-          '& .tox-statusbar': { display: 'none' },
-        },
       }}
     >
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleUpdateMenu}>
         <Box
           sx={{
             display: 'flex',
@@ -179,16 +146,7 @@ const EditMenu = ({ edit, setEdit }) => {
             autoFocus
             required
           />
-          <MyTextField
-            defaultValue={menu.catalog || catalog}
-            size="small"
-            label="catalog"
-            fullWidth
-            id="catalog"
-            name="catalog"
-            type=""
-            required
-          />
+          <CatalogDrop cataloglist={cataloglist} catalog={catalog} setCatalog={setCatalog} />
         </Box>
         <Box
           sx={{
@@ -207,7 +165,6 @@ const EditMenu = ({ edit, setEdit }) => {
             id="price"
             name="price"
             type="number"
-            autoFocus
             required
           />
           <MyTextField
@@ -235,11 +192,33 @@ const EditMenu = ({ edit, setEdit }) => {
             }}
             htmlFor="upload-image"
           >
+            <input hidden id="upload-image" type="file" accept="image/*" onChange={handleImageChange} />
+            {image ? (
+              <Typography> {image?.name} </Typography>
+            ) : (
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+              </Typography>
+            )}
+          </label>
+          {/* <label
+            style={{
+              border: '1px solid #0000003b',
+              borderRadius: '3px',
+              cursor: 'pointer',
+              minWidth: '200px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.4rem',
+              padding: '5px',
+            }}
+            htmlFor="upload-image"
+          >
             <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
           </label>
-          <input hidden id="upload-image" name="uploadImage" type="file" onChange={handleImageChange} />
+          <input hidden id="upload-image" name="uploadImage" type="file" onChange={handleImageChange} /> */}
         </Box>
-        {/* <Editor outRef={editorRef} sx={{ height: '200px' }} /> */}
         <Box sx={{ margin: '15px 0', display: 'flex', gap: '10px', justifyContent: 'end' }}>
           <MyButton color={{ bgColor: 'orange' }} type="submit">
             Lưu
@@ -249,11 +228,6 @@ const EditMenu = ({ edit, setEdit }) => {
           </MyButton>
         </Box>
       </form>
-      {/* {menu.preView && (
-                <Box sx={{ border: '1px solid #333', padding: '10px' }}>
-                    <Detail menu={menu} />
-                </Box>
-            )} */}
     </Box>
   );
 };

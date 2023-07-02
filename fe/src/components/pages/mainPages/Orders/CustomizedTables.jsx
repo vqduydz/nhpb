@@ -6,7 +6,7 @@ export default function CustomizedTables({ rows, sx }) {
       <TableBody
         sx={{
           border: '1px solid #0000000a',
-          '& td': { borderColor: '#0000000a', fontWeight: 500, fontSize: '1.6rem', padding: '18px' },
+          '& td': { borderColor: '#0000000a', fontWeight: 500, fontSize: '1.6rem', padding: '13px' },
           ...sx,
         }}
       >

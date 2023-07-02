@@ -203,7 +203,7 @@ const Order = () => {
                   <Typography sx={{ width: '100px', fontWeight: 700 }}>Đơn giá</Typography>
                   <Typography sx={{ width: '30px', fontWeight: 700 }}>SL</Typography>
                   <Typography sx={{ width: '100px', fontWeight: 700 }}>Thành tiền</Typography>
-                  {status === 'hoàn thành' && (
+                  {status === 'Hoàn thành' && (
                     <Typography sx={{ width: '120px', fontWeight: 700 }}>Thao tác</Typography>
                   )}
                 </Box>
@@ -289,7 +289,7 @@ const Order = () => {
                           <Typography sx={{ width: '100px' }} color={'#fe2c55'}>
                             {renderPrice(item.price * item.quantity)}
                           </Typography>
-                          {status === 'hoàn thành' &&
+                          {status === 'Hoàn thành' &&
                             (item?.feedbacked ? (
                               <MyButton
                                 style={{ width: '120px' }}

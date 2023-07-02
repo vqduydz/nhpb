@@ -12,7 +12,6 @@ export default function Header(props) {
   const { email, role, firstName } = currentUser;
   const handleLogout = () => {
     dispatch(logout());
-    // persistor.purge();
   };
   activeAddClass('header-btn');
 
@@ -23,6 +22,7 @@ export default function Header(props) {
         top: '0',
         backgroundColor: 'rgb(255 255 255)',
         zIndex: '2',
+        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)',
       }}
     >
       <Box
@@ -41,7 +41,7 @@ export default function Header(props) {
           marginLeft: 'auto',
           width: '100%',
           zIndex: 2,
-          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)',
+
           '& h3': {
             fontSize: '1.8rem',
           },
@@ -104,7 +104,7 @@ export default function Header(props) {
           className="header-btn logo"
           effect
           text
-          to={routes.manage}
+          href={routes.manage}
           style={{
             minWidth: '120px',
             fontWeight: '700',
@@ -124,10 +124,10 @@ export default function Header(props) {
           }}
         >
           <Typography sx={{ display: 'inline-flex', fontStyle: 'italic' }}>
-            Welcome : <b>{firstName}</b>
+            <i>Welcome : {firstName}</i>
           </Typography>
           <Typography sx={{ display: 'inline-flex', fontStyle: 'italic' }}>
-            Role : <b>{role}</b>
+            <i>Role : {role}</i>
           </Typography>
 
           <MyButton

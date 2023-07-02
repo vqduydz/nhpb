@@ -53,7 +53,6 @@ export default function EditUser({ edit, setEdit }) {
 
   const checkCurrentRole = (roles = []) => roles.includes(currentUser.role);
   const checkRole = (roles = []) => roles.includes(role);
-  const checkId = () => id === currentUser.id;
 
   return (
     <Box>
@@ -134,14 +133,31 @@ export default function EditUser({ edit, setEdit }) {
             autoComplete="address"
           />
           <FormLabel id="gender">Gender</FormLabel>
-          <RadioGroup defaultValue={gender} row aria-labelledby="gender" name="gender">
+          <RadioGroup
+            sx={{ '& .MuiRadio-root.Mui-checked': { color: '#333' } }}
+            defaultValue={gender}
+            row
+            aria-labelledby="gender"
+            name="gender"
+          >
             <FormControlLabel value="Female" control={<Radio />} label="Female" />
             <FormControlLabel value="Male" control={<Radio />} label="Male" />
             <FormControlLabel value="Other" control={<Radio />} label="Other" />
           </RadioGroup>
 
           <InputLabel id="role">Role</InputLabel>
-          <Select labelId="role" id="role" required sx={{ width: '100%' }} size="small" name="role" defaultValue={role}>
+          <Select
+            labelId="role"
+            id="role"
+            required
+            sx={{
+              width: '100%',
+              '& fieldset.MuiOutlinedInput-notchedOutline': { border: '1px solid #0000003b !important' },
+            }}
+            size="small"
+            name="role"
+            defaultValue={role}
+          >
             <MenuItem
               disabled={
                 checkRole(['Root']) ||

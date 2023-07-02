@@ -89,7 +89,7 @@ const deleteFeedbackById = async (req, res) => {
       return res.status(404).json({ errorMessage: 'Feedback does not exist' });
     }
 
-    const imageNames = [feedback.image_url, feedback.thumb_url, feedback.poster_url]; // Danh sách tên các file cần xóa được gửi trong body của request
+    const imageNames = [feedback.image_url]; // Danh sách tên các file cần xóa được gửi trong body của request
     // Duyệt qua danh sách các tên file và xóa từng file
     let delIamgeNoti = [];
     imageNames.map((imageName) => {

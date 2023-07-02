@@ -1,16 +1,17 @@
-import { Box } from '@mui/material';
-import { MyButton } from '_/components/common';
-import { capitalize, isEmptyObj } from '_/utills';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import { Box, Typography } from '@mui/material';
+import { unwrapResult } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { useState } from 'react';
-import { unwrapResult } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
+
+import { MyButton } from '_/components/common';
 import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
-import { updateCatalog, updateMenu } from '_/redux/slices';
+import { updateCatalog } from '_/redux/slices';
+import { capitalize } from '_/utills';
 import removeVietnameseTones from '_/utills/removeVietnameseTones';
-import { useDispatch } from 'react-redux';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 const EditMenu = ({ edit, setEdit }) => {
   const { value } = edit;
@@ -20,30 +21,24 @@ const EditMenu = ({ edit, setEdit }) => {
   const { setSnackbar } = useAuth();
   const [image, setImage] = useState(null);
   const [catalog, setCatalog] = useState({ name: null, slug: null });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const data = new FormData(e.currentTarget);
-      const name = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
-      await uploadImage(name)
+      const slug = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
+      await uploadImage(slug)
         .then((res) => {
-          const slug = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
-          const image_url = isEmptyObj(res)
-            ? { image_url: `${slug}.png`, thumb_url: `${slug}-thumb.png`, poster_url: `${slug}-poster.png` }
-            : res;
+          const image_url = `${slug}.png`;
           const catalogData = {
             id,
             name: capitalize(data.get('name')),
-            slug: removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-'),
-
-            ...image_url,
+            slug,
+            image_url,
           };
           setCatalog(catalogData);
-          return catalogData;
-        })
-        .then((catalog) => {
-          dispatch(updateCatalog(catalog))
+          dispatch(updateCatalog(catalogData))
             .then(unwrapResult)
             .then((result) => {
               setLoading(false);
@@ -92,6 +87,7 @@ const EditMenu = ({ edit, setEdit }) => {
   };
 
   const handleClearContent = () => {
+    setEdit({ stt: false, value: {} });
     setCatalog({ ...catalog, preView: false });
   };
 
@@ -110,22 +106,6 @@ const EditMenu = ({ edit, setEdit }) => {
         left: '50%',
         transform: 'translate(-50%,-50%)',
         boxShadow: '0 0 10px 5px #00000012',
-        '& .btn': {
-          marginBottom: '15px',
-          padding: '5px',
-          width: '100%',
-          boxShadow: '0 0 3px 1px #00000012',
-          '&:hover': {
-            backgroundColor: '#888888',
-          },
-          span: {
-            justifyContent: 'center',
-          },
-        },
-
-        '& .tox': {
-          '& .tox-statusbar': { display: 'none' },
-        },
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -165,9 +145,15 @@ const EditMenu = ({ edit, setEdit }) => {
             }}
             htmlFor="upload-image"
           >
-            <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+            <input hidden id="upload-image" type="file" accept="image/*" onChange={handleImageChange} />
+            {image ? (
+              <Typography> {image?.name} </Typography>
+            ) : (
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+              </Typography>
+            )}
           </label>
-          <input hidden id="upload-image" name="uploadImage" type="file" onChange={handleImageChange} />
         </Box>
 
         <Box sx={{ margin: '15px 0', display: 'flex', gap: '10px', justifyContent: 'end' }}>
@@ -179,11 +165,6 @@ const EditMenu = ({ edit, setEdit }) => {
           </MyButton>
         </Box>
       </form>
-      {/* {catalog.preView && (
-                <Box sx={{ border: '1px solid #333', padding: '10px' }}>
-                    <Detail catalog={catalog} />
-                </Box>
-            )} */}
     </Box>
   );
 };

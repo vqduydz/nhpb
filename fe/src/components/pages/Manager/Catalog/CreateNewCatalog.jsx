@@ -1,17 +1,18 @@
 import { Box, Typography } from '@mui/material';
-import { MyButton } from '_/components/common';
-import { capitalize } from '_/utills';
 import axios from 'axios';
 import { useState } from 'react';
 // import Detail from './Detail';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { unwrapResult } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
+
+import { MyButton } from '_/components/common';
 import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
 import { createNewCatalog } from '_/redux/slices';
+import { capitalize } from '_/utills';
 import removeVietnameseTones from '_/utills/removeVietnameseTones';
-import { useDispatch } from 'react-redux';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 const CreateNewCatalog = ({ setAddCatalog }) => {
   const dispatch = useDispatch();
@@ -24,13 +25,13 @@ const CreateNewCatalog = ({ setAddCatalog }) => {
     setLoading(true);
     try {
       const data = new FormData(e.currentTarget);
-      const name = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
-      await uploadImage(name)
-        .then((res) => {
+      const slug = removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-');
+      await uploadImage(slug)
+        .then((image_url) => {
           const menuData = {
             name: capitalize(data.get('name')),
-            slug: removeVietnameseTones(data.get('name')).toLowerCase().replace(/ /g, '-'),
-            ...res,
+            slug,
+            image_url,
           };
           return menuData;
         })
@@ -97,22 +98,6 @@ const CreateNewCatalog = ({ setAddCatalog }) => {
         left: '50%',
         transform: 'translate(-50%,-50%)',
         boxShadow: '0 0 10px 5px #00000012',
-        '& .btn': {
-          marginBottom: '15px',
-          padding: '5px',
-          width: '100%',
-          boxShadow: '0 0 3px 1px #00000012',
-          '&:hover': {
-            backgroundColor: '#888888',
-          },
-          span: {
-            justifyContent: 'center',
-          },
-        },
-
-        '& .tox': {
-          '& .tox-statusbar': { display: 'none' },
-        },
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -141,9 +126,15 @@ const CreateNewCatalog = ({ setAddCatalog }) => {
             }}
             htmlFor="upload-image"
           >
-            <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+            <input hidden id="upload-image" name="uploadImage" required type="file" onChange={handleImageChange} />
+            {image ? (
+              <Typography> {image?.name} </Typography>
+            ) : (
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
+              </Typography>
+            )}
           </label>
-          <input hidden id="upload-image" name="uploadImage" required type="file" onChange={handleImageChange} />
         </Box>
 
         <Box sx={{ mt: '15px', display: 'flex', gap: '10px', justifyContent: 'end' }}>
@@ -155,11 +146,6 @@ const CreateNewCatalog = ({ setAddCatalog }) => {
           </MyButton>
         </Box>
       </form>
-      {/* {menu.preView && (
-                <Box sx={{ border: '1px solid #333', padding: '10px' }}>
-                    <Detail menu={menu} />
-                </Box>
-            )} */}
     </Box>
   );
 };

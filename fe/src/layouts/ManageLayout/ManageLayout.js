@@ -5,7 +5,7 @@ import Edit from '_/components/pages/Manager/User/EditUser';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Inner } from '_/components/common/CustomComponents/CustomMui';
+import { Inner, SnackbarWrapper } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
 
 export default function ManageLayout({ children }) {
@@ -13,6 +13,9 @@ export default function ManageLayout({ children }) {
   const [addUser, setAddUser] = useState(false);
   const [overLay, setOverLay] = useState(false);
   const [sideNav, setSideNav] = useState(false);
+  const { snackbar } = useAuth();
+  const { open } = snackbar;
+
   const navigate = useNavigate();
   const { currentUser } = useAuth();
 
@@ -39,6 +42,7 @@ export default function ManageLayout({ children }) {
         minHeight: `100vh`,
       }}
     >
+      {open && <SnackbarWrapper />}
       <Box>
         <Box>
           {currentUser && (

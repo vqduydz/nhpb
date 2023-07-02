@@ -76,11 +76,6 @@ const CheckOut = () => {
       history: JSON.stringify([
         {
           time: null,
-          status: 'Hoàn thành',
-          stt_code: 5,
-        },
-        {
-          time: null,
           status: 'Giao hàng thành công',
           stt_code: 4,
         },

@@ -1,18 +1,11 @@
 import { Box, Typography } from '@mui/material';
-import removeVietnameseTones from '_/utills/removeVietnameseTones';
-import { useEffect, useState } from 'react';
-
-import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
 import { MyButton } from '_/components/common';
+import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
+import { useState } from 'react';
 
-function WardDrop({ wardList, setWardSelect, districtSelect, setReceiverUpdate, receiverUpdateMeno, setSearchValue }) {
-  const [ward, setWard] = useState(receiverUpdateMeno.address.ward);
+const DeliverDrop = ({ deliverlist, deliverSelect, setDeliverSelect }) => {
   const [display, setDisplay] = useState(false);
-  useEffect(() => {
-    districtSelect.wards && districtSelect.wards.some((ward) => ward.name === ward) ? setWard(ward) : setWard('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [districtSelect]);
-
+  const { deliver_name, deliver_id } = deliverSelect;
   const showList = () => {
     setDisplay(true);
   };
@@ -22,40 +15,35 @@ function WardDrop({ wardList, setWardSelect, districtSelect, setReceiverUpdate, 
     }, 200);
   };
 
-  const renderDistricts = () => {
-    const filteredWards = wardList.filter((w) => {
-      return (
-        // branch.url.toLowerCase().includes(ward.toLowerCase()) ||
-        removeVietnameseTones(w.name.toLowerCase()).includes(removeVietnameseTones(ward.toLowerCase()))
-      );
-    });
-
+  const renderDeliver = () => {
     return (
-      <Box>
-        {filteredWards.map((ward, i) => {
+      <Box
+        sx={{
+          '& .catalog-btn': {
+            ':hover': { backgroundColor: '#f5f5f5' },
+          },
+        }}
+      >
+        {deliverlist.map((deliver, i) => {
           return (
             <MyButton
-              tyle={'button'}
+              className="catalog-btn"
+              type={'button'}
               style={{
                 width: '100%',
                 fontSize: '1.4rem',
                 padding: '5px 10px',
                 lineHeight: 'normal',
                 borderBottom: '1px solid #f5f5f5',
+                borderRadius: '0',
               }}
               key={i}
               onClick={() => {
-                setWardSelect(ward.name);
-                setWard(ward.name);
-                setSearchValue('');
-                setReceiverUpdate({
-                  ...receiverUpdateMeno,
-                  address: { ...receiverUpdateMeno.address, ward: ward.name, specificAddress: '' },
-                });
+                setDeliverSelect({ deliver_name: deliver.firstName + ' ' + deliver.lastName, deliver_id: deliver.id });
               }}
             >
-              <Typography width={'100%'} variant="h5" fontSize={'1.4rem'}>
-                {ward.name}
+              <Typography width={'100%'} textAlign={'left'} fontSize={'1.4rem'}>
+                {deliver.firstName + ' ' + deliver.lastName}
               </Typography>
             </MyButton>
           );
@@ -67,29 +55,32 @@ function WardDrop({ wardList, setWardSelect, districtSelect, setReceiverUpdate, 
     <Box
       sx={{
         width: '100%',
-        marginTop: '15px',
-        borderRadius: '3px',
         border: '1px solid transparent',
         position: 'relative',
       }}
     >
       <MyTextField
-        required
         size="small"
-        label="Chọn Phường/Xã"
-        type="text"
+        label="Chọn người giao hàng"
         fullWidth
-        value={ward}
-        onChange={(e) => setWard(e.target.value)}
+        id="catalog"
+        required
+        type="text"
+        value={deliver_name}
+        // onChange={(e) => setCatalog(e.target.value)}
         onBlur={hideList}
         onFocus={showList}
+        name="catalog"
         sx={{
           // width: '100%',
           background: 'transparent',
           outline: 'none',
           border: 'none',
         }}
-        placeholder="Tìm Phường/Xã"
+        placeholder="Chọn người giao hàng"
+        InputProps={{
+          readOnly: true,
+        }}
       />
 
       {display && (
@@ -101,11 +92,9 @@ function WardDrop({ wardList, setWardSelect, districtSelect, setReceiverUpdate, 
             position: 'absolute',
             left: '0',
             background: '#fff',
-            borderRadius: '2px',
             border: '1px solid #ccc',
             width: '100%',
             textAlign: 'left',
-            minHeight: '50px',
             maxHeight: '30vh',
             overflow: 'auto',
             zIndex: 2,
@@ -118,11 +107,11 @@ function WardDrop({ wardList, setWardSelect, districtSelect, setReceiverUpdate, 
             },
           }}
         >
-          {renderDistricts()}
+          {renderDeliver()}
         </Box>
       )}
     </Box>
   );
-}
+};
 
-export default WardDrop;
+export default DeliverDrop;

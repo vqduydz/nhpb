@@ -1,28 +1,19 @@
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material';
-import { unwrapResult } from '@reduxjs/toolkit';
-import { MyButton } from '_/components/common';
-import { useThemMui } from '_/context/ThemeMuiContext';
-import { deleteCatalog, getCatalog } from '_/redux/slices';
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import CreateNewCatalog from './CreateNewCatalog';
-import EditMenu from './EditCatalog';
-import Row from './Row';
-import FileUpload from '../FileUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { Box, Typography } from '@mui/material';
+import { unwrapResult } from '@reduxjs/toolkit';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+
+import { MyButton } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
+import { useThemMui } from '_/context/ThemeMuiContext';
+import { deleteCatalog, getCatalog } from '_/redux/slices';
 import { dateTimeFormate } from '_/utills';
+import FileUpload from '../FileUpload';
+import { Wrapper } from '../Wrapper';
+import CreateNewCatalog from './CreateNewCatalog';
+import EditMenu from './EditCatalog';
 
 export default function CatalogManage() {
   const [edit, setEdit] = useState({ stt: false, value: {} });
@@ -81,7 +72,7 @@ export default function CatalogManage() {
 
   const render = () =>
     items.map((item, index) => {
-      const { id, slug, name, catalog, price, unit, thumb_url, createdAt } = item;
+      const { id, name, image_url, createdAt } = item;
       return (
         <Box
           key={index}
@@ -99,7 +90,7 @@ export default function CatalogManage() {
         >
           <Box
             sx={{
-              gap: '10px',
+              gap: '15px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -110,7 +101,7 @@ export default function CatalogManage() {
             </Typography>
             <Box
               sx={{
-                backgroundImage: `url(${imagePath}${thumb_url})`,
+                backgroundImage: `url(${imagePath}${image_url})`,
                 minWidth: '80px',
                 height: '60px',
                 backgroundPosition: 'center center',
@@ -124,7 +115,7 @@ export default function CatalogManage() {
           </Box>
           <Box
             sx={{
-              gap: '10px',
+              gap: '15px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -141,9 +132,9 @@ export default function CatalogManage() {
                 gap: '5px',
                 justifyContent: 'center',
                 '& .icon': {
-                  fontSize: '1.6rem !important',
+                  fontSize: '2rem !important',
                 },
-                ' * ': {
+                '* ': {
                   borderRadius: '3px',
                 },
               }}
@@ -151,22 +142,23 @@ export default function CatalogManage() {
               <MyButton
                 effect
                 color={{ mainColor: 'orange' }}
+                padding={'5px 8px'}
                 onClick={() => {
                   setEdit({ stt: true, value: item });
                 }}
                 aria-label="delete"
-                className={' btn edit-btn'}
+                className={'btn edit-btn'}
               >
                 <EditIcon className="icon" />
               </MyButton>
               <MyButton
                 effect
-                color={{ mainColor: 'red' }}
-                padding="2px 4px"
+                color={{ mainColor: '#fe2c55' }}
+                padding={'5px 8px'}
                 onClick={() => {
                   handleDelete(id);
                 }}
-                className={' btn del-btn'}
+                className={'btn del-btn'}
                 aria-label="delete"
               >
                 <DeleteIcon className="icon" />
@@ -178,12 +170,7 @@ export default function CatalogManage() {
     });
 
   return (
-    <Box
-      sx={{
-        pt: '10px',
-        border: '1px solid #0000000a',
-      }}
-    >
+    <Wrapper>
       <Box
         sx={{
           display: 'flex',
@@ -236,7 +223,7 @@ export default function CatalogManage() {
       >
         <Box
           sx={{
-            gap: '10px',
+            gap: '15px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -250,7 +237,7 @@ export default function CatalogManage() {
         </Box>
         <Box
           sx={{
-            gap: '10px',
+            gap: '15px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -264,29 +251,34 @@ export default function CatalogManage() {
       </Box>
 
       {render()}
-      {overLay && (
-        <Box
-          sx={{
-            // display: { 0: 'block', 768: 'none' },
-            position: 'fixed',
-            top: 0,
-            bottom: 0,
-            right: 0,
-            left: 0,
-            opacity: 0.6,
-            transition: 'bottom 0.3s linear 0s',
-            backgroundColor: '#212121',
-          }}
-          onClick={() => {
-            setEdit(false);
-            setAddCatalog(false);
-            setSideNav(false);
-          }}
-        />
+
+      {(overLay || edit.stt || addCatalog || upload) && (
+        <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
+          {overLay && (
+            <Box
+              sx={{
+                // display: { 0: 'block', 768: 'none' },
+                position: 'fixed',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+                opacity: 0.6,
+                transition: 'bottom 0.3s linear 0s',
+                backgroundColor: '#212121',
+              }}
+              onClick={() => {
+                setEdit(false);
+                setAddCatalog(false);
+                setSideNav(false);
+              }}
+            />
+          )}
+          {edit.stt && <EditMenu setEdit={setEdit} edit={edit} />}
+          {addCatalog && <CreateNewCatalog setAddCatalog={setAddCatalog} edit={edit} />}
+          {upload && <FileUpload setUpload={setUpload} catalogs />}
+        </Box>
       )}
-      {edit.stt && <EditMenu setEdit={setEdit} edit={edit} />}
-      {addCatalog && <CreateNewCatalog setAddCatalog={setAddCatalog} edit={edit} />}
-      {upload && <FileUpload setUpload={setUpload} catalogs />}
-    </Box>
+    </Wrapper>
   );
 }

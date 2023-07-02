@@ -18,14 +18,14 @@ const Detail = () => {
   const { slug: _slug } = useParams();
   const [menu, setMenu] = useState({});
   const { addToCart, currentUser } = useAuth();
-  const { id, name, catalog, price, unit, image_url, catalogSlug, imagePath } = menu;
+  const { id, name, catalog, price, unit, catalogSlug, imagePath, image_url } = menu;
   const [suggest, setSuggest] = useState({ items: [], imagePath: '' });
   const [feedbacks, setFeedbacks] = useState([]);
   const [rateValue, setRateValue] = useState({ soluot: 0, trunbinh: 0 });
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    dispatch(getMenu(_slug))
+    dispatch(getMenu({ slug: _slug }))
       .then(unwrapResult)
       .then((res) => {
         feedbackAPI
