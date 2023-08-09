@@ -1,11 +1,14 @@
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { MyButton } from '_/components/common';
-import { useThemMui } from '_/context/ThemeMuiContext';
-import { getUser } from '_/redux/slices';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Wrapper } from '../Wrapper';
+
+import { MyButton, PaginationCustom, SearchBox } from '_/components/common';
+import { useThemMui } from '_/context/ThemeMuiContext';
+import useDebounce from '_/hook/useDebounce';
+import { getUser } from '_/redux/slices';
+import { gmailFiller } from '_/utills';
+import FileUpload from '../FileUpload';
 import CreateNewUser from './CreateNewUser';
 import Edit from './EditUser';
 import Row from './Row';
@@ -14,90 +17,71 @@ export default function UserManage() {
   const [edit, setEdit] = useState({ stt: false, value: {} });
   const [addUser, setAddUser] = useState(false);
   const [overLay, setOverLay] = useState(false);
-  const [sideNav, setSideNav] = useState(false);
-  const [allUser, setAllUser] = useState([]);
-  const [rootUsers, setRootUsers] = useState([]);
-  const [adminUsers, setAdminUsers] = useState([]);
-  const [manageUsers, setManagerUsers] = useState([]);
-  const [customerUsers, setCustomerUsers] = useState([]);
-  const [deliverUsers, setDeliverUsers] = useState([]);
-  const [tab, setTab] = useState(0);
+
+  const [upload, setUpload] = useState(false);
+  const [tab, setTab] = useState({ index: 0, role: '', content: '' });
+  const { index, role, content } = tab;
   const { loading } = useThemMui();
   const dispatch = useDispatch();
+  const [searchValue, setSearchValue] = useState('');
+  const debounce = useDebounce(searchValue, 500);
+  const [load, setLoad] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit_per_page, setlimit_per_page] = useState(20);
+  const [allUser, setAllUser] = useState({ items: [], totalPages: 1, limitPerPage: limit_per_page });
+  const { items, totalPages, limitPerPage } = allUser;
 
   useEffect(() => {
-    if (!sideNav && !addUser && !edit.stt) {
+    if (!addUser && !edit.stt) {
       setOverLay(false);
       return;
     }
     setOverLay(true);
-  }, [addUser, edit.stt, sideNav]);
+  }, [addUser, edit.stt]);
 
   useEffect(() => {
-    dispatch(getUser())
-      .then(unwrapResult)
-      .then((result) => {
-        setAllUser(result.users);
-      })
-      .catch((error) => {
-        console.log({ error });
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
-
-  useEffect(() => {
-    setRootUsers(() => allUser.filter((user) => user.role === 'Root'));
-    setAdminUsers(() => allUser.filter((user) => user.role === 'Admin'));
-    setManagerUsers(() => allUser.filter((user) => user.role === 'Manager'));
-    setCustomerUsers(() => allUser.filter((user) => user.role === 'Customer'));
-    setDeliverUsers(() => allUser.filter((user) => user.role === 'Deliver'));
-  }, [allUser]);
-
-  const btnContent = [
-    { tab: 0, content: 'Tất cả', color: 'green' },
-    { tab: 1, content: 'Root', color: '#ed6c02' },
-    { tab: 2, content: 'Admin', color: '#0288d1' },
-    { tab: 3, content: 'Quản lý', color: '#0a66b7' },
-    { tab: 4, content: 'Người giao hàng', color: 'green' },
-    { tab: 5, content: 'Khách hàng', color: '#fe2c55' },
-  ];
-  const render = (tab) => {
-    let comp = [],
-      content = '';
-    switch (tab) {
-      case 0:
-        comp = allUser;
-        content = 'Tất cả';
-        break;
-      case 1:
-        comp = rootUsers;
-        content = 'Root';
-        break;
-      case 2:
-        comp = adminUsers;
-        content = 'Admin';
-        break;
-      case 3:
-        comp = manageUsers;
-        content = 'Quản lý';
-        break;
-      case 4:
-        comp = deliverUsers;
-        content = 'Người giao hàng';
-        break;
-      case 5:
-        comp = customerUsers;
-        content = 'Khách hàng';
-        break;
-
-      default:
-        break;
+    const query = !debounce.trim()
+      ? { page, limit_per_page, role }
+      : { page, limit_per_page, role, email: gmailFiller(debounce) };
+    if (debounce.trim()) {
+      setLoad(true);
     }
 
-    return comp.length > 0 ? (
+    dispatch(getUser(query))
+      .then(unwrapResult)
+      .then((result) => {
+        setLoad(false);
+        setAllUser({
+          items: result.users,
+          totalPages: result.totalPages,
+          limitPerPage: result.limit_per_page,
+        });
+      })
+      .catch((error) => {
+        setLoad(false);
+        console.log({ error });
+      });
+    window.scrollTo(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, debounce, page, limit_per_page, content]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [limit_per_page, index, debounce]);
+
+  const btnContent = [
+    { index: 0, role: '', content: 'Tất cả', color: 'green' },
+    { index: 1, role: 'Root', content: 'Root', color: '#ed6c02' },
+    { index: 2, role: 'Admin', content: 'Admin', color: '#0288d1' },
+    { index: 3, role: 'Manage', content: 'Quản lý', color: '#0a66b7' },
+    { index: 4, role: 'Deliver', content: 'Người giao hàng', color: 'green' },
+    { index: 5, role: 'Customer', content: 'Khách hàng', color: '#fe2c55' },
+  ];
+
+  const render = () => {
+    return items.length > 0 ? (
       <Table
         sx={{
-          mt: '10px',
           width: '100%',
           '& th': {
             '& +th': { borderLeft: '1px solid #00000024' },
@@ -124,6 +108,9 @@ export default function UserManage() {
           sx={{
             backgroundColor: '#f9f9f9',
             '& *': { fontWeight: '700 !important' },
+            position: 'sticky',
+            top: '137px',
+            zIndex: 1,
           }}
         >
           <TableRow>
@@ -143,11 +130,33 @@ export default function UserManage() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {comp.map((user, index) => {
-            return <Row setEdit={setEdit} key={user.id} user={user} STT={index + 1} />;
+          {items.map((user, index) => {
+            return (
+              <Row
+                setEdit={setEdit}
+                key={user.id}
+                user={user}
+                STT={page > 1 ? (page - 1) * limitPerPage + (index + 1) : index + 1}
+              />
+            );
           })}
         </TableBody>
       </Table>
+    ) : searchValue ? (
+      <Box
+        sx={{
+          padding: '40px 0 60px 0',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          alignItems: 'center',
+        }}
+      >
+        <Typography fontSize={'2rem'} fontWeight={700} color={'grey'}>
+          {`Không có email trùng khớp với "${searchValue}"`}
+        </Typography>
+      </Box>
     ) : (
       <Box
         sx={{
@@ -166,62 +175,68 @@ export default function UserManage() {
     );
   };
   return (
-    <Wrapper>
+    <>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          padding: '0 10px 10px',
-          '&  .btn': {
-            fontSize: '1.2rem',
-            padding: '10px',
-            '& *': { justifyContent: 'center' },
-          },
+          gap: '10px',
+          position: 'sticky',
+          top: '56px',
+          zIndex: 1,
+          mb: '1vh',
+          backgroundColor: '#fff',
         }}
       >
-        <Typography fontSize={'2.4rem'} fontWeight={700}>
-          Danh sách người dùng
-        </Typography>
-        <MyButton
-          effect
-          color={{ mainColor: 'green' }}
-          onClick={() => setAddUser(true)}
-          style={{ padding: '3px 8px' }}
-          className="btn"
-        >
-          Tạo mới
-        </MyButton>
+        <SearchBox
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          loading={load}
+          placeholder="Tìm user theo email ..."
+          handleCreate={setAddUser}
+          handleImport={setUpload}
+        />
       </Box>
       <Box
         sx={{
-          borderRadius: '6px',
           display: 'flex',
           gap: '5px',
           justifyContent: 'start',
-          padding: '10px',
-          mb: '10px',
-          backgroundColor: '#00000005',
-          border: '1px solid #0000000a',
+          padding: '5px 10px',
+          backgroundColor: '#f9f9f9',
+          border: '1px solid #eee',
+          position: 'sticky',
+          top: '96px',
+          zIndex: 1,
+          mb: '1vh',
         }}
       >
         {btnContent.map((btn) => (
           <MyButton
-            key={btn.tab}
+            key={btn.index}
             text
             fontWeight={700}
             color={{ mainColor: btn.color }}
-            style={{ borderBottom: btn.tab === tab ? `2px solid ${btn.color}` : '2px solid transparent' }}
+            style={{ borderBottom: btn.index === index ? `2px solid ${btn.color}` : '2px solid transparent' }}
             padding={'1px 9px'}
-            onClick={() => setTab(btn.tab)}
+            onClick={() => setTab({ index: btn.index, role: btn.role, content: btn.content })}
           >
             {btn.content}
           </MyButton>
         ))}
       </Box>
 
-      {render(tab)}
+      {render()}
 
-      {(overLay || edit.stt || addUser) && (
+      <PaginationCustom
+        limit_per_page={limit_per_page}
+        setlimit_per_page={setlimit_per_page}
+        total_page={totalPages}
+        page={page}
+        setPage={setPage}
+      />
+
+      {(overLay || edit.stt || addUser || upload) && (
         <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
           {overLay && (
             <Box
@@ -235,17 +250,13 @@ export default function UserManage() {
                 transition: 'bottom 0.3s linear 0s',
                 backgroundColor: '#212121',
               }}
-              onClick={() => {
-                setEdit(false);
-                setAddUser(false);
-                setSideNav(false);
-              }}
             />
           )}
           {edit.stt && <Edit setEdit={setEdit} edit={edit} />}
-          {addUser && <CreateNewUser setAddUser={setAddUser} edit={edit} />}
+          {addUser && <CreateNewUser setAddUser={setAddUser} />}
+          {upload && <FileUpload setUpload={setUpload} users />}
         </Box>
       )}
-    </Wrapper>
+    </>
   );
 }

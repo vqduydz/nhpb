@@ -9,12 +9,13 @@ import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
 import { createNewUser, getToken, login } from '_/redux/slices';
 import { routes } from '_/routes';
-import { capitalize } from '_/utills';
+import { capitalize, gmailFiller } from '_/utills';
 import AuthWrapper from './AuthWrapper';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Register() {
+  const [email, setEmail] = useState('');
   const { setLoading } = useThemMui();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -32,14 +33,14 @@ export default function Register() {
       const dataUser = {
         firstName: capitalize(data.get('firstName')),
         lastName: capitalize(data.get('lastName')),
-        email: data.get('email'),
+        email: gmailFiller(data.get('email')),
         password: data.get('password'),
         confirmpassword: data.get('confirmpassword'),
         gender: data.get('gender'),
         phoneNumber: data.get('phoneNumber'),
         role: 'Customer',
       };
-      console.log({ dataUser });
+
       if (dataUser.password !== dataUser.confirmpassword) {
         setSnackbar({ open: true, message: 'Password & confirmpassword not match!', status: 'error' });
         setLoading(false);
@@ -121,6 +122,8 @@ export default function Register() {
           size="small"
           label={text.enterEmail}
           required
+          value={email}
+          onChange={(e) => setEmail(gmailFiller(e.target.value))}
           fullWidth
           id="email"
           name="email"

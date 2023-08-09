@@ -48,6 +48,7 @@ const CreateNewMenu = ({ setAddMenu, cataloglist }) => {
             catalogSlug: removeVietnameseTones(data.get('catalog')).toLowerCase().replace(/ /g, '-'),
             desc: editorRef.current ? editorRef.current.value : '',
             price: data.get('price'),
+            max_order: data.get('max_order'),
             unit: data.get('unit'),
             image_url,
           };
@@ -101,18 +102,16 @@ const CreateNewMenu = ({ setAddMenu, cataloglist }) => {
   return (
     <Box
       sx={{
-        borderRadius: { 768: '10px' },
+        borderRadius: '6px',
         padding: '20px',
-        maxWidth: '768px',
-        width: '100%',
-        minWidth: '480px',
+        width: '680px',
         margin: '0 auto',
         backgroundColor: '#fff',
         position: 'fixed',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%,-50%)',
-        boxShadow: '0 0 10px 5px #00000012',
+        '& .inner': { display: 'flex', gap: '10px' },
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -139,7 +138,16 @@ const CreateNewMenu = ({ setAddMenu, cataloglist }) => {
           }}
         >
           <MyTextField size="small" label="Đơn giá" fullWidth id="price" name="price" type="number" required />
-          <MyTextField size="small" label="Đơn vị tính" fullWidth id="unit" name="unit" required type="" />
+          <MyTextField size="small" label="Đơn vị tính" fullWidth id="unit" name="unit" required type="" />{' '}
+          <MyTextField
+            size="small"
+            label="SL đặt tối đa"
+            fullWidth
+            id="max_order"
+            name="max_order"
+            required
+            type="number"
+          />
           <label
             style={{
               border: '1px solid #0000003b',

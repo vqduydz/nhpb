@@ -281,7 +281,7 @@ const ReceiverUpdate = ({ updateModel, setUpdateModel, setReceiver, receiver }) 
                 type="text"
                 id="provine"
                 defaultValue="TP. Hồ Chí Minh"
-                InputProps={{
+                inputProps={{
                   readOnly: true,
                 }}
               />

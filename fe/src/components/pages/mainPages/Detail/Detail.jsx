@@ -1,16 +1,17 @@
 import AddShoppingCartSharpIcon from '@mui/icons-material/AddShoppingCartSharp';
 import { Box, Rating, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import { MyButton, renderContent } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
 import { getCatalog, getMenu } from '_/redux/slices';
 import { routes } from '_/routes';
-import { dateTimeFormate, renderPrice } from '_/utills';
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
 import * as feedbackAPI from '_/services/api/feedbackApi';
+import { dateTimeFormate, renderPrice } from '_/utills';
 
 const Detail = () => {
   const navigate = useNavigate();

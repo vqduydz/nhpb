@@ -9,6 +9,8 @@ import {
   menuController,
   orderController,
   userController,
+  tableController,
+  bookingController,
 } from '../controllers';
 import { checkRole, verifyToken } from '../middlewares/middleware';
 
@@ -55,6 +57,14 @@ export const initWebRoutes = (app) => {
     checkRole(['Customer', 'Root', 'Admin', 'UserManage']),
     userController.deleteUserById,
   );
+  // import user
+  router.post(
+    '/user/import',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage']),
+    upload.single('file'),
+    userController.importUsers,
+  );
 
   //________menu______________________________________
   // get menu
@@ -76,7 +86,7 @@ export const initWebRoutes = (app) => {
 
   //________catalog______________________________________
   // get catalog
-  router.get('/catalog/:slug?', catalogController.getCatalog);
+  router.get('/catalog', catalogController.getCatalog);
   // create catalog
   router.post('/catalog', verifyToken, checkRole(['Root', 'Admin', 'UserManage']), catalogController.createCatalog);
   // update catalog data
@@ -129,7 +139,6 @@ export const initWebRoutes = (app) => {
   router.post('/cartitem', cartItemController.addCartItem);
 
   //________order______________________________________
-  /// order
   // get
   router.get(
     '/orders/:customer_id?',
@@ -148,7 +157,47 @@ export const initWebRoutes = (app) => {
   // // delete
   // router.delete('/order',    verifyToken, orderController.deleteOrderById);
   // add
-  router.post('/order', verifyToken, checkRole(['Customer']), orderController.createNewOrder);
+  router.post(
+    '/order',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage', 'Customer']),
+    orderController.createNewOrder,
+  );
+
+  //________ table ______________________________________
+  // get
+  router.get('/table', verifyToken, tableController.getTable);
+  // // update
+  router.patch('/table', verifyToken, tableController.updateTable);
+  // // delete
+  router.delete('/table', verifyToken, tableController.deleteTable);
+  // add
+  router.post('/table', verifyToken, tableController.createTable);
+  // import
+  router.post(
+    '/table/import',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage']),
+    upload.single('file'),
+    tableController.importTables,
+  );
+
+  //________ booking ______________________________________
+  // get booking
+  router.get('/booking', bookingController.getBooking);
+  // create booking
+  router.post('/booking', verifyToken, checkRole(['Root', 'Admin', 'UserManage']), bookingController.createNewBooking);
+  // update booking data
+  router.patch('/booking', verifyToken, checkRole(['Root', 'Admin', 'UserManage']), bookingController.updateBooking);
+
+  // // import booking
+  // router.post(
+  //   '/booking/import',
+  //   verifyToken,
+  //   checkRole(['Root', 'Admin', 'UserManage']),
+  //   upload.single('file'),
+  //   bookingController.importMenus,
+  // );
 
   //__________image____________________________________
   // upload image
@@ -157,6 +206,23 @@ export const initWebRoutes = (app) => {
     const outputFile = 'uploads/' + req.file.originalname + '.png';
     sharp(inputFile)
       .resize(800, 600)
+      .webp()
+      .toFile(outputFile, (err, info) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send('Có lỗi xảy ra trong quá trình xử lý hình ảnh');
+        } else {
+          res.status(200).json(req.file.originalname + '.png');
+        }
+      });
+  });
+
+  // upload image avartar
+  router.post('/upload', upload.single('image'), (req, res, next) => {
+    const inputFile = req.file.buffer;
+    const outputFile = 'uploads/' + req.file.originalname + '.png';
+    sharp(inputFile)
+      .resize(500, 500)
       .webp()
       .toFile(outputFile, (err, info) => {
         if (err) {

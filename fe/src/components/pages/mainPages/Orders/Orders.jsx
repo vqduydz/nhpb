@@ -21,11 +21,13 @@ const Orders = () => {
   const [completeOrders, setCompleteOrders] = useState([]);
   const [cancleOrders, setCancleOrders] = useState([]);
   const [tab, setTab] = useState(0);
+
   useEffect(() => {
     setLoading(true);
-    dispatch(getOrder(currentUser.id))
+    dispatch(getOrder({ customer_id: currentUser.id }))
       .then(unwrapResult)
       .then((res) => {
+        console.log({ res });
         setOrders(res.orders);
         setLoading(false);
       })
@@ -40,8 +42,8 @@ const Orders = () => {
     setWaitConfirmOrders(() => orders.filter((order) => order.status === 'Chờ xác nhận'));
     setPrepareOrders(() => orders.filter((order) => order.status === 'Đang chuẩn bị'));
     setDeliveringOrders(() => orders.filter((order) => order.status === 'Đang giao hàng'));
-    setCompleteOrders(() => orders.filter((order) => order.status === 'Đã hoàn thành'));
-    setCancleOrders(() => orders.filter((order) => order.status === 'Đã huyr'));
+    setCompleteOrders(() => orders.filter((order) => order.status === 'Hoàn thành'));
+    setCancleOrders(() => orders.filter((order) => order.status === 'Đã hủy'));
   }, [orders]);
 
   const btnContent = [
@@ -90,7 +92,7 @@ const Orders = () => {
         <Box
           sx={{
             borderRadius: '6px 6px 0 0',
-            padding: '15px 10px',
+            padding: '10px',
             backgroundColor: '#00000005',
             border: '1px solid #0000000a',
             display: 'flex',
@@ -125,7 +127,7 @@ const Orders = () => {
                 gap: '10px',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '15px 10px',
+                padding: '5px 10px',
                 backgroundColor: index % 2 === 0 ? '#fff' : '#f5f5f5',
                 border: '1px solid #0000000a',
                 textAlign: 'center',

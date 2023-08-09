@@ -78,7 +78,7 @@ const DeliverDrop = ({ deliverlist, deliverSelect, setDeliverSelect }) => {
           border: 'none',
         }}
         placeholder="Chọn người giao hàng"
-        InputProps={{
+        inputProps={{
           readOnly: true,
         }}
       />

@@ -5,23 +5,23 @@ import { unwrapResult } from '@reduxjs/toolkit';
 import { MyButton } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
-import { getCartItem, updateCartItem } from '_/redux/slices';
+import { getCartItem, getMenu, updateCartItem } from '_/redux/slices';
 import { memo, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods }) => {
+const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods, slug }) => {
   const [quantity, setQuantity] = useState(sl);
   const dispatch = useDispatch();
   const { setLoading } = useThemMui();
   const { handleGetCartItem, currentUser } = useAuth();
-  const sltd = 5;
+  const [maxOrder, setMaxOrder] = useState();
 
   const handleChangeQuantity = (quantity) => {
     setLoading(true);
     const updateData = { id, quantity };
     dispatch(updateCartItem(updateData))
       .then(unwrapResult)
-      .then(() => {
+      .then((res) => {
         handleGetCartItem(currentUser.id);
         dispatch(getCartItem(currentUser.id))
           .then(unwrapResult)
@@ -50,7 +50,15 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
       });
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    dispatch(getMenu({ slug }))
+      .then(unwrapResult)
+      .then((res) => {
+        setMaxOrder(res.max_order);
+      })
+      .catch((error) => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box
@@ -97,17 +105,17 @@ const Quantity = ({ sl, id, menu_id, checked, selectedFoods, setSelectedFoods })
         }}
         step="1"
         min={1}
-        max={sltd}
+        max={maxOrder}
         value={quantity}
         autoComplete="off"
         height="100%"
         readOnly
       />
       <MyButton
-        disable={quantity >= sltd}
+        disable={quantity >= maxOrder}
         onClick={() => {
           let res = quantity + 1;
-          if (res >= sltd) res = sltd;
+          if (res >= maxOrder) res = maxOrder;
           setQuantity(res);
           handleChangeQuantity(res);
         }}

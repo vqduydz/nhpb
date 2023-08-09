@@ -23,11 +23,11 @@
   min-width: 20px;
   transition: transform 0.2s;
   transform: translate(0, calc(var(--y, 0) * 1%)) scale(var(--scale, 1));
-  * {
-    overflow-wrap: break-word;
-    word-break: break-word;
-    white-space: normal;
-  }
+  // * {
+  //   overflow-wrap: break-word;
+  //   word-break: break-word;
+  //   white-space: normal;
+  // }
   opacity: var(--opacity, 0.9);
   &:hover {
     opacity: 1;

@@ -86,18 +86,16 @@ const CreateNewCatalog = ({ setAddCatalog }) => {
   return (
     <Box
       sx={{
-        borderRadius: { 768: '10px' },
+        borderRadius: '6px',
         padding: '20px',
-        maxWidth: '768px',
-        width: '100%',
-        minWidth: '480px',
+        width: '680px',
         margin: '0 auto',
         backgroundColor: '#fff',
         position: 'fixed',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%,-50%)',
-        boxShadow: '0 0 10px 5px #00000012',
+        '& .inner': { display: 'flex', gap: '10px' },
       }}
     >
       <form onSubmit={handleSubmit}>

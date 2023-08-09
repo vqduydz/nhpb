@@ -50,8 +50,6 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
         left: 0,
         width: '100%',
         height: '100%',
-        opacity: 0.6,
-        backgroundColor: '#999',
         zIndex: 1,
       }}
     >
@@ -62,6 +60,8 @@ const Feedback = ({ feedback, setfeedback, order_code }) => {
           left: 0,
           width: '100%',
           height: '100%',
+          opacity: 0.6,
+          backgroundColor: '#999',
         }}
         onClick={() => setfeedback({ open: false })}
       />

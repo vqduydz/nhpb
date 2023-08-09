@@ -13,7 +13,6 @@ AppOrderTimeline.propTypes = {
 };
 
 export default function AppOrderTimeline({ deliver, handler, subheader, list, ...other }) {
-  console.log({ list });
   return (
     <Card
       {...other}

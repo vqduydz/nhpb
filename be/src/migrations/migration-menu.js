@@ -34,7 +34,10 @@ module.exports = {
       unit: {
         type: Sequelize.STRING,
       },
-
+      max_order: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
       image_url: {
         type: Sequelize.STRING,
       },

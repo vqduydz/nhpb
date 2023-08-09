@@ -16,7 +16,7 @@ import CatalogDrop from './CatalogDrop';
 
 const EditMenu = ({ edit, setEdit, cataloglist }) => {
   const { value } = edit;
-  const { id, name, price, unit } = value;
+  const { id, name, price, unit, max_order } = value;
   const dispatch = useDispatch();
   const { setLoading } = useThemMui();
   const { setSnackbar } = useAuth();
@@ -49,6 +49,7 @@ const EditMenu = ({ edit, setEdit, cataloglist }) => {
             catalog: capitalize(data.get('catalog')),
             catalogSlug: removeVietnameseTones(data.get('catalog')).toLowerCase().replace(/ /g, '-'),
             price: data.get('price'),
+            max_order: data.get('max_order'),
             unit: capitalize(data.get('unit')),
             image_url,
           };
@@ -177,7 +178,16 @@ const EditMenu = ({ edit, setEdit, cataloglist }) => {
             required
             type=""
           />
-
+          <MyTextField
+            defaultValue={menu.max_order || max_order}
+            size="small"
+            label="SL đặt tối đa"
+            fullWidth
+            id="max_order"
+            name="max_order"
+            required
+            type="number"
+          />
           <label
             style={{
               border: '1px solid #0000003b',
@@ -201,23 +211,6 @@ const EditMenu = ({ edit, setEdit, cataloglist }) => {
               </Typography>
             )}
           </label>
-          {/* <label
-            style={{
-              border: '1px solid #0000003b',
-              borderRadius: '3px',
-              cursor: 'pointer',
-              minWidth: '200px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.4rem',
-              padding: '5px',
-            }}
-            htmlFor="upload-image"
-          >
-            <AddPhotoAlternateIcon fontSize="medium" sx={{ mr: '5px' }} /> Chọn ảnh
-          </label>
-          <input hidden id="upload-image" name="uploadImage" type="file" onChange={handleImageChange} /> */}
         </Box>
         <Box sx={{ margin: '15px 0', display: 'flex', gap: '10px', justifyContent: 'end' }}>
           <MyButton color={{ bgColor: 'orange' }} type="submit">

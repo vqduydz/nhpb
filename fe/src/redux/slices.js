@@ -83,9 +83,9 @@ export const getOrderByOrderCode = createAsyncThunk('getOrder', async (order_cod
   }
 });
 
-export const getOrder = createAsyncThunk('getOrder', async (customer_id, thunkAPI) => {
+export const getOrder = createAsyncThunk('getOrder', async (query, thunkAPI) => {
   try {
-    const res = await orderAPI.getOrderApi(customer_id);
+    const res = await orderAPI.getOrderApi({ ...query });
     return res;
   } catch (error) {
     console.log({ error });
@@ -217,9 +217,9 @@ const { reducer: cartItemReducer } = cartItemSlice;
 export { cartItemReducer };
 
 // catalog
-export const getCatalog = createAsyncThunk('getCatalog', async (params, thunkAPI) => {
+export const getCatalog = createAsyncThunk('getCatalog', async (query, thunkAPI) => {
   try {
-    const res = await catalogAPI.catalogApi(params);
+    const res = await catalogAPI.catalogApi({ ...query });
     return res;
   } catch (error) {
     console.log({ error });
@@ -363,9 +363,9 @@ const { reducer: menusReducer } = menusSlice;
 export { menusReducer };
 
 // get user
-export const getUser = createAsyncThunk('getUser', async (params, thunkAPI) => {
+export const getUser = createAsyncThunk('getUser', async (query, thunkAPI) => {
   try {
-    const res = await userAPI.userApi(params);
+    const res = await userAPI.userApi({ ...query });
     return res;
   } catch (error) {
     console.log({ error });

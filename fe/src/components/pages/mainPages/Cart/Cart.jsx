@@ -68,6 +68,7 @@ const Cart = () => {
       image: item.image,
       slug: item.slug,
       total: item.quantity * item.price,
+      max_order: item.max_order,
     }));
     dispatch(setOrderItems(orderItems));
     navigate(routes.checkout);
@@ -308,6 +309,7 @@ const Cart = () => {
                           sl={item.quantity}
                           id={item.id}
                           menu_id={item.menu_id}
+                          slug={item.slug}
                         />
 
                         <Box

@@ -1,19 +1,53 @@
-import MenuIcon from '@mui/icons-material/Menu';
-import { Box, Typography } from '@mui/material';
+import { Logout } from '@mui/icons-material';
+import { Box, Tooltip } from '@mui/material';
 import { MyButton } from '_/components/common';
-import { logout } from '_/redux/slices';
+import UserAvatar from '_/components/common/Avatar/Avatar';
+import { logout, setOrderItems } from '_/redux/slices';
 import { routes } from '_/routes';
 import { activeAddClass } from '_/utills/activeAddClass';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-export default function Header(props) {
+export default function Header() {
   const dispatch = useDispatch();
-  const { currentUser, sideNav, setSideNav } = props;
-  const { email, role, firstName } = currentUser;
+  const [tab, setTab] = useState();
+  const [anchorElUser, setAnchorElUser] = useState();
+
   const handleLogout = () => {
+    dispatch(setOrderItems([]));
     dispatch(logout());
   };
+
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   activeAddClass('header-btn');
+
+  const btnContent = [
+    { tab: 0, content: 'Users', link: routes.usermanage },
+    { tab: 1, content: 'Menus', link: routes.menumanage },
+    { tab: 2, content: 'Catalogs', link: routes.catalogmanage },
+    { tab: 3, content: 'Orders', link: routes.ordersmanage },
+    { tab: 4, content: 'Booking', link: routes.bookingmanage },
+  ];
+
+  useEffect(() => {
+    const currentURL = window.location.href;
+    const urlParts = currentURL.split('/');
+
+    const matchedTab =
+      btnContent.find((item) => item.link === `/${urlParts[urlParts.length - 1]}`) ||
+      btnContent.find((item) => item.link === `/${urlParts[urlParts.length - 2]}`);
+
+    if (matchedTab) setTab(matchedTab.tab);
+    else setTab(0);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box
@@ -28,148 +62,130 @@ export default function Header(props) {
       <Box
         sx={{
           display: 'flex',
-          gap: '10px',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingTop: '10px',
-          paddingBottom: '10px',
           maxWidth: '768px',
           minWidth: '762px',
-          paddingRight: '0.8rem',
-          paddingLeft: '0.8rem',
+          padding: '12px 1.8rem',
           marginRight: 'auto',
           marginLeft: 'auto',
           width: '100%',
           zIndex: 2,
-
-          '& h3': {
-            fontSize: '1.8rem',
-          },
+          '& .inner': { fontSize: '1.2rem' },
         }}
       >
-        <Box sx={{ display: { 0: 'block', 768: 'none' } }}>
-          <MyButton style={{ backgroundColor: 'transparent' }} className="btn" onClick={() => setSideNav(!sideNav)}>
-            <MenuIcon sx={{ fontSize: '2rem', color: '#000' }} />
+        <Box
+          className="inner"
+          sx={{
+            display: 'flex',
+            gap: '10px',
+            justifyContent: 'start',
+            width: '100%',
+          }}
+        >
+          {btnContent.map((btn) => (
+            <MyButton
+              to={btn.link}
+              key={btn.tab}
+              text
+              fontWeight={700}
+              color={{ mainColor: btn.tab === tab ? `#fe2c55` : '#0a66b7' }}
+              style={{ borderBottom: btn.tab === tab ? `2px solid #fe2c55` : '2px solid transparent' }}
+              padding={'1px 9px'}
+              onClick={() => setTab(btn.tab)}
+            >
+              {btn.content}
+            </MyButton>
+          ))}
+        </Box>
+        <Tooltip>
+          <MyButton fontSize={1.2} text onClick={handleOpenUserMenu}>
+            <UserAvatar
+              style={{
+                fontSize: '1.4rem',
+                width: '30px',
+                height: '30px',
+                border: '1px solid currentColor',
+              }}
+            />
           </MyButton>
-          {sideNav && (
+        </Tooltip>
+        <Box
+          onClick={handleCloseUserMenu}
+          sx={{
+            display: anchorElUser ? 'block' : 'none',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '100vh',
+            zIndex: 3,
+            '& *': {
+              color: '#000000DE',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: '768px',
+              margin: '0 auto',
+              padding: '0 15px',
+              position: 'relative',
+            }}
+          >
             <Box
               sx={{
-                padding: '1vh',
-                position: 'fixed',
-                left: 0,
-                top: '40px',
-                maxWidth: '60vh',
-                height: '100vh',
+                boxShadow: '0 0 10px 5px #00000012',
                 backgroundColor: '#fff',
-                '& h4 , .btn': {
-                  mt: '10px',
+                color: 'rgba(0, 0, 0, 0.87)',
+                borderRadius: '4px',
+                position: 'absolute',
+                padding: '10px 0',
+                maxWidth: '270px',
+                top: '50px',
+                right: 0,
+                opacity: '1',
+                '&:before': {
+                  boxShadow: '-6px -6px 8px 0px #00000012',
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 30,
+                  width: 10,
+                  height: 10,
+                  bgcolor: '#fff',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                },
+                '& .user-action': {
+                  padding: '5px 15px',
                   width: '100%',
+                  fontSize: '1.6rem',
+                  fontWeight: 500,
+                  display: 'flex',
+                  justifyContent: 'start',
+                  pr: '25px',
+
+                  '+.user-action': { borderTop: '1px solid #eee' },
+                  '& .icon': { width: '40px', backgroundColor: 'transparent' },
+                  '&:hover': {
+                    backgroundColor: '#0000000a',
+                  },
                 },
-                '& .btn': {
-                  '& *': { justifyContent: 'center' },
-                },
-                display: 'block',
               }}
             >
-              <Typography sx={{ fontStyle: 'italic' }} variant="h4">
-                <b>{email}</b>
-              </Typography>
-              <Typography sx={{ fontStyle: 'italic' }} variant="h4">
-                <b>{role}</b>
-              </Typography>
-              <MyButton effect className="btn header-btn" to={routes.usermanage} onClick={() => setSideNav(!sideNav)}>
-                User Manage
-              </MyButton>
               <MyButton
-                effect
-                className="btn header-btn"
-                to={routes.contentmanage}
-                onClick={() => setSideNav(!sideNav)}
+                className="user-action"
+                onClick={() => {
+                  handleLogout();
+                }}
               >
-                A Manage
-              </MyButton>
-              <MyButton effect className="btn header-btn" to={routes.ordermanage} onClick={() => setSideNav(!sideNav)}>
-                B Manage
-              </MyButton>
-
-              <MyButton className="btn header-btn" onClick={handleLogout}>
-                Log out
+                <Logout className="icon" />
+                Đăng xuất
               </MyButton>
             </Box>
-          )}
+          </Box>
         </Box>
-        <MyButton
-          padding="5px"
-          fontSize={2.5}
-          className="header-btn logo"
-          effect
-          text
-          href={routes.manage}
-          style={{
-            minWidth: '120px',
-            fontWeight: '700',
-            marginRight: '15px',
-            color: 'blue',
-          }}
-        >
-          Manage
-        </MyButton>
-        <Box
-          sx={{
-            width: '100%',
-            display: { 0: 'none', 768: 'flex' },
-            position: 'relative',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Typography sx={{ display: 'inline-flex', fontStyle: 'italic' }}>
-            <i>Welcome : {firstName}</i>
-          </Typography>
-          <Typography sx={{ display: 'inline-flex', fontStyle: 'italic' }}>
-            <i>Role : {role}</i>
-          </Typography>
-
-          <MyButton
-            effect
-            fontSize={1.3}
-            padding="5px 15px"
-            color={{ mainColor: 'red' }}
-            onClick={handleLogout}
-            type="button"
-          >
-            Log out
-          </MyButton>
-        </Box>
-        {/* <Box
-                  sx={{
-                    display: 'flex',
-                    flexGrow: 0,
-                    '& .lg-btn': {
-                      color: '#fffs',
-                      padding: '5px 15px',
-                      mr: '1vh',
-                    },
-                    '& .lg-btn-active': { color: '#45c3d2' },
-                  }}
-                >
-                  <MyButton
-                    color={{ textColorBefore: '#fff' }}
-                    effect
-                    onClick={() => handleChangeLanguage('vi')}
-                    className={language === 'vi' ? 'lg-btn lg-btn-active' : 'lg-btn'}
-                  >
-                    VN
-                  </MyButton>
-                  <MyButton
-                    color={{ textColorBefore: '#fff' }}
-                    effect
-                    onClick={() => handleChangeLanguage('en')}
-                    className={language === 'en' ? 'lg-btn lg-btn-active' : 'lg-btn'}
-                  >
-                    EN
-                  </MyButton>
-                </Box> */}
       </Box>
     </Box>
   );

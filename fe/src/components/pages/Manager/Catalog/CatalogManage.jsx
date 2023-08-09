@@ -5,13 +5,14 @@ import { unwrapResult } from '@reduxjs/toolkit';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { MyButton } from '_/components/common';
+import { MyButton, PaginationCustom, SearchBox } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
+import useDebounce from '_/hook/useDebounce';
 import { deleteCatalog, getCatalog } from '_/redux/slices';
 import { dateTimeFormate } from '_/utills';
+import removeVietnameseTones from '_/utills/removeVietnameseTones';
 import FileUpload from '../FileUpload';
-import { Wrapper } from '../Wrapper';
 import CreateNewCatalog from './CreateNewCatalog';
 import EditMenu from './EditCatalog';
 
@@ -20,29 +21,53 @@ export default function CatalogManage() {
   const [upload, setUpload] = useState(false);
   const [addCatalog, setAddCatalog] = useState(false);
   const [overLay, setOverLay] = useState(false);
-  const [sideNav, setSideNav] = useState(false);
-  const [catalogs, setCatalogs] = useState({ items: [], pathImage: '' });
+  const [page, setPage] = useState(1);
+  const [limit_per_page, setlimit_per_page] = useState(20);
+  const [catalogs, setCatalogs] = useState({ items: [], imagePath: '', totalPages: 1, limitPerPage: limit_per_page });
   const { loading, setLoading } = useThemMui();
   const dispatch = useDispatch();
   const { setSnackbar } = useAuth();
-  const { items, imagePath } = catalogs;
+  const { items, imagePath, totalPages, limitPerPage } = catalogs;
+  const [searchValue, setSearchValue] = useState('');
+  const debounce = useDebounce(searchValue, 500);
+  const [load, setLoad] = useState(false);
+
   useEffect(() => {
-    if (!sideNav && !addCatalog && !edit.stt) {
+    if (!addCatalog && !edit.stt) {
       setOverLay(false);
       return;
     }
     setOverLay(true);
-  }, [addCatalog, edit?.stt, sideNav]);
+  }, [addCatalog, edit?.stt]);
 
   useEffect(() => {
-    dispatch(getCatalog())
+    const query = !debounce.trim()
+      ? { page, limit_per_page }
+      : { page, limit_per_page, name: removeVietnameseTones(debounce).toLowerCase().replace(/ /g, '-') };
+
+    if (debounce.trim()) setLoad(true);
+    dispatch(getCatalog(query))
       .then(unwrapResult)
       .then((result) => {
-        setCatalogs({ items: result.catalogsWithMenus, imagePath: result.imagePath });
+        setLoad(false);
+        setCatalogs({
+          items: result.catalogs,
+          imagePath: result.imagePath,
+          totalPages: result.totalPages,
+          limitPerPage: result.limit_per_page,
+        });
       })
-      .catch((error) => {});
+      .catch((error) => {
+        setLoad(false);
+      });
+    window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
+  }, [loading, page, limit_per_page, debounce]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [limit_per_page, debounce]);
+
   const handleDelete = (id) => {
     // eslint-disable-next-line no-restricted-globals
     if (confirm('Delete confirmation')) {
@@ -97,7 +122,7 @@ export default function CatalogManage() {
             }}
           >
             <Typography textAlign={'center'} sx={{ minWidth: '30px' }}>
-              {index + 1}
+              {page > 1 ? (page - 1) * limitPerPage + (index + 1) : index + 1}
             </Typography>
             <Box
               sx={{
@@ -170,52 +195,39 @@ export default function CatalogManage() {
     });
 
   return (
-    <Wrapper>
+    <>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          mb: '10px',
-          padding: '0 10px',
-          '&  .btn': {
-            fontSize: '1.2rem',
-            padding: '10px',
-            '& *': { justifyContent: 'center' },
-          },
+          gap: '10px',
+          position: 'sticky',
+          top: '56px',
+          zIndex: 1,
+          mb: '1vh',
+          backgroundColor: '#fff',
         }}
       >
-        <Typography fontSize={'2.4rem'} fontWeight={700}>
-          Danh sách danh mục
-        </Typography>
-        <Box sx={{ display: 'flex', gap: '10px' }}>
-          <MyButton
-            effect
-            color={{ mainColor: 'green' }}
-            onClick={() => setAddCatalog(true)}
-            style={{ padding: '3px 8px' }}
-            className="btn"
-          >
-            Tạo mới
-          </MyButton>
-          <MyButton
-            effect
-            color={{ mainColor: 'blue' }}
-            onClick={() => setUpload(true)}
-            style={{ padding: '3px 8px' }}
-            className="btn"
-          >
-            Import
-          </MyButton>
-        </Box>
+        <SearchBox
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          loading={load}
+          placeholder="Tìm catalog ..."
+          handleCreate={setAddCatalog}
+          handleImport={setUpload}
+        />
       </Box>
 
       <Box
         sx={{
           padding: '15px 10px',
-          backgroundColor: '#00000005',
+          backgroundColor: '#f9f9f9',
           border: '1px solid #0000000a',
           display: 'flex',
           justifyContent: 'space-between',
+          position: 'sticky',
+          top: '96px',
+          zIndex: 1,
           '& p': {
             fontWeight: 700,
           },
@@ -252,6 +264,14 @@ export default function CatalogManage() {
 
       {render()}
 
+      <PaginationCustom
+        limit_per_page={limit_per_page}
+        setlimit_per_page={setlimit_per_page}
+        total_page={totalPages}
+        page={page}
+        setPage={setPage}
+      />
+
       {(overLay || edit.stt || addCatalog || upload) && (
         <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
           {overLay && (
@@ -267,11 +287,6 @@ export default function CatalogManage() {
                 transition: 'bottom 0.3s linear 0s',
                 backgroundColor: '#212121',
               }}
-              onClick={() => {
-                setEdit(false);
-                setAddCatalog(false);
-                setSideNav(false);
-              }}
             />
           )}
           {edit.stt && <EditMenu setEdit={setEdit} edit={edit} />}
@@ -279,6 +294,6 @@ export default function CatalogManage() {
           {upload && <FileUpload setUpload={setUpload} catalogs />}
         </Box>
       )}
-    </Wrapper>
+    </>
   );
 }

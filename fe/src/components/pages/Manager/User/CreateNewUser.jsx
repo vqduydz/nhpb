@@ -16,8 +16,8 @@ export default function CreateNewUser1({ setAddUser }) {
   const { setLoading } = useThemMui();
   const { setSnackbar } = useAuth();
   const [notif, setNotif] = useState();
-  const [role, setRole] = useState('Customer');
-  const [gender, setGender] = useState('Female');
+  const [roleSelect, setRoleSelect] = useState('Customer');
+  const [genderSelect, setGenderSelect] = useState('Female');
   const roleList = ['Root', 'Admin', 'Manage', 'Deliver', 'Customer'];
   const genderList = ['Female', 'Male', 'Other'];
 
@@ -34,8 +34,8 @@ export default function CreateNewUser1({ setAddUser }) {
       confirmpassword: data.get('confirmpassword'),
       phoneNumber: data.get('phoneNumber'),
       address: data.get('address'),
-      gender,
-      role,
+      role: roleSelect,
+      gender: genderSelect,
     };
 
     if (dataUser.password !== dataUser.confirmpassword) {
@@ -95,7 +95,7 @@ export default function CreateNewUser1({ setAddUser }) {
               fullWidth
               id="firstName"
               name="firstName"
-              autoComplete="firstName"
+              autoComplete="off"
               type=""
               autoFocus
             />
@@ -106,7 +106,7 @@ export default function CreateNewUser1({ setAddUser }) {
               fullWidth
               id="lastName"
               name="lastName"
-              autoComplete="lastName"
+              autoComplete="off"
               type=""
             />
           </Box>
@@ -118,7 +118,7 @@ export default function CreateNewUser1({ setAddUser }) {
               fullWidth
               id="email"
               name="email"
-              autoComplete="email"
+              autoComplete="off"
               type="email"
             />
             <MyTextField
@@ -128,7 +128,7 @@ export default function CreateNewUser1({ setAddUser }) {
               name="phoneNumber"
               type="number"
               id="phoneNumber"
-              autoComplete="phoneNumber"
+              autoComplete="off"
             />
           </Box>
           <Box className="inner">
@@ -140,7 +140,7 @@ export default function CreateNewUser1({ setAddUser }) {
               name="password"
               type="password"
               id="password"
-              autoComplete="current-password"
+              autoComplete="off"
             />
             <MyTextField
               size="small"
@@ -150,7 +150,7 @@ export default function CreateNewUser1({ setAddUser }) {
               name="confirmpassword"
               type="password"
               id="confirmpassword"
-              autoComplete="current-password"
+              autoComplete="off"
             />
           </Box>
           {notif ? (
@@ -177,8 +177,13 @@ export default function CreateNewUser1({ setAddUser }) {
             />
           )}
           <Box className="inner" sx={{ justifyContent: 'space-between' }}>
-            <DropWrapper droplist={genderList} itemSelect={gender} setItemSelect={setGender} label="Gender" />
-            <DropWrapper droplist={roleList} itemSelect={role} setItemSelect={setRole} label="Role" />
+            <DropWrapper
+              droplist={genderList}
+              itemSelect={genderSelect}
+              setItemSelect={setGenderSelect}
+              label="Gender"
+            />
+            <DropWrapper droplist={roleList} itemSelect={roleSelect} setItemSelect={setRoleSelect} label="Role" />
             <Box sx={{ display: 'flex', justifyContent: 'end', gap: '5px', '& button': { padding: '3px 15px' } }}>
               <MyButton color={{ bgColor: 'green', mainColor: '#fff' }} type="submit">
                 Create

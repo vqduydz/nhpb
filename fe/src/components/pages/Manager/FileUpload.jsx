@@ -1,14 +1,14 @@
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { MyButton } from '_/components/common';
-import { MyTextField } from '_/components/common/CustomComponents/CustomMui';
 import { useThemMui } from '_/context/ThemeMuiContext';
-import { importCatalogs, importMenus } from '_/redux/slices';
+import { importCatalogs, importMenus, importUsers } from '_/redux/slices';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const FileUpload = ({ setUpload, menus = false, catalogs = false, users = false }) => {
+  console.log(users);
   const [file, setFile] = useState(null);
   const { setLoading } = useThemMui();
   const dispatch = useDispatch();
@@ -50,7 +50,7 @@ const FileUpload = ({ setUpload, menus = false, catalogs = false, users = false 
       return;
     }
     if (users) {
-      dispatch(importMenus(formData))
+      dispatch(importUsers(formData))
         .then(unwrapResult)
         .then((result) => {
           setUpload(false);
@@ -82,7 +82,6 @@ const FileUpload = ({ setUpload, menus = false, catalogs = false, users = false 
           backgroundColor: '#555',
           opacity: 0.5,
         }}
-        onClick={() => setUpload()}
       />
       <form onSubmit={handleUpload} encType="multipart/form-data">
         <Box

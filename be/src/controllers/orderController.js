@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import db from '../models';
+const { Op } = require('sequelize');
 
 dotenv.config();
 const Order = db.Order;
@@ -7,20 +8,7 @@ const User = db.User;
 
 const createNewOrder = async (req, res) => {
   try {
-    const {
-      payment_methods,
-      order_code,
-      customer_id,
-      status,
-      ship_fee,
-      total_amount,
-      total_payment,
-      items,
-      history,
-      receiver,
-      orderer,
-      payment,
-    } = req.body;
+    const { order_code } = req.body;
     const order = await Order.findOne({
       where: { order_code },
     });
@@ -29,20 +17,7 @@ const createNewOrder = async (req, res) => {
       return res.status(442).json({ errorMessage: 'Order already exists' });
     }
 
-    await Order.create({
-      payment_methods,
-      order_code,
-      customer_id,
-      status,
-      payment,
-      ship_fee,
-      total_amount,
-      total_payment,
-      items,
-      history,
-      receiver,
-      orderer,
-    });
+    await Order.create(req.body);
     return res.status(200).json({ message: 'Order added successfully' });
   } catch (error) {
     console.log('112---', error);
@@ -52,18 +27,98 @@ const createNewOrder = async (req, res) => {
 
 const getOrders = async (req, res) => {
   try {
-    const { customer_id } = req.params;
+    const { customer_id, order_code, status, page, limit_per_page } = req.query;
+
+    let currentPage = 1,
+      limit,
+      offset;
+
+    if (limit_per_page) {
+      limit = Number(limit_per_page);
+    } else {
+      limit = 20;
+    }
+    if (page) {
+      currentPage = page;
+      offset = (currentPage - 1) * limit;
+    } else {
+      offset = 0;
+    }
+
     if (customer_id) {
-      const orders = await Order.findAll({
+      const orders = await Order.findAndCountAll({
+        limit,
+        offset,
         where: { customer_id },
         order: [['createdAt', 'DESC']],
       });
-      return res.status(200).json({ orders });
+      const totalCount = orders.count;
+      const totalPages = Math.ceil(totalCount / limit);
+      return res.status(200).json({ orders: orders.rows, totalCount, totalPages, currentPage, limit_per_page });
     }
-    const orders = await Order.findAll({
-      order: [['createdAt', 'DESC']],
-    });
-    return res.status(200).json({ orders });
+
+    const allOrder = await Order.findAll({ order: [['createdAt', 'DESC']] });
+    if (order_code && !status) {
+      const orders = await Order.findAndCountAll({
+        limit,
+        offset,
+        where: {
+          order_code: {
+            [Op.like]: `%${order_code}%`,
+          },
+        },
+        order: [['createdAt', 'DESC']],
+      });
+      const totalCount = orders.count;
+      const totalPages = Math.ceil(totalCount / limit);
+      return res
+        .status(200)
+        .json({ allOrder, orders: orders.rows, totalCount, totalPages, currentPage, limit_per_page });
+    }
+
+    if (order_code && status) {
+      const orders = await Order.findAndCountAll({
+        limit,
+        offset,
+        where: {
+          status,
+          order_code: {
+            [Op.like]: `%${order_code}%`,
+          },
+        },
+        order: [['createdAt', 'DESC']],
+      });
+      const totalCount = orders.count;
+      const totalPages = Math.ceil(totalCount / limit);
+      return res
+        .status(200)
+        .json({ allOrder, orders: orders.rows, totalCount, totalPages, currentPage, limit_per_page });
+    }
+
+    if (!order_code && status) {
+      const orders = await Order.findAndCountAll({
+        limit,
+        offset,
+        where: {
+          status,
+        },
+        order: [['createdAt', 'DESC']],
+      });
+      const totalCount = orders.count;
+      const totalPages = Math.ceil(totalCount / limit);
+      return res
+        .status(200)
+        .json({ allOrder, orders: orders.rows, totalCount, totalPages, currentPage, limit_per_page });
+    }
+
+    if (!order_code && !status) {
+      const orders = await Order.findAndCountAll({ limit, offset, order: [['createdAt', 'DESC']] });
+      const totalCount = orders.count;
+      const totalPages = Math.ceil(totalCount / limit);
+      return res
+        .status(200)
+        .json({ allOrder, orders: orders.rows, totalCount, totalPages, currentPage, limit_per_page });
+    }
   } catch (error) {
     console.log('58---', error);
     return res.status(500).json({ errorMessage: 'Server error' });
@@ -71,8 +126,8 @@ const getOrders = async (req, res) => {
 };
 
 const getOrderByOrderCode = async (req, res) => {
-  const { order_code } = req.params;
   try {
+    const { order_code } = req.params;
     const order = await Order.findOne({
       where: { order_code },
       raw: true,
@@ -93,8 +148,6 @@ const getOrderByOrderCode = async (req, res) => {
         raw: true,
       });
     }
-
-    console.log('80---', order, deliver, handler);
 
     return res.status(200).json({ ...order, deliver, handler });
   } catch (error) {

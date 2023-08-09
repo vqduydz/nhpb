@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
 import { unlink } from 'node:fs/promises';
 import path from 'path';
-import db from '../models';
 import { renameImg } from '../feature/renameImg';
+import db from '../models';
+const { Op } = require('sequelize');
 const xlsx = require('xlsx');
 dotenv.config();
 const Catalog = db.Catalog;
@@ -29,22 +30,66 @@ const createCatalog = async (req, res) => {
 
 const getCatalog = async (req, res) => {
   try {
-    const catalogs = await Catalog.findAll({
-      order: [['id', 'ASC']],
-    });
-    const catalogSlugs = catalogs.map((catalog) => catalog.slug);
+    const { name, page, limit_per_page } = req.query;
+    const allCatalog = await Catalog.findAll({ order: [['createdAt', 'DESC']] });
+    const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
+    let currentPage = 1,
+      limit,
+      offset;
+
+    if (limit_per_page) {
+      limit = Number(limit_per_page);
+    } else {
+      limit = 20;
+    }
+    if (page) {
+      currentPage = page;
+      offset = (currentPage - 1) * limit;
+    } else {
+      offset = 0;
+    }
+
+    if (name) {
+      const catalogs = await Catalog.findAndCountAll({
+        where: {
+          slug: {
+            [Op.like]: `%${name}%`,
+          },
+        },
+        limit,
+        offset,
+      });
+      const totalCount = catalogs.count;
+      const totalPages = Math.ceil(totalCount / limit);
+      return res
+        .status(200)
+        .json({ catalogs: catalogs.rows, totalCount, totalPages, currentPage, imagePath, limit_per_page });
+    }
+
+    const catalogs = await Catalog.findAndCountAll({ limit, offset, order: [['id', 'ASC']] });
+    const totalCount = catalogs.count;
+    const totalPages = Math.ceil(totalCount / limit);
+    const catalogSlugs = allCatalog.map((catalog) => catalog.slug);
     const menus = await Menu.findAll({
       where: {
         catalogSlug: catalogSlugs,
       },
       order: [['id', 'ASC']],
     });
-    const catalogsWithMenus = catalogs.map((catalog) => {
+    const catalogsWithMenus = allCatalog.map((catalog) => {
       const catalogMenus = menus.filter((menu) => menu.catalogSlug === catalog.slug);
       return { ...catalog.toJSON(), menus: catalogMenus };
     });
-    const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
-    return res.status(200).json({ catalogsWithMenus, catalogs, imagePath });
+
+    return res.status(200).json({
+      catalogsWithMenus,
+      catalogs: catalogs.rows,
+      totalCount,
+      totalPages,
+      currentPage,
+      imagePath,
+      limit_per_page,
+    });
   } catch (error) {
     console.log('63---,', error);
     return res.status(500).json({ errorMessage: 'Server error' });
@@ -113,7 +158,7 @@ const importCatalogs = async (req, res) => {
       return res.status(400).json({ error: 'Invalid file' });
     }
     const workbook = xlsx.read(file.buffer, { type: 'buffer' });
-    const sheet = workbook.Sheets[workbook.SheetNames[1]];
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
     const existingSlugs = await Catalog.findAll({ attributes: ['slug'] });
     const existingSlugSet = new Set(existingSlugs.map((catalog) => catalog.slug));

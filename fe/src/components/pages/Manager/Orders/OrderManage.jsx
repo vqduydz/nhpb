@@ -1,33 +1,37 @@
+import PrintIcon from '@mui/icons-material/Print';
 import { Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { MyButton } from '_/components/common';
-import { Inner } from '_/components/common/CustomComponents/CustomMui';
-import { useThemMui } from '_/context/ThemeMuiContext';
-import { getOrderByOrderCode, getUser } from '_/redux/slices';
-import { routes } from '_/routes';
-import { renderPrice } from '_/utills';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import CustomizedTables from '../../mainPages/Orders/CustomizedTables';
-import { updateOrderApi } from '_/services/api/orderApi';
+import EditIcon from '@mui/icons-material/Edit';
+
+import { MyButton } from '_/components/common';
+import { Inner } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
+import { useThemMui } from '_/context/ThemeMuiContext';
+import { getOrderByOrderCode, getUser } from '_/redux/slices';
+import { routes } from '_/routes';
+import { updateOrderApi } from '_/services/api/orderApi';
+import { renderPrice } from '_/utills';
+import CustomizedTables from '../../mainPages/Orders/CustomizedTables';
 import DeliverDrop from './DeliverDrop';
+import EditOrder from './EditOrder';
 
 const OrderManage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { order_code: _order_code } = useParams();
+
   const { loading } = useThemMui();
   const { currentUser } = useAuth();
   const [order, setOrder] = useState({});
-
+  const [overLay, setOverLay] = useState(false);
   const [deliverUsers, setDeliverUsers] = useState([]);
   const [deliverSelect, setDeliverSelect] = useState({ deliver_name: '', deliver_id: null });
+  const [edit, setEdit] = useState(false);
 
   const {
-    deliver,
-    handler,
     payment_methods,
     order_code,
     status,
@@ -39,6 +43,7 @@ const OrderManage = () => {
     items,
     receiver,
     orderer,
+    note,
   } = order;
 
   useEffect(() => {
@@ -46,6 +51,7 @@ const OrderManage = () => {
       .then(unwrapResult)
       .then((res) => {
         const {
+          note,
           deliver,
           handler,
           payment_methods,
@@ -62,6 +68,7 @@ const OrderManage = () => {
           createdAt,
         } = res;
         setOrder({
+          note,
           deliver,
           handler,
           payment_methods,
@@ -86,15 +93,14 @@ const OrderManage = () => {
         console.log(error);
       });
 
-    dispatch(getUser())
+    dispatch(getUser({ role: 'Deliver' }))
       .then(unwrapResult)
       .then((result) => {
-        setDeliverUsers(() => result.users.filter((user) => user.role === 'Deliver'));
+        setDeliverUsers(result.users);
       })
       .catch((error) => {
         console.log({ error });
       });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
@@ -175,6 +181,14 @@ const OrderManage = () => {
     }
   };
 
+  useEffect(() => {
+    if (!edit) {
+      setOverLay(false);
+      return;
+    }
+    setOverLay(true);
+  }, [edit]);
+
   return (
     <>
       <Box
@@ -201,6 +215,8 @@ const OrderManage = () => {
             >
               <Box
                 sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   '& p': {
                     fontWeight: 500,
                     '& i': {
@@ -210,12 +226,33 @@ const OrderManage = () => {
                   },
                 }}
               >
-                <Typography>
-                  Mã đơn hàng : <i>{order_code}</i>
-                </Typography>
-                <Typography>
-                  Trạng thái đơn hàng : <i>{status}</i>{' '}
-                </Typography>
+                <Box>
+                  <Typography>
+                    Mã đơn hàng : <i>{order_code}</i>
+                  </Typography>
+                  <Typography>
+                    Trạng thái đơn hàng : <i>{status}</i>
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignContent: 'center',
+                    gap: '10px',
+                  }}
+                >
+                  <MyButton
+                    style={{ width: '30px' }}
+                    onClick={() => {
+                      setEdit(true);
+                    }}
+                  >
+                    <EditIcon />
+                  </MyButton>
+                  <MyButton to={`${routes.bill}/${order_code}`} style={{ width: '30px' }} target="_blank">
+                    <PrintIcon />
+                  </MyButton>
+                </Box>
               </Box>
               <Typography sx={{ mt: 2, pt: 2, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
                 <u> Người đặt</u>
@@ -288,9 +325,9 @@ const OrderManage = () => {
               <Box sx={{ display: 'flex', gap: '2px', flexDirection: 'column', '& p': { fontWeight: 500 } }}>
                 {items?.map((item, index) => (
                   <Box
-                    key={item.cartItemId}
+                    key={index}
                     sx={{
-                      padding: '10px',
+                      padding: '5px 10px',
                       backgroundColor: '#00000005',
                       border: '1px solid #0000000a',
                       display: 'flex',
@@ -373,11 +410,14 @@ const OrderManage = () => {
                 sx={{
                   backgroundColor: 'transparent',
                   width: '100%',
-                  '& td': { borderColor: '#0000000a', fontWeight: 500, fontSize: '1.6rem', padding: '8px' },
+                  '& td': { borderColor: '#0000000a', fontWeight: 500, fontSize: '1.6rem', padding: '3px 8px' },
                 }}
                 rows={rows}
               />
             </Box>
+            <Typography color={'#fe2c55'}>
+              <i>Ghi chú : {note}</i>
+            </Typography>
             <Box sx={{ mt: '10px', display: 'flex', justifyContent: 'end' }}>
               {status === 'Chờ xác nhận' && (
                 <MyButton onClick={confirmOrder} color={{ bgColor: 'orange' }}>
@@ -393,7 +433,7 @@ const OrderManage = () => {
                   />
                   <MyButton
                     disable={!deliverSelect}
-                    style={{ width: '150px' }}
+                    style={{ width: '300px' }}
                     onClick={confirmDeliver}
                     color={{ bgColor: 'orange' }}
                   >
@@ -410,6 +450,29 @@ const OrderManage = () => {
           </Box>
         </Inner>
       </Box>
+
+      {(overLay || edit) && (
+        <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
+          {overLay && (
+            <Box
+              sx={{
+                position: 'fixed',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+                opacity: 0.6,
+                transition: 'bottom 0.3s linear 0s',
+                backgroundColor: '#212121',
+              }}
+              onClick={() => {
+                setEdit(false);
+              }}
+            />
+          )}
+          {edit && <EditOrder value={order} setEdit={setEdit} edit={edit} />}
+        </Box>
+      )}
     </>
   );
 };

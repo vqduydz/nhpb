@@ -17,7 +17,6 @@ module.exports = {
       },
       payment_methods: {
         type: Sequelize.STRING,
-        allowNull: false,
       },
       order_code: {
         type: Sequelize.STRING,
@@ -25,31 +24,27 @@ module.exports = {
       },
       customer_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       status: {
         type: Sequelize.STRING,
-        allowNull: false,
+      },
+      type: {
+        type: Sequelize.STRING,
       },
       payment: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       ship_fee: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       total_amount: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       total_payment: {
         type: Sequelize.INTEGER,
-        allowNull: false,
       },
       items: {
         type: Sequelize.TEXT,
-        allowNull: false,
       },
       history: {
         type: Sequelize.TEXT,
@@ -58,6 +53,9 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       orderer: {
+        type: Sequelize.TEXT,
+      },
+      note: {
         type: Sequelize.TEXT,
       },
       createdAt: {

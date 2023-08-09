@@ -1,20 +1,23 @@
 import { Box } from '@mui/material';
+import { useEffect, useState } from 'react';
+
 import { Loading, MyButton } from '_/components/common';
-import { useState } from 'react';
-import { CatalogManage, MenuManage, OrdersManage, UserManage } from '..';
-import { useEffect } from 'react';
 import { useThemMui } from '_/context/ThemeMuiContext';
+import { BookingsManage, CatalogManage, MenuManage, OrdersManage, UserManage } from '..';
 
 export default function Manage() {
   const [tab, setTab] = useState(0);
   const [bl, setBl] = useState(false);
   const { loading } = useThemMui();
+
   const btnContent = [
-    { tab: 0, content: 'QL người dùng' },
-    { tab: 1, content: 'QL món ăn - đồ uống' },
-    { tab: 2, content: 'QL danh mục' },
-    { tab: 3, content: 'QL đơn hàng' },
+    { tab: 0, content: 'Users' },
+    { tab: 1, content: 'Menus' },
+    { tab: 2, content: 'Catalogs' },
+    { tab: 3, content: 'Orders' },
+    { tab: 4, content: 'Booking' },
   ];
+
   const render = (tab) => {
     let Comp;
     switch (tab) {
@@ -30,11 +33,15 @@ export default function Manage() {
       case 3:
         Comp = <OrdersManage />;
         break;
+      case 4:
+        Comp = <BookingsManage />;
+        break;
       default:
         break;
     }
     return Comp;
   };
+
   useEffect(() => {
     setBl(!bl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -55,6 +62,7 @@ export default function Manage() {
           position: 'sticky',
           top: '56px',
           zIndex: '2',
+          mb: '1vh',
         }}
       >
         {btnContent.map((btn) => (
@@ -62,8 +70,8 @@ export default function Manage() {
             key={btn.tab}
             text
             fontWeight={700}
-            color={{ mainColor: '#0a66b7' }}
-            style={{ borderBottom: btn.tab === tab ? `2px solid #0a66b7` : '2px solid transparent' }}
+            color={{ mainColor: btn.tab === tab ? `#fe2c55` : '#0a66b7' }}
+            style={{ borderBottom: btn.tab === tab ? `2px solid #fe2c55` : '2px solid transparent' }}
             padding={'1px 9px'}
             onClick={() => setTab(btn.tab)}
           >

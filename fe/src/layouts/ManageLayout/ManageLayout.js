@@ -5,7 +5,7 @@ import Edit from '_/components/pages/Manager/User/EditUser';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Inner, SnackbarWrapper } from '_/components/common/CustomComponents/CustomMui';
+import { SnackbarWrapper } from '_/components/common/CustomComponents/CustomMui';
 import { useAuth } from '_/context/AuthContext';
 
 export default function ManageLayout({ children }) {
@@ -40,14 +40,14 @@ export default function ManageLayout({ children }) {
         borderRadius: ` 0px 0px 6px 6px`,
         width: `100%`,
         minHeight: `100vh`,
+        '& p': { fontSize: '1.4rem', fontWeight: 500 },
+        '& i': { fontSize: '1.2rem', lineHeight: 1 },
       }}
     >
       {open && <SnackbarWrapper />}
       <Box>
         <Box>
-          {currentUser && (
-            <Header setAddUser={setAddUser} sideNav={sideNav} setSideNav={setSideNav} currentUser={currentUser} />
-          )}
+          <Header currentUser={currentUser} />
           <Box
             sx={{
               maxWidth: '768px',
@@ -61,29 +61,6 @@ export default function ManageLayout({ children }) {
           >
             {children}
           </Box>
-          ;
-          {overLay && (
-            <Box
-              sx={{
-                // display: { 0: 'block', 768: 'none' },
-                position: 'fixed',
-                top: 0,
-                bottom: 0,
-                right: 0,
-                left: 0,
-                opacity: 0.6,
-                transition: 'bottom 0.3s linear 0s',
-                backgroundColor: '#212121',
-              }}
-              onClick={() => {
-                setEdit(false);
-                setAddUser(false);
-                setSideNav(false);
-              }}
-            />
-          )}
-          {edit.stt && <Edit setEdit={setEdit} edit={edit} />}
-          {addUser && <CreateNewUser setAddUser={setAddUser} edit={edit} />}
         </Box>
       </Box>
     </Box>

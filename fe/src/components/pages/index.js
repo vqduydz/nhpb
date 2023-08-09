@@ -23,6 +23,9 @@ export { default as CatalogManage } from '_/components/pages/Manager/Catalog/Cat
 export { default as ContentManage } from '_/components/pages/Manager/ContentManage';
 export { default as OrdersManage } from '_/components/pages/Manager/Orders/OrdersManage';
 export { default as OrderManage } from '_/components/pages/Manager/Orders/OrderManage';
+export { default as BookingsManage } from '_/components/pages/Manager/Booking/BookingsManage';
+export { default as BookingManage } from '_/components/pages/Manager/Booking/BookingManage';
+export { default as Bill } from '_/components/pages/Manager/Orders/Bill';
 
 // other
 export { default as NotFoundPage } from '_/components/pages/NotFoundPage';

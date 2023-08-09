@@ -77,7 +77,7 @@ const CatalogDrop = ({ cataloglist, catalog, setCatalog }) => {
           border: 'none',
         }}
         placeholder="Chọn catalog"
-        InputProps={{
+        inputProps={{
           readOnly: true,
         }}
       />

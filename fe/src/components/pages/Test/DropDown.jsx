@@ -94,7 +94,7 @@ function DropDown({
           size="small"
           fullWidth
           value={result || dropList[0] | ''}
-          InputProps={{
+          inputProps={{
             readOnly: true,
           }}
           required

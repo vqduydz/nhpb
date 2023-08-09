@@ -3,7 +3,9 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import db from '../models';
-import { io } from '../server';
+const { Op } = require('sequelize');
+const fs = require('fs');
+const xlsx = require('xlsx');
 
 var salt = bcrypt.genSaltSync(10);
 dotenv.config();
@@ -168,7 +170,8 @@ const resetPassword = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const { id, page } = req.body;
+    const { id, email, page, limit_per_page, role } = req.query;
+
     if (id) {
       const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } });
       if (!user) {
@@ -177,9 +180,14 @@ const getUser = async (req, res) => {
       return res.status(200).json({ user });
     }
 
-    const limit = 20;
-    let currentPage = 1;
-    let offset;
+    let currentPage = 1,
+      limit,
+      offset;
+    if (limit_per_page) {
+      limit = Number(limit_per_page);
+    } else {
+      limit = 20;
+    }
     if (page) {
       currentPage = page;
       offset = (currentPage - 1) * limit; // Tính toán vị trí bắt đầu
@@ -187,17 +195,96 @@ const getUser = async (req, res) => {
       offset = 0;
     }
 
-    const users = await User.findAndCountAll({
-      limit,
-      offset,
-      attributes: { exclude: ['password'] },
-      order: [['createdAt', 'DESC']],
-    });
-    const totalCount = users.count; // Tổng số lượng người dùng
-    const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
+    if (email && !role) {
+      const users = await User.findAndCountAll({
+        limit,
+        offset,
+        where: {
+          email: {
+            [Op.like]: `%${email}%`,
+          },
+        },
+        attributes: { exclude: ['password'] },
+        order: [['createdAt', 'DESC']],
+      });
+      const totalCount = users.count; // Tổng số lượng người dùng
+      const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
+      return res.status(200).json({
+        users: users.rows,
+        totalCount,
+        totalPages,
+        currentPage: Number(currentPage),
+        limit_per_page: Number(limit_per_page),
+      });
+    }
 
-    return res.status(200).json({ users: users.rows, totalCount, totalPages, currentPage });
+    if (email && role) {
+      const users = await User.findAndCountAll({
+        limit,
+        offset,
+        where: {
+          email: {
+            [Op.like]: `%${email}%`,
+          },
+          role,
+        },
+        attributes: { exclude: ['password'] },
+        order: [['createdAt', 'DESC']],
+      });
+      const totalCount = users.count; // Tổng số lượng người dùng
+      const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
+      return res.status(200).json({
+        users: users.rows,
+        totalCount,
+        totalPages,
+        currentPage: Number(currentPage),
+        limit_per_page: Number(limit_per_page),
+      });
+    }
+
+    if (!email && !role) {
+      const users = await User.findAndCountAll({
+        limit,
+        offset,
+        attributes: { exclude: ['password'] },
+        order: [
+          // ['role', 'ASC', 'Root', 'Admin', 'Manage', 'Customer'],
+          ['createdAt', 'DESC'],
+        ],
+      });
+      const totalCount = users.count; // Tổng số lượng người dùng
+      const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
+      return res.status(200).json({
+        users: users.rows,
+        totalCount,
+        totalPages,
+        currentPage: Number(currentPage),
+        limit_per_page: Number(limit_per_page),
+      });
+    }
+
+    if (!email && role) {
+      const users = await User.findAndCountAll({
+        limit,
+        offset,
+        where: {
+          role,
+        },
+        attributes: { exclude: ['password'] },
+        order: [['createdAt', 'DESC']],
+      });
+      const totalCount = users.count; // Tổng số lượng người dùng
+      const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
+      return res.status(200).json({
+        users: users.rows,
+        totalCount,
+        totalPages,
+        currentPage: Number(currentPage),
+        limit_per_page: Number(limit_per_page),
+      });
+    }
   } catch (error) {
+    console.log('219---', error);
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
@@ -214,6 +301,7 @@ const updateUserById = async (req, res) => {
     await user.save();
     return res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
+    console.log({ error });
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
@@ -231,6 +319,37 @@ const deleteUserById = async (req, res) => {
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };
+
+const importUsers = async (req, res) => {
+  try {
+    const file = req.file;
+    // Kiểm tra nếu không có file hoặc file không đúng định dạng
+    if (!file) {
+      return res.status(400).json({ error: 'Invalid file' });
+    }
+    // Đọc dữ liệu từ file Excel
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = xlsx.utils.sheet_to_json(sheet);
+    // kiểm tra trùng dữ liệu
+    const existingEmails = await User.findAll({ attributes: ['email'] });
+    const existingEmailSet = new Set(existingEmails.map((user) => user.email));
+    // lọc dữ liệu trùng lặp
+    const newData = data.filter((row) => !existingEmailSet.has(row.email));
+    // Lưu vào database
+    User.bulkCreate(newData)
+      .then(() => {
+        res.status(200).json({ message: 'Import successful' });
+      })
+      .catch((error) => {
+        console.error('Import failed:', error);
+        res.status(500).json({ error: 'Import failed' });
+      });
+  } catch (error) {
+    console.error('Error importing data:', error);
+    res.status(500).json({ error: 'Failed to import data.' });
+  }
+};
 export default {
   getToken,
   handleLogin,
@@ -240,4 +359,5 @@ export default {
   getUser,
   updateUserById,
   deleteUserById,
+  importUsers,
 };

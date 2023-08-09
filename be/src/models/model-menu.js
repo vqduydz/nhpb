@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       catalog: DataTypes.STRING,
       catalogSlug: DataTypes.STRING,
       price: DataTypes.INTEGER,
+      max_order: DataTypes.INTEGER,
       unit: DataTypes.STRING,
       image_url: DataTypes.STRING,
       desc: DataTypes.TEXT,

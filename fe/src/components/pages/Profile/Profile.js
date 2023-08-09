@@ -1,18 +1,17 @@
 import { Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import UserAvatar from '_/components/common/Avatar/Avatar';
-import { useAuth } from '_/context/AuthContext';
 import classNames from 'classnames/bind';
 import { useState } from 'react';
-import styles from './Profile.module.scss';
+
 import { MyButton } from '_/components/common';
+import UserAvatar from '_/components/common/Avatar/Avatar';
+import { useAuth } from '_/context/AuthContext';
+import styles from './Profile.module.scss';
 
 const cx = classNames.bind(styles);
 
 function Profile() {
   const [open, setOpen] = useState(false);
   const { currentUser } = useAuth();
-
-  // eslint-disable-next-line no-unused-vars
 
   const handleEdit = () => {};
 
@@ -26,7 +25,7 @@ function Profile() {
 
   const handleDelete = async () => {};
   if (!currentUser) return;
-  const { id, email, firstName, lastName, phoneNumber, gender, place, image, role, birthday, createdAt } = currentUser;
+  const { email, firstName, lastName, phoneNumber, gender, place } = currentUser;
   const displayName = firstName + ' ' + lastName;
 
   return (
@@ -57,10 +56,6 @@ function Profile() {
                 <span className={cx('title')}>Gender : </span>
                 <span className={cx('msg')}>{gender}</span>
               </Box>
-              {/* <Box className={cx('account')}>
-                                <span className={cx('title')}>Birth : </span>
-                                <span className={cx('msg')}>Birth</span>
-                            </Box> */}
               <Box className={cx('account')}>
                 <span className={cx('title')}>Email :</span>
                 <span className={cx('msg')}>{email}</span>
@@ -72,7 +67,16 @@ function Profile() {
 
               <Box className={cx('account')}>
                 <span className={cx('title')}>Address :</span>
-                <span className={cx('msg')}>{place}</span>
+                <span className={cx('msg')}>
+                  {(() => {
+                    if (place) {
+                      const address = JSON.parse(place);
+                      return `${address?.address}, ${address?.ward}, ${address?.district}, ${address?.province}`;
+                    } else {
+                      return ``;
+                    }
+                  })()}
+                </span>
               </Box>
 
               <Box className={cx('acction')}>

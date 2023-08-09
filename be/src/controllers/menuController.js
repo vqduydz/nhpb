@@ -38,16 +38,7 @@ const getMenu = async (req, res) => {
     const { name, slug, page, limit_per_page } = req.query;
     const imagePath = req.protocol + '://' + req.get('host') + '/v1/api/images/';
 
-    if (name) {
-      const menus = await Menu.findAll({
-        where: {
-          slug: {
-            [Op.like]: `%${name}%`,
-          },
-        },
-      });
-      return res.status(200).json({ menus, imagePath });
-    }
+    const allMenu = await Menu.findAll({ order: [['createdAt', 'DESC']] });
 
     if (slug) {
       const menu = await Menu.findOne({ where: { slug }, raw: true });
@@ -56,6 +47,7 @@ const getMenu = async (req, res) => {
       }
       return res.status(200).json({ ...menu, imagePath });
     }
+
     let currentPage = 1,
       limit,
       offset;
@@ -67,14 +59,34 @@ const getMenu = async (req, res) => {
     }
     if (page) {
       currentPage = page;
-      offset = (currentPage - 1) * limit; // Tính toán vị trí bắt đầu
+      offset = (currentPage - 1) * limit;
     } else {
       offset = 0;
     }
+
+    if (name) {
+      const menus = await Menu.findAndCountAll({
+        where: {
+          slug: {
+            [Op.like]: `%${name}%`,
+          },
+        },
+        limit,
+        offset,
+      });
+      const totalCount = menus.count;
+      const totalPages = Math.ceil(totalCount / limit);
+      return res
+        .status(200)
+        .json({ menus: menus.rows, totalCount, totalPages, currentPage, imagePath, limit_per_page });
+    }
+
     const menus = await Menu.findAndCountAll({ limit, offset });
-    const totalCount = menus.count; // Tổng số lượng người dùng
-    const totalPages = Math.ceil(totalCount / limit); // Tổng số trang
-    return res.status(200).json({ menus: menus.rows, totalCount, totalPages, currentPage, imagePath, limit_per_page });
+    const totalCount = menus.count;
+    const totalPages = Math.ceil(totalCount / limit);
+    return res
+      .status(200)
+      .json({ allMenu, menus: menus.rows, totalCount, totalPages, currentPage, imagePath, limit_per_page });
   } catch (error) {
     console.log('71--', error);
     return res.status(500).json({ errorMessage: 'Server error' });

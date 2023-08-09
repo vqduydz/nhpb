@@ -1,92 +1,102 @@
+import PrintIcon from '@mui/icons-material/Print';
 import { Badge, Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { dateTimeFormate, renderPrice } from '_/utills';
-import { MyButton } from '_/components/common';
+import { MyButton, PaginationCustom, SearchBox } from '_/components/common';
+import useDebounce from '_/hook/useDebounce';
 import { getOrder } from '_/redux/slices';
 import { routes } from '_/routes';
-import { Wrapper } from '../Wrapper';
+import { renderPrice } from '_/utills';
+import removeVietnameseTones from '_/utills/removeVietnameseTones';
+import FileUpload from '../FileUpload';
+import CreateNewOrder from './CreateNewOrder';
 
 const OrdersManage = () => {
   const dispatch = useDispatch();
-  const [orders, setOrders] = useState([]);
-  const [waitConfirmOrders, setWaitConfirmOrders] = useState([]);
-  const [prepareOrders, setPrepareOrders] = useState([]);
-  const [deliveringOrders, setDeliveringOrders] = useState([]);
-  const [completeOrders, setCompleteOrders] = useState([]);
-  const [cancleOrders, setCancleOrders] = useState([]);
-
-  const [tab, setTab] = useState(0);
+  const [page, setPage] = useState(1);
+  const [addOrder, setAddOrder] = useState(false);
+  const [upload, setUpload] = useState(false);
+  const [limit_per_page, setlimit_per_page] = useState(20);
+  const [orders, setOrders] = useState({ orderList: [], totalPages: 1, limitPerPage: limit_per_page });
+  const { orderList, totalPages, limitPerPage } = orders;
+  const [searchValue, setSearchValue] = useState('');
+  const debounce = useDebounce(searchValue, 500);
+  const [load, setLoad] = useState(false);
+  const [tab, setTab] = useState({ index: 0, status: '', content: '' });
+  const { index, status, content } = tab;
+  const [allOrder, setAllOrder] = useState([]);
+  const [overLay, setOverLay] = useState(false);
 
   useEffect(() => {
-    dispatch(getOrder())
+    const query = !debounce.trim()
+      ? { page, limit_per_page, status }
+      : { page, limit_per_page, status, order_code: removeVietnameseTones(debounce).toLowerCase().replace(/ /g, '') };
+    if (debounce.trim()) {
+      setLoad(true);
+    }
+
+    dispatch(getOrder(query))
       .then(unwrapResult)
-      .then((res) => {
-        setOrders(res.orders);
+      .then((result) => {
+        setLoad(false);
+        setAllOrder(result.allOrder);
+        setOrders({
+          orderList: result.orders,
+          totalPages: result.totalPages,
+          limitPerPage: result.limit_per_page,
+        });
       })
       .catch((error) => {
+        setLoad(false);
         console.log(error);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  useEffect(() => {
-    setWaitConfirmOrders(() => orders.filter((order) => order.status === 'Chờ xác nhận'));
-    setPrepareOrders(() => orders.filter((order) => order.status === 'Đang chuẩn bị'));
-    setDeliveringOrders(() => orders.filter((order) => order.status === 'Đang giao hàng'));
-    setCompleteOrders(() => orders.filter((order) => order.status === 'Hoàn thành'));
-    setCancleOrders(() => orders.filter((order) => order.status === 'Đã hủy'));
-  }, [orders]);
+  }, [index, page, limit_per_page, debounce]);
 
   const btnContent = [
-    { tab: 0, content: 'Tất cả', color: 'green' },
-    { tab: 1, content: 'Chờ xác nhận', color: '#ed6c02', badgeContent: waitConfirmOrders.length },
-    { tab: 2, content: 'Đang chuẩn bị', color: '#0288d1', badgeContent: prepareOrders.length },
-    { tab: 3, content: 'Đang giao hàng', color: '#0a66b7', badgeContent: deliveringOrders.length },
-    { tab: 4, content: 'Hoàn thành', color: 'green' },
-    { tab: 5, content: 'Đã hủy', color: '#fe2c55' },
+    { index: 0, status: '', content: 'Tất cả', color: 'green' },
+    {
+      index: 1,
+      status: 'Chờ xác nhận',
+      content: 'Chờ xác nhận',
+      color: '#ed6c02',
+      badgeContent: allOrder.filter((order) => order.status === 'Chờ xác nhận').length,
+    },
+    {
+      index: 2,
+      status: 'Đang chuẩn bị',
+      content: 'Đang chuẩn bị',
+      color: '#0288d1',
+      badgeContent: allOrder.filter((order) => order.status === 'Đang chuẩn bị').length,
+    },
+    {
+      index: 3,
+      status: 'Đang giao hàng',
+      content: 'Đang giao hàng',
+      color: '#0a66b7',
+      badgeContent: allOrder.filter((order) => order.status === 'Đang giao hàng').length,
+    },
+    { index: 4, status: 'Hoàn thành', content: 'Hoàn thành', color: 'green' },
+    { index: 5, status: 'Đã hủy', content: 'Đã hủy', color: '#fe2c55' },
   ];
 
-  const render = (tab) => {
-    let comp = [],
-      content = '';
-    switch (tab) {
-      case 0:
-        comp = orders;
-        content = 'Tất cả';
-        break;
-      case 1:
-        comp = waitConfirmOrders;
-        content = 'Chờ xác nhận';
-        break;
-      case 2:
-        comp = prepareOrders;
-        content = 'Đang chuẩn bị';
-        break;
-      case 3:
-        comp = deliveringOrders;
-        content = 'Đang giao hàng';
-        break;
-      case 4:
-        comp = completeOrders;
-        content = 'Hoàn thành';
-        break;
-      case 5:
-        comp = cancleOrders;
-        content = 'Đã hủy';
-        break;
-      default:
-        break;
+  useEffect(() => {
+    if (!addOrder) {
+      setOverLay(false);
+      return;
     }
+    setOverLay(true);
+  }, [addOrder]);
 
-    return comp.length > 0 ? (
+  const render = () => {
+    return orderList.length > 0 ? (
       <>
         <Box
           sx={{
             borderRadius: '6px 6px 0 0',
-            padding: '15px 10px',
+            padding: '10px',
             backgroundColor: '#00000005',
             border: '1px solid #0000000a',
             display: 'flex',
@@ -100,20 +110,25 @@ const OrdersManage = () => {
             },
           }}
         >
-          <Typography textAlign={'left'}>Mã đơn hàng</Typography>
-          <Typography textAlign={'center'}>Thời gian đặt</Typography>
-          <Typography textAlign={'center'}>Tổng Thanh toán</Typography>
-          <Typography textAlign={'right'}>Trạng thái</Typography>
+          <Typography sx={{ maxWidth: '30px' }} textAlign={'center'}>
+            STT
+          </Typography>
+          <Typography sx={{ maxWidth: '160px' }} textAlign={'left'}>
+            Mã đơn hàng
+          </Typography>
+          <Typography textAlign={'center'}>Phân loại</Typography>
+          <Typography sx={{ maxWidth: '150px' }} textAlign={'center'}>
+            Tổng Thanh toán
+          </Typography>
+          <Typography sx={{ maxWidth: '150px' }} textAlign={'center'}>
+            Trạng thái
+          </Typography>
+          <Typography sx={{ maxWidth: '30px' }} textAlign={'right'}>
+            Bill
+          </Typography>
         </Box>
-        {comp.map((item, index) => (
-          <MyButton
-            text
-            style={{ width: '100%' }}
-            padding={'0 0'}
-            key={item.id}
-            to={routes.ordersmanage + '/' + item.order_code}
-            // target="_blank"
-          >
+        {orderList.map((item, index) => (
+          <Box style={{ width: '100%' }} padding={'0 0'} key={item.id}>
             <Box
               sx={{
                 width: '100%',
@@ -121,7 +136,7 @@ const OrdersManage = () => {
                 gap: '10px',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '15px 10px',
+                padding: '5px 10px',
                 backgroundColor: index % 2 === 0 ? '#fff' : '#f5f5f5',
                 border: '1px solid #0000000a',
                 textAlign: 'center',
@@ -130,14 +145,29 @@ const OrdersManage = () => {
                 },
               }}
             >
-              <Typography textAlign={'left'}>{item.order_code}</Typography>
-              <Typography textAlign={'center'}>{dateTimeFormate(item.createdAt)}</Typography>
-              <Typography textAlign={'center'} color={'#fe2c55'}>
+              <Typography sx={{ maxWidth: '30px' }} textAlign={'center'}>
+                {page > 1 ? (page - 1) * limitPerPage + (index + 1) : index + 1}
+              </Typography>
+              <MyButton
+                text
+                to={routes.ordersmanage + '/' + item.order_code}
+                style={{ width: '160px' }}
+                // target="_blank"
+              >
+                <Typography textAlign={'left'}>{item.order_code}</Typography>
+              </MyButton>
+              <Typography textAlign={'center'}>{item.type}</Typography>
+              <Typography sx={{ maxWidth: '150px' }} textAlign={'center'} color={'#fe2c55'}>
                 {renderPrice(item.total_payment)}
               </Typography>
-              <Typography textAlign={'right'}>{item.status}</Typography>
+              <Typography sx={{ maxWidth: '150px' }} textAlign={'center'}>
+                {item.status}
+              </Typography>
+              <MyButton to={`${routes.bill}/${item.order_code}`} style={{ width: '30px' }} target="_blank">
+                <PrintIcon />
+              </MyButton>
             </Box>
-          </MyButton>
+          </Box>
         ))}
       </>
     ) : (
@@ -159,60 +189,94 @@ const OrdersManage = () => {
   };
 
   return (
-    <Wrapper>
+    <>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          '&  .btn': {
-            fontSize: '1.2rem',
-            padding: '10px',
-            '& *': { justifyContent: 'center' },
-          },
+          gap: '10px',
+          position: 'sticky',
+          top: '56px',
+          zIndex: 1,
+          mb: '1vh',
+          backgroundColor: '#fff',
         }}
       >
-        <Box>
-          <Typography padding={'0 10px'} fontSize={'2.4rem'} fontWeight={700}>
-            Danh sách đơn hàng
-          </Typography>
-          <Box
-            sx={{
-              borderRadius: '6px',
-              display: 'flex',
-              gap: '5px',
-              justifyContent: 'start',
-              padding: '10px',
-              mt: '10px',
-              mb: '10px',
-              backgroundColor: '#00000005',
-              border: '1px solid #0000000a',
-            }}
-          >
-            {btnContent.map((btn) => (
-              <Badge
-                key={btn.tab}
-                sx={{ cursor: 'pointer' }}
-                variant={btn.badgeContent && btn.badgeContent > 0 ? 'dot' : 'none'}
-                color="error"
-              >
-                <MyButton
-                  text
-                  fontWeight={700}
-                  color={{ mainColor: btn.color }}
-                  style={{ borderBottom: btn.tab === tab ? `2px solid ${btn.color}` : '2px solid transparent' }}
-                  padding={'1px 9px'}
-                  onClick={() => setTab(btn.tab)}
-                >
-                  {btn.content}
-                </MyButton>
-              </Badge>
-            ))}
-          </Box>
-
-          {render(tab)}
-        </Box>
+        <SearchBox
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          loading={load}
+          placeholder="Tìm đơn hàng theo code order  ..."
+          handleCreate={setAddOrder}
+          handleImport={setUpload}
+        />
       </Box>
-    </Wrapper>
+
+      <Box
+        sx={{
+          display: 'flex',
+          gap: '5px',
+          justifyContent: 'start',
+          padding: '5px 10px',
+          backgroundColor: '#f9f9f9',
+          border: '1px solid #eee',
+          position: 'sticky',
+          top: '96px',
+          zIndex: 1,
+          mb: '1vh',
+        }}
+      >
+        {btnContent.map((btn) => (
+          <Badge
+            key={btn.index}
+            sx={{ cursor: 'pointer' }}
+            variant={btn.badgeContent && btn.badgeContent > 0 ? 'dot' : 'none'}
+            color="error"
+          >
+            <MyButton
+              text
+              fontWeight={700}
+              color={{ mainColor: btn.color }}
+              style={{ borderBottom: btn.index === index ? `2px solid ${btn.color}` : '2px solid transparent' }}
+              padding={'1px 9px'}
+              onClick={() => setTab({ index: btn.index, status: btn.status, content: btn.content })}
+            >
+              {btn.content}
+            </MyButton>
+          </Badge>
+        ))}
+      </Box>
+      {render()}
+
+      <PaginationCustom
+        limit_per_page={limit_per_page}
+        setlimit_per_page={setlimit_per_page}
+        total_page={totalPages}
+        page={page}
+        setPage={setPage}
+      />
+
+      {(overLay || addOrder || upload) && (
+        <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
+          {overLay && (
+            <Box
+              sx={{
+                position: 'fixed',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+                opacity: 0.6,
+                transition: 'bottom 0.3s linear 0s',
+                backgroundColor: '#212121',
+              }}
+            />
+          )}
+          {addOrder && <CreateNewOrder setAddOrder={setAddOrder} />}
+          {upload && <FileUpload setUpload={setUpload} users />}
+        </Box>
+      )}
+    </>
   );
 };
 

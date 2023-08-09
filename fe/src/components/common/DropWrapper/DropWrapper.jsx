@@ -69,7 +69,7 @@ const DropWrapper = ({ droplist, itemSelect, setItemSelect, sx, label }) => {
         onBlur={hideList}
         onFocus={showList}
         placeholder={label}
-        InputProps={{
+        inputProps={{
           readOnly: true,
         }}
       />

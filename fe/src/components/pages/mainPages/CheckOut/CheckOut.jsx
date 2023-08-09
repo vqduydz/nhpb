@@ -35,6 +35,7 @@ const CheckOut = () => {
     position: null,
   });
 
+  console.log({ orderItems });
   useEffect(() => {
     if (!currentUser.place) return;
     const place = JSON.parse(currentUser.place);
@@ -60,10 +61,10 @@ const CheckOut = () => {
     e.preventDefault();
     setLoading(true);
     const { name, phoneNumber, address } = receiver;
-    console.log({ address });
     const orderData = {
+      type: 'Online Order',
       payment_methods: data.get('payment-methods'),
-      order_code: `${userID}${removeVietnameseTones(dateTimeFormate(new Date())).replace(/ /g, '')}`,
+      order_code: `${removeVietnameseTones(dateTimeFormate(new Date())).replace(/ /g, '')}${userID}`,
       customer_id: userID,
       items: JSON.stringify(orderItems),
       total_amount: orderItems.reduce((acc, c) => {
@@ -101,7 +102,6 @@ const CheckOut = () => {
       }),
       receiver: JSON.stringify({ name, phoneNumber, address }),
     };
-    console.log({ orderData });
     dispatch(createNewOrder(orderData))
       .then(unwrapResult)
       .then(() => {

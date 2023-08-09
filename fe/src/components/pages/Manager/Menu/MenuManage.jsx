@@ -5,17 +5,17 @@ import { unwrapResult } from '@reduxjs/toolkit';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { MyButton, PaginationCustom } from '_/components/common';
+import { MyButton, PaginationCustom, SearchBox } from '_/components/common';
 import { useAuth } from '_/context/AuthContext';
 import { useThemMui } from '_/context/ThemeMuiContext';
+import useDebounce from '_/hook/useDebounce';
 import { deleteMenu, getCatalog, getMenu } from '_/redux/slices';
 import { renderPrice } from '_/utills';
+import removeVietnameseTones from '_/utills/removeVietnameseTones';
 import FileUpload from '../FileUpload';
-import { Wrapper } from '../Wrapper';
 import CreateNewUser from './CreateNewMenu';
 import EditMenu from './EditMenu';
 import Preview from './Preview';
-import SearchBox from './SearchBox';
 
 export default function MenuManage() {
   const { loading, setLoading } = useThemMui();
@@ -25,29 +25,34 @@ export default function MenuManage() {
   const [addMenu, setAddMenu] = useState(false);
   const [upload, setUpload] = useState(false);
   const [overLay, setOverLay] = useState(false);
-  const [sideNav, setSideNav] = useState(false);
   const [page, setPage] = useState(1);
   const [limit_per_page, setlimit_per_page] = useState(20);
-  const [menus, setMenus] = useState({ items: [], pathImage: '', totalPages: 1, limitPerPage: limit_per_page });
+  const [menus, setMenus] = useState({ items: [], imagePath: '', totalPages: 1, limitPerPage: limit_per_page });
   const { items, imagePath, totalPages, limitPerPage } = menus;
   const [preview, setPreview] = useState({ slug: '', open: false });
   const { open, slug } = preview;
   const [catalogs, setCatalogs] = useState([]);
   const [searchValue, setSearchValue] = useState('');
-  const [menusSearch, setMenusSearch] = useState({ items: [], imagePath: '' });
+  const debounce = useDebounce(searchValue, 500);
+  const [load, setLoad] = useState(false);
 
   useEffect(() => {
-    if (!sideNav && !addMenu && !edit.stt && !open) {
+    if (!addMenu && !edit.stt && !open) {
       setOverLay(false);
       return;
     }
     setOverLay(true);
-  }, [addMenu, edit?.stt, sideNav, open]);
+  }, [addMenu, edit?.stt, open]);
 
   useEffect(() => {
-    dispatch(getMenu({ page, limit_per_page }))
+    const query = !debounce.trim()
+      ? { page, limit_per_page }
+      : { page, limit_per_page, name: removeVietnameseTones(debounce).toLowerCase().replace(/ /g, '-') };
+    if (debounce.trim()) setLoad(true);
+    dispatch(getMenu(query))
       .then(unwrapResult)
       .then((result) => {
+        setLoad(false);
         setMenus({
           items: result.menus,
           imagePath: result.imagePath,
@@ -56,8 +61,14 @@ export default function MenuManage() {
         });
       })
       .catch((error) => {
+        setLoad(false);
         console.log({ error });
       });
+    window.scrollTo(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, page, limit_per_page, debounce]);
+
+  useEffect(() => {
     dispatch(getCatalog())
       .then(unwrapResult)
       .then((res) => {
@@ -68,13 +79,12 @@ export default function MenuManage() {
       .catch((error) => {
         console.log({ error });
       });
-    window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, page, limit_per_page]);
+  }, []);
 
   useEffect(() => {
     setPage(1);
-  }, [limit_per_page]);
+  }, [limit_per_page, debounce]);
 
   const handleDelete = (id) => {
     // eslint-disable-next-line no-restricted-globals
@@ -105,9 +115,8 @@ export default function MenuManage() {
   };
 
   const render = () => {
-    const menusRender = searchValue ? menusSearch.items : items;
-    return menusRender.map((item, index) => {
-      const { id, slug, name, catalog, price, unit, image_url } = item;
+    return items.map((item, index) => {
+      const { id, slug, name, catalog, price, max_order, unit, image_url } = item;
       return (
         <Box
           key={index}
@@ -151,11 +160,9 @@ export default function MenuManage() {
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}
               text
             >
-              <Typography fontSize={'1.6rem'} sx={{ textAlign: 'left' }}>
-                {name}
-              </Typography>
-              <Typography fontStyle={'italic'} color={'#fe2c55'} fontSize={'1.2rem'} sx={{ textAlign: 'left' }}>
-                {catalog}
+              <Typography sx={{ textAlign: 'left' }}>{name}</Typography>
+              <Typography color={'#fe2c55'} sx={{ textAlign: 'left' }}>
+                <i> {catalog}</i>
               </Typography>
             </MyButton>
           </Box>
@@ -167,21 +174,24 @@ export default function MenuManage() {
               justifyContent: 'space-between',
             }}
           >
-            <Typography sx={{ minWidth: '100px' }} textAlign={'center'} color={'#fe2c55'}>
+            <Typography sx={{ minWidth: '80px' }} textAlign={'center'} color={'#fe2c55'}>
               {renderPrice(price)}
             </Typography>
-            <Typography sx={{ minWidth: '80px' }} textAlign={'center'}>
+            <Typography sx={{ minWidth: '60px' }} textAlign={'center'}>
               {unit}
+            </Typography>{' '}
+            <Typography sx={{ minWidth: '60px' }} textAlign={'center'}>
+              {max_order}
             </Typography>
             <Box
               justifyContent={'end'}
               sx={{
-                width: '100px',
+                width: '80px',
                 display: 'flex',
                 gap: '5px',
                 justifyContent: 'center',
                 '& .icon': {
-                  fontSize: '2rem !important',
+                  fontSize: '1.6rem !important',
                 },
                 '* ': {
                   borderRadius: '3px',
@@ -220,73 +230,39 @@ export default function MenuManage() {
   };
 
   return (
-    <Wrapper>
+    <>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          mb: '10px',
-          padding: '0 10px',
-          '& .btn': {
-            fontSize: '1.2rem',
-            '& *': { justifyContent: 'center' },
-          },
-        }}
-      >
-        <Typography fontSize={'2.4rem'} fontWeight={700}>
-          Danh sách món ăn - đồ uống
-        </Typography>
-        <Box sx={{ display: 'flex', gap: '10px' }}>
-          <MyButton
-            effect
-            color={{ mainColor: 'green' }}
-            onClick={() => setAddMenu(true)}
-            padding={'3px 8px'}
-            className="btn"
-          >
-            Tạo mới
-          </MyButton>
-          <MyButton
-            effect
-            color={{ mainColor: 'blue' }}
-            onClick={() => setUpload(true)}
-            padding={'3px 8px'}
-            className="btn"
-          >
-            Import
-          </MyButton>
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          display: 'flex',
           gap: '10px',
-          justifyContent: 'start',
-          borderRadius: '6px',
-          border: '1px solid #f7d800',
-          width: '100%',
           position: 'sticky',
-          top: '107px',
-          zIndex: '2',
+          top: '56px',
+          zIndex: 1,
+          backgroundColor: '#fff',
           mb: '1vh',
         }}
       >
         <SearchBox
           searchValue={searchValue}
           setSearchValue={setSearchValue}
-          menusSearch={menusSearch}
-          setMenusSearch={setMenusSearch}
+          loading={load}
+          placeholder="Tìm user theo email ..."
+          handleCreate={setAddMenu}
+          handleImport={setUpload}
         />
       </Box>
 
       <Box
         sx={{
           padding: '15px 10px',
-          backgroundColor: '#00000005',
+          backgroundColor: '#f9f9f9',
           border: '1px solid #0000000a',
           display: 'flex',
           justifyContent: 'space-between',
+          position: 'sticky',
+          top: '96px',
+          zIndex: 1,
           '& p': {
             fontWeight: 700,
           },
@@ -303,7 +279,7 @@ export default function MenuManage() {
           <Typography sx={{ minWidth: '30px' }} textAlign={'center'}>
             STT
           </Typography>
-          <Typography sx={{ minWidth: '80px' }} textAlign={'center'}>
+          <Typography sx={{ minWidth: '60px' }} textAlign={'center'}>
             Hình ảnh
           </Typography>
           <Typography textAlign={'center'}>Tên món ăn</Typography>
@@ -316,13 +292,16 @@ export default function MenuManage() {
             justifyContent: 'space-between',
           }}
         >
-          <Typography sx={{ minWidth: '100px' }} textAlign={'center'}>
+          <Typography sx={{ minWidth: '80px' }} textAlign={'center'}>
             Đơn giá
           </Typography>
-          <Typography sx={{ minWidth: '80px' }} textAlign={'center'}>
-            Đơn vị tính
+          <Typography sx={{ minWidth: '60px' }} textAlign={'center'}>
+            ĐVT
+          </Typography>{' '}
+          <Typography sx={{ minWidth: '60px' }} textAlign={'center'}>
+            GH đặt
           </Typography>
-          <Typography sx={{ minWidth: '100px' }} textAlign={'right'}>
+          <Typography sx={{ minWidth: '80px' }} textAlign={'center'}>
             Hành động
           </Typography>
         </Box>
@@ -330,24 +309,19 @@ export default function MenuManage() {
 
       {render()}
 
-      {!searchValue && (
-        <Box sx={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
-          <PaginationCustom
-            limit_per_page={limit_per_page}
-            setlimit_per_page={setlimit_per_page}
-            total_page={totalPages}
-            page={page}
-            setPage={setPage}
-          />
-        </Box>
-      )}
+      <PaginationCustom
+        limit_per_page={limit_per_page}
+        setlimit_per_page={setlimit_per_page}
+        total_page={totalPages}
+        page={page}
+        setPage={setPage}
+      />
 
       {(overLay || edit.stt || addMenu || upload || open) && (
         <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
           {overLay && (
             <Box
               sx={{
-                // display: { 0: 'block', 768: 'none'},
                 position: 'fixed',
                 top: 0,
                 bottom: 0,
@@ -357,12 +331,6 @@ export default function MenuManage() {
                 transition: 'bottom 0.3s linear 0s',
                 backgroundColor: '#212121',
               }}
-              onClick={() => {
-                setPreview({ ...preview, open: false });
-                setEdit(false);
-                setAddMenu(false);
-                setSideNav(false);
-              }}
             />
           )}
           {open && <Preview slug={slug} setPreview={setPreview} />}
@@ -371,6 +339,6 @@ export default function MenuManage() {
           {upload && <FileUpload setUpload={setUpload} menus />}
         </Box>
       )}
-    </Wrapper>
+    </>
   );
 }

@@ -1,12 +1,13 @@
 import AddShoppingCartSharpIcon from '@mui/icons-material/AddShoppingCartSharp';
 import { Box, Rating, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+
 import { MyButton } from '_/components/common';
 import { getMenu } from '_/redux/slices';
 import * as feedbackAPI from '_/services/api/feedbackApi';
 import { renderPrice } from '_/utills';
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 
 const Preview = ({ slug, setPreview }) => {
   const dispatch = useDispatch();
@@ -43,6 +44,7 @@ const Preview = ({ slug, setPreview }) => {
   }, [slug]);
 
   const { soluot, trunbinh } = rateValue;
+
   return (
     <Box
       sx={{
