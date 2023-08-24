@@ -62,7 +62,7 @@ const CheckOut = () => {
     setLoading(true);
     const { name, phoneNumber, address } = receiver;
     const orderData = {
-      type: 'Online Order',
+      type: 4,
       payment_methods: data.get('payment-methods'),
       order_code: `${removeVietnameseTones(dateTimeFormate(new Date())).replace(/ /g, '')}${userID}`,
       customer_id: userID,
@@ -159,7 +159,7 @@ const CheckOut = () => {
               <Typography fontWeight={500}>
                 Tên: {currentUser?.firstName} {currentUser?.lastName}
               </Typography>
-              <Typography fontWeight={500}>Số điện thoại: (+84){currentUser?.phoneNumber}</Typography>
+              <Typography fontWeight={500}>Số điện thoại: {currentUser?.phoneNumber}</Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: '10px' }}>
               <Typography fontWeight={500}> Địa chỉ: </Typography>

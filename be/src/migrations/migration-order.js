@@ -29,9 +29,12 @@ module.exports = {
         type: Sequelize.STRING,
       },
       type: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
       payment: {
+        type: Sequelize.INTEGER,
+      },
+      deposit_amount: {
         type: Sequelize.INTEGER,
       },
       ship_fee: {
@@ -45,6 +48,9 @@ module.exports = {
       },
       items: {
         type: Sequelize.TEXT,
+      },
+      table_id: {
+        type: Sequelize.STRING,
       },
       history: {
         type: Sequelize.TEXT,

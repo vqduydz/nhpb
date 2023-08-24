@@ -40,7 +40,7 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return catalogs?.length ? (
+  return catalogs.length ? (
     <Box>
       <Box
         sx={{

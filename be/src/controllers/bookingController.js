@@ -134,6 +134,7 @@ const updateBooking = async (req, res) => {
     await booking.save();
     return res.status(200).json({ message: 'Booking updated successfully' });
   } catch (error) {
+    console.log('137-- error --', error);
     return res.status(500).json({ errorMessage: 'Server error' });
   }
 };

@@ -106,7 +106,7 @@ const CreateNewOrder = ({ setAddOrder }) => {
     setLoading(true);
     const data = new FormData(e.currentTarget);
     const orderData = {
-      type: 'Phone Order',
+      type: 5,
       payment_methods: data.get('payment-methods'),
       order_code: `${removeVietnameseTones(dateTimeFormate(new Date())).replace(/ /g, '')}`,
       note: data.get('note'),

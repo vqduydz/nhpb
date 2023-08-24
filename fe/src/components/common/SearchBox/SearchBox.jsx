@@ -19,7 +19,7 @@ function SearchBox({
   handleImport,
   search = true,
   create = true,
-  upload = true,
+  _import = true,
 }) {
   const handleChange = (e) => {
     const searchValue = e.target.value.replace(/ + /g, ' ');
@@ -136,7 +136,7 @@ function SearchBox({
             Tạo mới
           </MyButton>
         )}
-        {upload && (
+        {_import && (
           <MyButton
             color={{ bgColor: 'blue', mainColor: '#fff' }}
             onClick={() => handleImport(true)}

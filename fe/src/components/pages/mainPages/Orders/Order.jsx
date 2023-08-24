@@ -178,7 +178,7 @@ const Order = () => {
                   }}
                 >
                   <Typography>{receiver?.name}</Typography>
-                  <Typography>(+84){receiver?.phoneNumber}</Typography>
+                  <Typography> {receiver?.phoneNumber}</Typography>
                 </Box>
                 <Typography>Địa chỉ :{` ${receiver?.place}`}</Typography>
               </Box>

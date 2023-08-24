@@ -14,7 +14,6 @@ import { useThemMui } from '_/context/ThemeMuiContext';
 
 const BookingsManage = () => {
   const { loading } = useThemMui();
-  const [addOrder, setAddOrder] = useState(false);
   const [page, setPage] = useState(1);
   const [upload, setUpload] = useState(false);
   const [overLay, setOverLay] = useState(false);
@@ -72,14 +71,14 @@ const BookingsManage = () => {
     {
       index: 1,
       status: 'Chờ xác nhận',
-      content: 'Chờ xác nhận',
+      content: 'Chờ xn',
       color: '#ed6c02',
       badgeContent: allBookings.filter((booking) => booking.status === 'Chờ xác nhận').length,
     },
     {
       index: 2,
       status: 'Đã xác nhận',
-      content: 'Đã xác nhận',
+      content: 'Đã xn',
       color: '#ed6c02',
       badgeContent: allBookings.filter((booking) => booking.status === 'Đã xác nhận').length,
     },
@@ -98,7 +97,14 @@ const BookingsManage = () => {
       badgeContent: allBookings.filter((booking) => booking.status === 'Đang phục vụ').length,
     },
     { index: 5, status: 'Hoàn thành', content: 'Hoàn thành', color: 'green' },
-    { index: 6, status: 'Đã hủy', content: 'Đã hủy', color: '#fe2c55' },
+    {
+      index: 6,
+      status: 'Chưa xử lý',
+      content: 'Chưa xử lý',
+      color: 'green',
+      badgeContent: allBookings.filter((booking) => booking.status === 'Chưa xử lý').length,
+    },
+    { index: 7, status: 'Đã hủy', content: 'Đã hủy', color: '#fe2c55' },
   ];
 
   const render = () => {
@@ -188,6 +194,14 @@ const BookingsManage = () => {
       </Box>
     );
   };
+
+  useEffect(() => {
+    if (!upload) {
+      setOverLay(false);
+      return;
+    }
+    setOverLay(true);
+  }, [upload]);
 
   return (
     <>
@@ -292,7 +306,6 @@ const BookingsManage = () => {
           setSearchValue={setSearchValue}
           loading={load}
           placeholder="Tìm đơn hàng theo code order  ..."
-          handleCreate={setAddOrder}
           handleImport={setUpload}
         />
       </Box>
@@ -340,7 +353,7 @@ const BookingsManage = () => {
         page={page}
         setPage={setPage}
       />
-      {(overLay || addOrder) && (
+      {(overLay || upload) && (
         <Box sx={{ zIndex: 3, backgroundColor: '#212121', position: 'relative' }}>
           {overLay && (
             <Box

@@ -12,7 +12,6 @@ BookingTimeline.propTypes = {
 };
 
 export default function BookingTimeline({ list, ...other }) {
-  console.log({ list });
   return (
     <Card
       {...other}
@@ -55,7 +54,7 @@ OrderItem.propTypes = {
 };
 
 function OrderItem({ item, isLast, type }) {
-  const { status, time, reasons } = item;
+  const { status, time, reasons, refund, refundTime, refundContent } = item;
   const color = time
     ? (type === 'booking5' && 'success') ||
       (type === 'booking4' && 'info') ||
@@ -77,9 +76,17 @@ function OrderItem({ item, isLast, type }) {
         {isLast ? null : <TimelineConnector />}
       </TimelineSeparator>
       <TimelineContent sx={{ padding: '7px 16px', display: 'flex', flexDirection: 'column' }}>
-        <Typography fontWeight={700}>{status}</Typography>
+        <Typography fontWeight={700}>
+          {status}
+          {refund && `  - ${refund}`}
+        </Typography>
         <i>{time ? dateTimeFormate(time) : '........'}</i>
-        {reasons && <i style={{ color: '#fe2c55' }}>{reasons}</i>}
+        {reasons && <i style={{ color: '#fe2c55', marginTop: '5px' }}>{`Lý do hủy : ${reasons}`}</i>}
+        {refundContent && (
+          <i
+            style={{ color: '#fff', marginTop: '5px', backgroundColor: 'orange', padding: '5px' }}
+          >{`Thông tin hoàn tiền : ${refundContent} vào lúc ${dateTimeFormate(refundTime)}`}</i>
+        )}
       </TimelineContent>
     </TimelineItem>
   );

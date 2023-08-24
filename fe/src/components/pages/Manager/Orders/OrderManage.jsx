@@ -1,10 +1,10 @@
+import EditIcon from '@mui/icons-material/Edit';
 import PrintIcon from '@mui/icons-material/Print';
 import { Box, Typography } from '@mui/material';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit';
 
 import { MyButton } from '_/components/common';
 import { Inner } from '_/components/common/CustomComponents/CustomMui';
@@ -32,6 +32,7 @@ const OrderManage = () => {
   const [edit, setEdit] = useState(false);
 
   const {
+    type,
     payment_methods,
     order_code,
     status,
@@ -44,13 +45,20 @@ const OrderManage = () => {
     receiver,
     orderer,
     note,
+    deposit_amount,
+    table_id,
   } = order;
 
   useEffect(() => {
     dispatch(getOrderByOrderCode(_order_code))
       .then(unwrapResult)
       .then((res) => {
+        if (!res.order_code) {
+          navigate(routes.ordersmanage);
+          return;
+        }
         const {
+          type,
           note,
           deliver,
           handler,
@@ -61,13 +69,17 @@ const OrderManage = () => {
           ship_fee,
           total_amount,
           total_payment,
+          table_id,
           items,
           history,
           orderer,
           receiver,
           createdAt,
+          deposit_amount,
         } = res;
+
         setOrder({
+          type,
           note,
           deliver,
           handler,
@@ -75,18 +87,22 @@ const OrderManage = () => {
           order_code,
           status,
           payment,
-          ship_fee,
+          ship_fee: ship_fee ? ship_fee : 0,
           total_amount,
           total_payment,
+          table_id: table_id ? JSON.parse(table_id) : null,
           history: JSON.parse(history),
           items: JSON.parse(items),
           orderer: { name: JSON.parse(orderer).name, phoneNumber: JSON.parse(orderer).phoneNumber },
-          receiver: {
-            name: JSON.parse(receiver).name,
-            phoneNumber: JSON.parse(receiver).phoneNumber,
-            place: JSON.parse(receiver).address,
-          },
+          receiver: receiver
+            ? {
+                name: JSON.parse(receiver).name,
+                phoneNumber: JSON.parse(receiver).phoneNumber,
+                place: JSON.parse(receiver).address,
+              }
+            : null,
           createdAt,
+          deposit_amount,
         });
       })
       .catch((error) => {
@@ -108,13 +124,23 @@ const OrderManage = () => {
     return { name, value };
   }
 
-  const rows = [
-    createData('Tổng số lượng', total_amount),
-    createData('Tổng tiền hàng', renderPrice(payment)),
-    createData('Phí giao hàng', renderPrice(ship_fee)),
-    createData('Tổng tiền thanh toán', renderPrice(total_payment)),
-    createData('Phương thức Thanh toán', payment_methods),
-  ];
+  const rows =
+    type === 1
+      ? [createData('Tổng số lượng', total_amount), createData('Tổng tiền thanh toán', renderPrice(payment))]
+      : type === 2 || type === 3
+      ? [
+          createData('Tổng số lượng', total_amount),
+          createData('Tổng tiền', renderPrice(payment)),
+          createData('Đã cọc', renderPrice(deposit_amount)),
+          createData('Tiền thanh toán còn lại', renderPrice(payment - deposit_amount)),
+        ]
+      : [
+          createData('Tổng số lượng', total_amount),
+          createData('Tổng tiền', renderPrice(payment)),
+          createData('Phí giao hàng', renderPrice(ship_fee)),
+          createData('Tổng tiền thanh toán', renderPrice(total_payment)),
+          createData('Phương thức Thanh toán', payment_methods),
+        ];
 
   const confirmOrder = async () => {
     try {
@@ -233,6 +259,9 @@ const OrderManage = () => {
                   <Typography>
                     Trạng thái đơn hàng : <i>{status}</i>
                   </Typography>
+                  <Typography>
+                    Phân loại : <i>{type}</i> -- Bàn số : <i> {table_id?.join(', ')}</i>
+                  </Typography>
                 </Box>
                 <Box
                   sx={{
@@ -241,14 +270,16 @@ const OrderManage = () => {
                     gap: '10px',
                   }}
                 >
-                  <MyButton
-                    style={{ width: '30px' }}
-                    onClick={() => {
-                      setEdit(true);
-                    }}
-                  >
-                    <EditIcon />
-                  </MyButton>
+                  {type !== 1 && type !== 2 && type !== 3 && (
+                    <MyButton
+                      style={{ width: '30px' }}
+                      onClick={() => {
+                        setEdit(true);
+                      }}
+                    >
+                      <EditIcon />
+                    </MyButton>
+                  )}
                   <MyButton to={`${routes.bill}/${order_code}`} style={{ width: '30px' }} target="_blank">
                     <PrintIcon />
                   </MyButton>
@@ -273,32 +304,36 @@ const OrderManage = () => {
                   }}
                 >
                   <Typography>{orderer?.name}</Typography>
-                  <Typography>(+84){orderer?.phoneNumber}</Typography>
+                  <Typography> {orderer?.phoneNumber}</Typography>
                 </Box>
               </Box>
-              <Typography sx={{ mt: 2, pt: 2, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
-                <u> Người nhận</u>
-              </Typography>
-              <Box
-                sx={{
-                  flexDirection: 'column',
-                  display: 'flex',
-                  '& p': {
-                    fontWeight: 500,
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    gap: '10px',
-                  }}
-                >
-                  <Typography>{receiver?.name}</Typography>
-                  <Typography>(+84){receiver?.phoneNumber}</Typography>
-                </Box>
-                <Typography>Địa chỉ :{` ${receiver?.place}`}</Typography>
-              </Box>
+              {receiver && (
+                <>
+                  <Typography sx={{ mt: 2, pt: 2, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
+                    <u> Người nhận</u>
+                  </Typography>
+                  <Box
+                    sx={{
+                      flexDirection: 'column',
+                      display: 'flex',
+                      '& p': {
+                        fontWeight: 500,
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: '10px',
+                      }}
+                    >
+                      <Typography>{receiver?.name}</Typography>
+                      <Typography> {receiver?.phoneNumber}</Typography>
+                    </Box>
+                    <Typography>Địa chỉ :{` ${receiver?.place}`}</Typography>
+                  </Box>
+                </>
+              )}
             </Box>
             <Box>
               <Box
@@ -415,9 +450,11 @@ const OrderManage = () => {
                 rows={rows}
               />
             </Box>
-            <Typography color={'#fe2c55'}>
-              <i>Ghi chú : {note}</i>
-            </Typography>
+            {note && (
+              <Typography color={'#fe2c55'}>
+                <i>Ghi chú : {note}</i>
+              </Typography>
+            )}
             <Box sx={{ mt: '10px', display: 'flex', justifyContent: 'end' }}>
               {status === 'Chờ xác nhận' && (
                 <MyButton onClick={confirmOrder} color={{ bgColor: 'orange' }}>

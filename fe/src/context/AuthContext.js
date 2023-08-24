@@ -72,22 +72,22 @@ function AuthContextProvider({ children }) {
 
   // currentUser nhận được sau khi giải mã JWT lưu ở local storage
   if (currentUser) {
-    const userEmail = currentUser.email;
+    const userEmail = currentUser?.email;
     socket.emit('checkAvailableUser', userEmail);
   }
 
   socket.on('connection', () => {});
   socket.on('forceLogout', (userEmail) => {
-    if (currentUser.email) {
-      if (currentUser.email === userEmail) {
+    if (currentUser?.email) {
+      if (currentUser?.email === userEmail) {
         dispatch(logout());
       }
     }
   });
 
   socket.on('logoutUser', (userId) => {
-    if (currentUser.id) {
-      if (currentUser.id === userId) {
+    if (currentUser?.id) {
+      if (currentUser?.id === userId) {
         dispatch(logout());
       }
     }
@@ -112,10 +112,10 @@ function AuthContextProvider({ children }) {
   };
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== 'Customer') {
+    if (!currentUser || currentUser?.role !== 'Customer') {
       setCartItems([]);
     } else {
-      handleGetCartItem(currentUser.id);
+      handleGetCartItem(currentUser?.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, loading]);
@@ -129,7 +129,7 @@ function AuthContextProvider({ children }) {
       .then((res) => {
         setLoading(false);
         setSnackbar({ open: true, message: res.message, status: 'success' });
-        handleGetCartItem(currentUser.id);
+        handleGetCartItem(currentUser?.id);
       })
       .catch((error) => {
         setLoading(false);

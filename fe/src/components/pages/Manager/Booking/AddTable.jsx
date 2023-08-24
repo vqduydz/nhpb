@@ -244,7 +244,7 @@ export default function AddTable({ confirm, reSelectTable, setReSelectTable, cur
                         : 'none',
                     '& *': { fontSize: '1.4rem !important' },
                     '& .Mui-checked': {
-                      color: 'red !important',
+                      color: 'green!important',
                     },
                   }}
                   key={i}

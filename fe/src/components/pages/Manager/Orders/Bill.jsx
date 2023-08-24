@@ -1,61 +1,18 @@
 import { Box, Typography } from '@mui/material';
+import { unwrapResult } from '@reduxjs/toolkit';
+import { getOrderByOrderCode } from '_/redux/slices';
 import { renderPrice } from '_/utills';
-import CustomizedTables from '../../mainPages/Orders/CustomizedTables';
-import { MyButton } from '_/components/common';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { getOrderByOrderCode } from '_/redux/slices';
-import { unwrapResult } from '@reduxjs/toolkit';
 import { useParams } from 'react-router-dom';
+import CustomizedTables from '../../mainPages/Orders/CustomizedTables';
 
 const Bill = () => {
   const { order_code: _order_code } = useParams();
   const [order, setOrder] = useState({});
   const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(getOrderByOrderCode(_order_code))
-      .then(unwrapResult)
-      .then((res) => {
-        const {
-          note,
-          payment_methods,
-          order_code,
-          payment,
-          ship_fee,
-          total_amount,
-          total_payment,
-          items,
-          orderer,
-          receiver,
-          createdAt,
-        } = res;
-
-        setOrder({
-          note,
-          payment_methods,
-          order_code,
-          payment,
-          ship_fee,
-          total_amount,
-          total_payment,
-          items: JSON.parse(items),
-          orderer: { name: JSON.parse(orderer).name, phoneNumber: JSON.parse(orderer).phoneNumber },
-          receiver: {
-            name: JSON.parse(receiver).name,
-            phoneNumber: JSON.parse(receiver).phoneNumber,
-            place: JSON.parse(receiver).address,
-          },
-          createdAt,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_order_code]);
-
   const {
+    type,
     payment_methods,
     order_code,
     payment,
@@ -66,18 +23,90 @@ const Bill = () => {
     receiver,
     orderer,
     note,
+    deposit_amount,
+    table_id,
   } = order;
+
+  useEffect(() => {
+    dispatch(getOrderByOrderCode(_order_code))
+      .then(unwrapResult)
+      .then((res) => {
+        const {
+          type,
+          note,
+          deliver,
+          handler,
+          payment_methods,
+          order_code,
+          status,
+          payment,
+          ship_fee,
+          total_amount,
+          total_payment,
+          table_id,
+          items,
+          history,
+          orderer,
+          receiver,
+          createdAt,
+          deposit_amount,
+        } = res;
+
+        setOrder({
+          type,
+          note,
+          deliver,
+          handler,
+          payment_methods,
+          order_code,
+          status,
+          payment,
+          ship_fee: ship_fee ? ship_fee : 0,
+          total_amount,
+          total_payment,
+          table_id: table_id ? JSON.parse(table_id) : null,
+          history: JSON.parse(history),
+          items: JSON.parse(items),
+          orderer: { name: JSON.parse(orderer).name, phoneNumber: JSON.parse(orderer).phoneNumber },
+          receiver: receiver
+            ? {
+                name: JSON.parse(receiver).name,
+                phoneNumber: JSON.parse(receiver).phoneNumber,
+                place: JSON.parse(receiver).address,
+              }
+            : null,
+          createdAt,
+          deposit_amount,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_order_code]);
 
   function createData(name, value) {
     return { name, value };
   }
-  const rows = [
-    createData('Tổng số lượng', total_amount),
-    createData('Tổng tiền hàng', renderPrice(payment)),
-    createData('Phí giao hàng', renderPrice(ship_fee)),
-    createData('Tổng tiền thanh toán', renderPrice(total_payment)),
-    createData('Phương thức Thanh toán', payment_methods),
-  ];
+
+  const rows =
+    type === 1
+      ? [createData('Tổng số lượng', total_amount), createData('Tổng tiền thanh toán', renderPrice(payment))]
+      : type === 2
+      ? [
+          createData('Tổng số lượng', total_amount),
+          createData('Tổng tiền', renderPrice(payment)),
+          createData('Đã cọc', renderPrice(deposit_amount)),
+          createData('Tiền thanh toán còn lại', renderPrice(payment - deposit_amount)),
+        ]
+      : [
+          createData('Tổng số lượng', total_amount),
+          createData('Tổng tiền', renderPrice(payment)),
+          createData('Phí giao hàng', renderPrice(ship_fee)),
+          createData('Tổng tiền thanh toán', renderPrice(total_payment)),
+          createData('Phương thức Thanh toán', payment_methods),
+        ];
 
   return (
     <Box
@@ -108,60 +137,54 @@ const Bill = () => {
           }}
         >
           <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
+            sx={
+              {
+                // display: 'flex',
+                // justifyContent: 'space-between',
+              }
+            }
           >
             <Typography>
               Mã đơn hàng : <i>{order_code}</i>
+            </Typography>
+            <Typography>
+              Phân loại : <i>{type}</i>
             </Typography>
           </Box>
           <Typography sx={{ mt: 1, pt: 1, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
             <u> Người đặt</u>
           </Typography>
-          <Box
-            sx={{
-              flexDirection: 'column',
-              display: 'flex',
-              '& p': {
-                fontWeight: 500,
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                gap: '10px',
-              }}
-            >
-              <Typography>{orderer?.name}</Typography>
-              <Typography>(+84){orderer?.phoneNumber}</Typography>
-            </Box>
-          </Box>
-          <Typography sx={{ mt: 1, pt: 1, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
-            <u> Người nhận</u>
+          <Typography>
+            {orderer?.name} --- {orderer?.phoneNumber}
           </Typography>
-          <Box
-            sx={{
-              flexDirection: 'column',
-              display: 'flex',
-              '& p': {
-                fontWeight: 500,
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                gap: '10px',
-              }}
-            >
-              <Typography>{receiver?.name}</Typography>
-              <Typography>(+84){receiver?.phoneNumber}</Typography>
-            </Box>
-            <Typography>Địa chỉ :{` ${receiver?.place}`}</Typography>
-          </Box>
+          <Typography>Mã số bàn : {table_id?.join(', ')}</Typography>
+          {receiver && (
+            <>
+              <Typography sx={{ mt: 1, pt: 1, borderTop: '1px solid #0000000a', fontWeight: 700 }}>
+                <u> Người nhận</u>
+              </Typography>
+              <Box
+                sx={{
+                  flexDirection: 'column',
+                  display: 'flex',
+                  '& p': {
+                    fontWeight: 500,
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    gap: '10px',
+                  }}
+                >
+                  <Typography>{receiver?.name}</Typography>
+                  <Typography> {receiver?.phoneNumber}</Typography>
+                </Box>
+                <Typography>Địa chỉ :{` ${receiver?.place}`}</Typography>
+              </Box>
+            </>
+          )}
         </Box>
         <Box
           sx={{
@@ -175,7 +198,7 @@ const Bill = () => {
         >
           {items?.map((item, index) => (
             <Box
-              key={item.cartItemId}
+              key={index}
               sx={{
                 padding: '2px 15px',
                 display: 'flex',
@@ -222,9 +245,11 @@ const Bill = () => {
           rows={rows}
         />
       </Box>
-      <Typography sx={{ borderTop: '1px solid #0000000a', pt: '10px', mt: '10px' }}>
-        <i style={{ color: '#fe2c55' }}>Ghi chú : {note}</i>
-      </Typography>
+      {note && (
+        <Typography sx={{ borderTop: '1px solid #0000000a', pt: '10px', mt: '10px' }}>
+          <i style={{ color: '#fe2c55' }}>Ghi chú : {note}</i>
+        </Typography>
+      )}
       {/* <MyButton
         onClick={handlePrint}
         style={{ width: '100%', position: 'sticky', bottom: -1, opacity: 1, borderRadius: 0 }}

@@ -100,7 +100,7 @@ function Header() {
             <MyButton text to={'#'} className={cx('nav-menu')}>
               <Typography>Khuyến mãi</Typography>
             </MyButton>
-            <MyButton text to={'#'} className={cx('nav-menu')}>
+            <MyButton text to={routes.bookings} className={cx('nav-menu')}>
               <Typography>Đặt bàn</Typography>
             </MyButton>
           </Box>

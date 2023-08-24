@@ -186,9 +186,19 @@ export const initWebRoutes = (app) => {
   // get booking
   router.get('/booking', bookingController.getBooking);
   // create booking
-  router.post('/booking', verifyToken, checkRole(['Root', 'Admin', 'UserManage']), bookingController.createNewBooking);
+  router.post(
+    '/booking',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage', 'Customer']),
+    bookingController.createNewBooking,
+  );
   // update booking data
-  router.patch('/booking', verifyToken, checkRole(['Root', 'Admin', 'UserManage']), bookingController.updateBooking);
+  router.patch(
+    '/booking',
+    verifyToken,
+    checkRole(['Root', 'Admin', 'UserManage', 'Customer']),
+    bookingController.updateBooking,
+  );
 
   // // import booking
   // router.post(

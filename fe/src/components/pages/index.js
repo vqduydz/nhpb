@@ -12,8 +12,10 @@ export { default as Cart } from '_/components/pages/mainPages/Cart/Cart';
 export { default as CheckOut } from '_/components/pages/mainPages/CheckOut/CheckOut';
 export { default as Test } from '_/components/pages/Test/Test';
 export { default as Profile } from '_/components/pages/Profile/Profile';
-export { default as Orders } from '_/components/pages/mainPages/Orders/Orders';
 export { default as Order } from '_/components/pages/mainPages/Orders/Order';
+export { default as Orders } from '_/components/pages/mainPages/Orders/Orders';
+export { default as Booking } from '_/components/pages/mainPages/Bookings/Booking';
+export { default as Bookings } from '_/components/pages/mainPages/Bookings/Bookings';
 
 // Manage
 export { default as Manage } from '_/components/pages/Manager/Manage';

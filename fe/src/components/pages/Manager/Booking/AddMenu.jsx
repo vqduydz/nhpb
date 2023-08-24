@@ -13,7 +13,7 @@ import { renderPrice } from '_/utills';
 import removeVietnameseTones from '_/utills/removeVietnameseTones';
 import MenuDrop from '../Orders/MenuDrop';
 
-const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
+const AddMenu = ({ orderList, disable = false, handleSubmit, deposit_amount }) => {
   const [newOrderList, setNewOrderList] = useState([]);
   const dispatch = useDispatch();
   const [selectedItem, setSelectedItem] = useState();
@@ -24,6 +24,15 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [notif, setNotif] = useState();
   const [total, setTotal] = useState(0);
+  const [depositAmount, setDepositAmount] = useState();
+
+  useEffect(() => {
+    setDepositAmount(() => {
+      const min = Math.round((total / 5 + 50000) / 100000) * 100000;
+      if (!total || min <= 200000 || total <= 800000) return 200000;
+      return min;
+    });
+  }, [total]);
 
   useEffect(() => {
     const query = !debounce.trim() ? {} : { name: removeVietnameseTones(debounce).toLowerCase().replace(/ /g, '-') };
@@ -42,15 +51,16 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
   }, [debounce]);
 
   useEffect(() => {
+    if (!orderList || !orderList.length) return;
+    setNewOrderList(orderList);
+  }, [orderList]);
+
+  useEffect(() => {
     const total = newOrderList?.reduce((accumulator, currentValue) => {
       return accumulator + currentValue.price * currentValue.quantity;
     }, 0);
     setTotal(total);
   }, [newOrderList]);
-
-  useEffect(() => {
-    setNewOrderList(orderList ? orderList : []);
-  }, [orderList]);
 
   const handleAddToOrder = () => {
     if (selectedItem) {
@@ -95,66 +105,66 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
   };
 
   const handleOrder = () => {
-    if (!newOrderList || !newOrderList.length) {
-      setNotif('Chưa chọn món ăn');
-      return;
-    }
-    confirmOrderlist(newOrderList);
+    handleSubmit(newOrderList);
   };
+
   return (
     <>
-      <Box sx={{ display: 'flex', gap: '2px', alignItems: 'center', mb: 5 }}>
-        <MenuDrop
-          menulist={menuItems}
-          setSelectedItem={setSelectedItem}
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-        />
+      {!disable && (
+        <>
+          <Box sx={{ display: 'flex', gap: '2px', alignItems: 'center', mb: 5 }}>
+            <MenuDrop
+              menulist={menuItems}
+              setSelectedItem={setSelectedItem}
+              searchValue={searchValue}
+              setSearchValue={setSearchValue}
+            />
 
-        <MyButton
-          padding={'5px 15px'}
-          type="button"
-          onClick={handleAddToOrder}
-          color={{ bgColor: 'orange', mainColor: '#fff' }}
-        >
-          Thêm
-        </MyButton>
-      </Box>
-
-      {notif ? (
-        <Box
-          sx={{
-            backgroundColor: notif ? '#fe2c55' : 'transparent',
-            height: '30px',
-            display: 'flex',
-            alignItems: 'center',
-            p: '0 20px',
-            '& p': { lineHeight: 0.9 },
-          }}
-        >
-          <Typography sx={{ color: '#fff', height: '10px' }}>{notif}</Typography>
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            height: '30px',
-            position: 'relative',
-            '::after': {
-              zIndex: 1,
-              display: 'block',
-              position: 'absolute',
-              top: '50%',
-              content: `''`,
-              height: '1px',
-              width: '100%',
-              backgroundColor: '#0000003b',
-            },
-          }}
-        />
+            <MyButton
+              padding={'5px 15px'}
+              type="button"
+              onClick={handleAddToOrder}
+              color={{ bgColor: 'orange', mainColor: '#fff' }}
+            >
+              Thêm
+            </MyButton>
+          </Box>
+          {notif ? (
+            <Box
+              sx={{
+                backgroundColor: notif ? '#fe2c55' : 'transparent',
+                height: '30px',
+                display: 'flex',
+                alignItems: 'center',
+                p: '0 20px',
+                '& p': { lineHeight: 0.9 },
+              }}
+            >
+              <Typography sx={{ color: '#fff', height: '10px' }}>{notif}</Typography>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                height: '30px',
+                position: 'relative',
+                '::after': {
+                  zIndex: 1,
+                  display: 'block',
+                  position: 'absolute',
+                  top: '50%',
+                  content: `''`,
+                  height: '1px',
+                  width: '100%',
+                  backgroundColor: '#0000003b',
+                },
+              }}
+            />
+          )}
+        </>
       )}
       <Box sx={{ mt: 5, display: 'flex', gap: '2px', flexDirection: 'column' }}>
         <Typography fontWeight={700}>Danh sách món ăn:</Typography>
-        <Box sx={{ height: main ? '250px' : '50vh', overflow: 'auto', '& p': { fontWeight: 500 } }}>
+        <Box sx={{ height: '50vh', overflow: 'auto', '& p': { fontWeight: 500 } }}>
           <Box sx={{ minHeight: '100px' }}>
             {newOrderList.length > 0 &&
               newOrderList.map((item, index) => (
@@ -165,6 +175,7 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
                     display: 'flex',
                     textAlign: 'center',
                     gap: '1px',
+                    borderTop: index > 0 ? '1px solid #0000000a' : 'none',
                   }}
                 >
                   <Box
@@ -203,24 +214,40 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
                           },
                         }}
                       >
-                        <MyButton
-                          type="button"
-                          disable={item.quantity <= 1}
-                          onClick={() => {
-                            let res = item.quantity - 1;
-                            if (res <= 1) res = 1;
-                            handleChangeQuantity(item.id, res);
-                          }}
-                          className="so-luong"
-                          style={{
-                            border: 'none',
-                            backgroundColor: '#0000001a',
-                            color: '#0000008b',
-                            padding: 0,
-                          }}
-                        >
-                          <RemoveIcon />
-                        </MyButton>
+                        {!disable ? (
+                          <MyButton
+                            type="button"
+                            disable={item.quantity <= 1}
+                            onClick={() => {
+                              let res = item.quantity - 1;
+                              if (res <= 1) res = 1;
+                              handleChangeQuantity(item.id, res);
+                            }}
+                            className="so-luong"
+                            style={{
+                              border: 'none',
+                              backgroundColor: '#0000001a',
+                              color: '#0000008b',
+                              padding: 0,
+                            }}
+                          >
+                            <RemoveIcon />
+                          </MyButton>
+                        ) : (
+                          <MyButton
+                            type="button"
+                            disable
+                            className="so-luong"
+                            style={{
+                              border: 'none',
+                              backgroundColor: '#0000001a',
+                              color: '#0000008b',
+                              padding: 0,
+                            }}
+                          >
+                            <RemoveIcon />
+                          </MyButton>
+                        )}
                         <input
                           className="so-luong"
                           style={{
@@ -237,23 +264,39 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
                           height="100%"
                           readOnly
                         />
-                        <MyButton
-                          type="button"
-                          onClick={() => {
-                            let res = item.quantity + 1;
+                        {!disable ? (
+                          <MyButton
+                            type="button"
+                            onClick={() => {
+                              let res = item.quantity + 1;
 
-                            handleChangeQuantity(item.id, res);
-                          }}
-                          className="so-luong"
-                          style={{
-                            border: 'none',
-                            backgroundColor: '#0000001a',
-                            color: '#0000008b',
-                            padding: 0,
-                          }}
-                        >
-                          <AddIcon />
-                        </MyButton>
+                              handleChangeQuantity(item.id, res);
+                            }}
+                            className="so-luong"
+                            style={{
+                              border: 'none',
+                              backgroundColor: '#0000001a',
+                              color: '#0000008b',
+                              padding: 0,
+                            }}
+                          >
+                            <AddIcon />
+                          </MyButton>
+                        ) : (
+                          <MyButton
+                            type="button"
+                            disable
+                            className="so-luong"
+                            style={{
+                              border: 'none',
+                              backgroundColor: '#0000001a',
+                              color: '#0000008b',
+                              padding: 0,
+                            }}
+                          >
+                            <AddIcon />
+                          </MyButton>
+                        )}
                       </Box>
                       <Typography sx={{ width: '100px', textAlign: 'center' }}>{renderPrice(item.total)}</Typography>
                       <Box
@@ -271,18 +314,31 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
                           },
                         }}
                       >
-                        <MyButton
-                          type="button"
-                          effect
-                          color={{ mainColor: '#fe2c55' }}
-                          padding={'5px 8px'}
-                          onClick={() => {
-                            handleDelete(item.id);
-                          }}
-                          aria-label="delete"
-                        >
-                          <DeleteIcon fontSize="1.4rem" />
-                        </MyButton>
+                        {!disable ? (
+                          <MyButton
+                            type="button"
+                            effect
+                            color={{ mainColor: '#fe2c55' }}
+                            padding={'5px 8px'}
+                            onClick={() => {
+                              handleDelete(item.id);
+                            }}
+                            aria-label="delete"
+                          >
+                            <DeleteIcon fontSize="1.4rem" />
+                          </MyButton>
+                        ) : (
+                          <MyButton
+                            type="button"
+                            effect
+                            color={{ mainColor: '#fe2c55' }}
+                            padding={'5px 8px'}
+                            disable
+                            aria-label="delete"
+                          >
+                            <DeleteIcon fontSize="1.4rem" />
+                          </MyButton>
+                        )}
                       </Box>
                     </Box>
                   </Box>
@@ -297,41 +353,68 @@ const AddMenu = ({ orderList = [], main = false, confirmOrderlist }) => {
           display: 'flex',
           gap: '5px',
           flexDirection: 'column',
-
           borderTop: '1px solid #0000000a',
           position: 'sticky',
           bottom: '-1px',
           backgroundColor: '#00000005',
+          alignItems: 'end',
+          padding: '0 5px',
         }}
       >
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'row',
             gap: '10px',
+            flexDirection: 'row',
             justifyContent: 'end',
             alignItems: 'center',
-
+            minHeight: '32px',
             color: '#fe2c55',
           }}
         >
-          <Typography align="right" sx={{ display: 'block', flex: 1 }} fontWeight={700}>
+          <Typography align="right" sx={{ display: 'block' }} fontWeight={700}>
             Tổng tiền
           </Typography>
-          <Typography textAlign={'right'} fontWeight={700} fontSize={'1.6rem'} sx={{ display: 'block', flex: 1 }}>
+          <Typography
+            textAlign={'right'}
+            fontWeight={700}
+            fontSize={'1.6rem'}
+            sx={{ display: 'block', width: '120px' }}
+          >
             {renderPrice(total)}
           </Typography>
-          {!main && (
-            <MyButton
-              style={{ flex: 1 }}
-              type="button"
-              onClick={handleOrder}
-              color={{ bgColor: 'orange', mainColor: '#fff' }}
-            >
-              Đặt món
-            </MyButton>
-          )}
         </Box>
+        {(!deposit_amount || deposit_amount <= 0) && !disable && (
+          <Box
+            sx={{
+              display: 'flex',
+              gap: '10px',
+              justifyContent: 'end',
+              alignItems: 'center',
+              minHeight: '32px',
+              padding: '5px 0',
+              color: '#fe2c55',
+              borderBottom: '1px solid #0000000a',
+            }}
+          >
+            <Typography align="right" sx={{ display: 'block' }} fontWeight={700}>
+              Số tiền cần đặt cọc
+            </Typography>
+            <Typography textAlign={'right'} fontWeight={700} sx={{ display: 'block', width: '120px' }}>
+              {renderPrice(depositAmount)}
+            </Typography>
+          </Box>
+        )}
+        {!disable && (
+          <MyButton
+            style={{ width: '130px' }}
+            type="button"
+            onClick={() => handleOrder()}
+            color={{ bgColor: 'orange', mainColor: '#fff' }}
+          >
+            Đặt món
+          </MyButton>
+        )}
       </Box>
     </>
   );

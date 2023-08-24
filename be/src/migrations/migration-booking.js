@@ -13,8 +13,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      customer_id: {
+        type: Sequelize.INTEGER,
+      },
       type: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
       customer_name: {
         type: Sequelize.STRING,

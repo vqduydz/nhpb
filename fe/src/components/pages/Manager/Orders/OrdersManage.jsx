@@ -105,25 +105,26 @@ const OrdersManage = () => {
             justifyContent: 'space-between',
             gap: '10px',
             '& p': {
-              flex: 1,
               fontWeight: 700,
             },
           }}
         >
-          <Typography sx={{ maxWidth: '30px' }} textAlign={'center'}>
+          <Typography sx={{ width: '30px' }} textAlign={'center'}>
             STT
           </Typography>
-          <Typography sx={{ maxWidth: '160px' }} textAlign={'left'}>
+          <Typography sx={{ flex: 1 }} textAlign={'left'}>
             Mã đơn hàng
           </Typography>
-          <Typography textAlign={'center'}>Phân loại</Typography>
-          <Typography sx={{ maxWidth: '150px' }} textAlign={'center'}>
+          <Typography sx={{ width: '130px' }} textAlign={'center'}>
+            Phân loại
+          </Typography>
+          <Typography sx={{ width: '130px' }} textAlign={'center'}>
             Tổng Thanh toán
           </Typography>
-          <Typography sx={{ maxWidth: '150px' }} textAlign={'center'}>
+          <Typography sx={{ width: '100px' }} textAlign={'center'}>
             Trạng thái
           </Typography>
-          <Typography sx={{ maxWidth: '30px' }} textAlign={'right'}>
+          <Typography sx={{ width: '30px' }} textAlign={'right'}>
             Bill
           </Typography>
         </Box>
@@ -140,27 +141,26 @@ const OrdersManage = () => {
                 backgroundColor: index % 2 === 0 ? '#fff' : '#f5f5f5',
                 border: '1px solid #0000000a',
                 textAlign: 'center',
-                '& p': {
-                  flex: 1,
-                },
               }}
             >
-              <Typography sx={{ maxWidth: '30px' }} textAlign={'center'}>
+              <Typography sx={{ width: '30px' }} textAlign={'center'}>
                 {page > 1 ? (page - 1) * limitPerPage + (index + 1) : index + 1}
               </Typography>
               <MyButton
+                style={{ flex: 1, justifyContent: 'start' }}
                 text
                 to={routes.ordersmanage + '/' + item.order_code}
-                style={{ width: '160px' }}
-                // target="_blank"
+                target="_blank"
               >
                 <Typography textAlign={'left'}>{item.order_code}</Typography>
               </MyButton>
-              <Typography textAlign={'center'}>{item.type}</Typography>
-              <Typography sx={{ maxWidth: '150px' }} textAlign={'center'} color={'#fe2c55'}>
+              <Typography sx={{ width: '130px' }} textAlign={'center'}>
+                {item.type}
+              </Typography>
+              <Typography sx={{ width: '130px' }} textAlign={'center'} color={'#fe2c55'}>
                 {renderPrice(item.total_payment)}
               </Typography>
-              <Typography sx={{ maxWidth: '150px' }} textAlign={'center'}>
+              <Typography sx={{ width: '100px' }} textAlign={'center'}>
                 {item.status}
               </Typography>
               <MyButton to={`${routes.bill}/${item.order_code}`} style={{ width: '30px' }} target="_blank">

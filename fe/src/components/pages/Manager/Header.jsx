@@ -31,8 +31,8 @@ export default function Header() {
     { tab: 0, content: 'Users', link: routes.usermanage },
     { tab: 1, content: 'Menus', link: routes.menumanage },
     { tab: 2, content: 'Catalogs', link: routes.catalogmanage },
-    { tab: 3, content: 'Orders', link: routes.ordersmanage },
     { tab: 4, content: 'Booking', link: routes.bookingmanage },
+    { tab: 3, content: 'Orders', link: routes.ordersmanage },
   ];
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function Header() {
     else setTab(0);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [window.location.href]);
 
   return (
     <Box
