@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "sa",
-    "password": "root",
-    "database": "nha-hang-pho-bien",
+    "password": "123456",
+    "database": "seafood-nextjs-mui",
     "host": "localhost",
     "dialect": "mssql",
     "timezone": "+07:00",
@@ -13,10 +13,11 @@
       }
     }
   },
+
   "test": {
     "username": "sa",
-    "password": "root",
-    "database": "nha-hang-pho-bien",
+    "password": "123456",
+    "database": "seafood-nextjs-mui",
     "host": "localhost",
     "dialect": "mssql",
     "timezone": "+07:00",
@@ -28,8 +29,8 @@
   },
   "production": {
     "username": "sa",
-    "password": "root",
-    "database": "nha-hang-pho-bien",
+    "password": "123456",
+    "database": "seafood-nextjs-mui",
     "host": "localhost",
     "dialect": "mssql",
     "timezone": "+07:00",
